@@ -68,10 +68,10 @@ bool handleMessage(void* arg, const addr_t from, const char* message);
 	print assigned port number
 	decide whether spectator or player
 
-#### ‘handleInput’:
+#### `handleInput`:
 	Parse stdin using ncurses.
 
-#### ‘handleMessage’:
+#### `handleMessage`:
 	Clients shall be prepared to receive these message types:
 		If “OK”:
 			User was allowed into game
@@ -93,7 +93,7 @@ bool handleMessage(void* arg, const addr_t from, const char* message);
 
 ### Data structures
 
-The _game_ struct, which is a single global variable accessible to both client and server. The struct is provided in the client section of IMPLEMENTATION.spec
+The _game_ struct, which is a single global variable accessible to both client and server. The struct is provided in the client section of the Implementation Spec. 
 
 ### Definition of function prototypes
 
@@ -153,7 +153,7 @@ void gameOver()
 		seed the random-number generator with getpid()
 ```
 
-#### `initializeGame `
+#### `initializeGame`:
 ```
 	populate the global variable “game” with the given map.txt file by calling gridConvert()
 	while we have not yet dropped GoldMaxNumPiles piles: 
@@ -165,14 +165,14 @@ void gameOver()
 		drop a pile of size y on this room spot 
 ```
 
-#### `acceptMessages`
+#### `acceptMessages`:
 ```
   print the port number of the client sending the message
 	call message_loop() with handleMessage() to await clients
 	call visibility 
 ```
 
-#### `handleMessage`
+#### `handleMessage`:
 ```
 if the messsage from the client is: 
 	“PLAY”
@@ -382,14 +382,14 @@ if any errors
 #### `player_move` 
 
 ```
-replace the `position` of this player with the given `position`
+replace the position of this player with the given position
 ```
 
 #### `player_delete` 
 
 ``` 
 if the given player struct is not null
-	free the memory for the `position` and `grid` of this player
+	free the memory for the position and grid of this player
 	free the memory for the player object
 ```
 
@@ -406,13 +406,13 @@ else
 
 ```
 if player is not null 
-	add the given amount to this player’s _numGold_ count
+	add the given amount to this player’s numGold count
 ```
 
 #### `player_isTalking`
 ```
 if player is not null 
-	return this player’s bool struct _isTalking_ 
+	return this player’s bool struct isTalking
 else 
 	return false 
 ```
