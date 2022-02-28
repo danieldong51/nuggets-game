@@ -62,31 +62,37 @@ bool handleMessage(void* arg, const addr_t from, const char* message);
 ### Detailed pseudo code
 
 #### `parseArgs`:
-	validate command-line arguments
-	check if hostname or IP address is valid address by calling message_isAddr()
-	initialize message module by calling message_init() 
-	print assigned port number
-	decide whether spectator or player
+```
+  validate command-line arguments
+  check if hostname or IP address is valid address by calling message_isAddr()
+  initialize message module by calling message_init() 
+  print assigned port number
+  decide whether spectator or player
+```
 
 #### `handleInput`:
+```
 	Parse stdin using ncurses.
+```
 
 #### `handleMessage`:
-	Clients shall be prepared to receive these message types:
-		If “OK”:
-			User was allowed into game
-		If “GRID”
-			This message shows the GRID’s dimensions.
-		If “GOLD”
-			Allows user to see nuggets collected, current score, and nuggets left.
-		If “DISPLAY”
-			Allows the user to see the map.
-		If “QUIT”
-			Ends the ncurses library
-		If “ERROR”
+```
+if the message from the server is: 
+	“OK”:
+		User was allowed into game
+	“GRID”:
+		This message shows the GRID’s dimensions.
+	“GOLD”:
+		Allows user to see nuggets collected, current score, and nuggets left.
+	“DISPLAY”:
+		Allows the user to see the map.
+	“QUIT”:
+		Ends the ncurses library
+  “ERROR”: 
+    Do nothing. 
+```
+    
 			
-			
-
 ---
 
 ## Server
@@ -133,13 +139,13 @@ void gameOver()
 
 #### `main`:
 ```
-	validate command line arguments using parseArgs()
+  validate command line arguments using parseArgs()
 	call initializeGame() with map.txt 
 	initialize ‘message module’ 
 	print the port number on which we wait 
 	call acceptMessages()
   call gameOver() to inform all clients the game has ended
-	clean up
+  clean up
 ```
 
 #### `parseArgs`:
@@ -272,8 +278,8 @@ For number of rows in file
 				add player or piles of gold to grid struct if it exists at that square
 			loop over adjacent squares:
 				if square not visited:
-mark square as visited
-add to toVisit
+          mark square as visited
+          add to toVisit
 ```
 
 ### `gridPrint`
@@ -283,7 +289,7 @@ add to toVisit
 		If (x,y) = currentPostion
 			Grid[y][x] = “@”
 		Else
-Grid[y][x] = “i+65” (ascii conversion in character form) 
+      Grid[y][x] = “i+65” (ascii conversion in character form) 
 	For i < # of gold piles, i++
 		Obtain position of pile, (x, y)
 		Grid[y][x] = “*”
