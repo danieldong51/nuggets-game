@@ -72,13 +72,13 @@ bool handleMessage(void* arg, const addr_t from, const char* message);
 
 #### `handleInput`:
 ```
-	Parse stdin using ncurses.
+Parse stdin using ncurses.
 ```
 
 #### `handleMessage`:
 ```
 if the message from the server is: 
-	“OK”:
+  “OK”:
 		User was allowed into game
 	“GRID”:
 		This message shows the GRID’s dimensions.
@@ -139,13 +139,13 @@ void gameOver()
 
 #### `main`:
 ```
-  validate command line arguments using parseArgs()
-	call initializeGame() with map.txt 
-	initialize ‘message module’ 
-	print the port number on which we wait 
-	call acceptMessages()
-  call gameOver() to inform all clients the game has ended
-  clean up
+validate command line arguments using parseArgs()
+call initializeGame() with map.txt 
+initialize ‘message module’ 
+print the port number on which we wait 
+call acceptMessages()
+call gameOver() to inform all clients the game has ended
+clean up
 ```
 
 #### `parseArgs`:
@@ -187,7 +187,7 @@ if the messsage from the client is:
 		Else:
 			Respond with “OK”. Means, user was allowed 
       Add player by calling player_new with the user's real name, letter, and the master grid
-      call updateGrid with this player's grid and the master grid 
+      Call updateGrid with this player's grid and the master grid 
 	“SPECTATE”
 		If there is a spot available for spectator,
 			Add the spectator by calling spectator_new 
