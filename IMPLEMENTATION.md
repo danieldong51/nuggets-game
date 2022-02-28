@@ -89,7 +89,7 @@ if the message from the server is:
 	“QUIT”:
 		Ends the ncurses library
   “ERROR”: 
-    Do nothing. 
+    Print explanation that should be to the right of the error message.
 ```
     
 			
@@ -187,6 +187,7 @@ if the messsage from the client is:
 		Else:
 			Respond with “OK”. Means, user was allowed 
       Add player by calling player_new with the user's real name, letter, and the master grid
+      call updateGrid with this player's grid and the master grid 
 	“SPECTATE”
 		If there is a spot available for spectator,
 			Add the spectator by calling spectator_new 
@@ -265,7 +266,7 @@ For number of rows in file
 	Add contents of row x into slot x of a the array of strings
 ```
 
-### `updateGrid`
+#### `updateGrid`
 ```
 	initialize toVisit bag
 	initialize char** visited as a blank grid with same dimensions as serverGrid
@@ -283,7 +284,7 @@ For number of rows in file
           add to toVisit
 ```
 
-### `gridPrint`
+#### `gridPrint`
 ```
 	For i < # of players, i++
 		Obtain position of player (x, y)
@@ -298,7 +299,7 @@ For number of rows in file
 		Print the string in a new line
 ```
 
-### `gridValidMove`
+#### `gridValidMove`
 ```
 	Given position (x,y)
 	If grid[y][x] = ‘*’ // gold pile
@@ -451,6 +452,51 @@ else
 ```
 —
 
+## Spectator
+
+### Data structures
+
+The data structure for the spectator is the rooms it has seen before, which is represented by the _grid_ struct.
+
+```c
+grid_t* grid;
+```
+
+### Definition of function prototypes
+
+A function to create a new spectator struct. 
+
+```c
+spectator_t* spectator_new(grid_t* masterGrid); 
+```
+
+A function to delete a player and free all of its memory. 
+
+```c
+void spectator_delete(spectator_t* spectator); 
+``` 
+
+### Detailed pseudo code
+
+#### `spectator_new`
+
+```
+if the spectator given is not NULL,
+	 set the grid for the player to be an empty grid
+ return the spectator.
+else:
+	Print an error message and return NULL.
+```
+
+
+#### `spectator_delete` 
+
+```
+if the given spectator struct is not null:
+	free the memory for the spectator object
+```
+
+—
 
 ## Testing plan
 
