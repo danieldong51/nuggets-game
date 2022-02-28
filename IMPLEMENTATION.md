@@ -186,9 +186,10 @@ if the messsage from the client is:
 			Respond with “NO”
 		Else:
 			Respond with “OK”. Means, user was allowed 
+      Add player by calling player_new with the user's real name, letter, and the master grid
 	“SPECTATE”
 		If there is a spot available for spectator,
-			Add the spectator
+			Add the spectator by calling spectator_new 
 		Else:
 			Replace the spectator
 	“KEY”
@@ -329,7 +330,7 @@ bool isTalking;
 
 A function to create a new player struct. It initializes the players location to a random room spot and sets the player's grid to be the empty grid. The server will then call updateGrid on the player's grid and master grid. 
 ```c
-player_t* player_new(char* name, position_t* pos); 
+player_t* player_new(char* name, char* letter, position_t* pos); 
 ```
 
 A function to update the players `position` struct to register a player’s move. This function need not update their grid, for this is handled by the server. This function need not check that the position coordinates are valid since this is also handled by the server. 
@@ -368,18 +369,25 @@ A function to return the grid object of a player.
 grid_t* player_getGrid(player_t* player); 
 ```
 
+
+A function to change whether or not the player is talking to the server. 
+
+```c 
+void player_changeStatus(player_t* player); 
+```
  
 ### Detailed pseudo code
 
 #### `player_new`
 
 ```
-if given name and grid is valid
+if given name, letter, and grid is valid
   generate a random room spot on the grid 
   allocate memory for a new player
   if memory for player can be created: 
     set this spot as the players position
     set the grid for the player to the empty grid 
+    initialize other player information
 	  return the new player object
 if any errors
 	return null 
@@ -431,6 +439,16 @@ if player is not null
 else 
 	return null
 ```
+
+#### `player_changeStatus`
+
+```
+if player is not null 
+	if isTakling is false, make it true 
+  if isTalking is true, make it false 
+else 
+  do nothing
+```
 —
 
 
@@ -440,7 +458,7 @@ else
 
 > How will you test each unit (module) before integrating them with a main program (client or server)?
 
-We will conduct unit tests according to detailing in the Design Spec, [https://github.com/cs50winter2022/nuggets-team-tux/blob/submit-design/DESIGN.md](DESIGN.md). We will individually test each module as we code to ensure each individual unit of the program runs smoothly. 
+We will conduct unit tests according to detailing in the Design Spec, [https://github.com/cs50winter2022/nuggets-team-tux/blob/submit-implementation/DESIGN.md](DESIGN.md). We will individually test each module as we code to ensure each individual unit of the program runs smoothly. 
 
 ### integration testing
 
