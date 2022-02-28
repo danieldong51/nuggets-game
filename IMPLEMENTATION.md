@@ -4,7 +4,7 @@
 
 > This **template** includes some gray text meant to explain how to use the template; delete all of them in your document!
 
-According to the [Requirements Spec](REQUIREMENTS.md), the Nuggets game requires two standalone programs: a client and a server.
+According to the [https://github.com/cs50winter2022/nuggets-info/blob/main/REQUIREMENTS.md](REQUIREMENTS.md), the Nuggets game requires two standalone programs: a client and a server.
 Our design also includes the player, spectator, and grid modules. 
 We describe each program and module separately.
 We do not describe the `support` library nor the modules that enable features that go beyond the spec.
@@ -440,7 +440,7 @@ else
 
 > How will you test each unit (module) before integrating them with a main program (client or server)?
 
-We will conduct unit tests according to detailing in the DESIGN spec. We will individually test each module as we code to ensure each individual unit of the program runs smoothly. 
+We will conduct unit tests according to detailing in the Design Spec, [https://github.com/cs50winter2022/nuggets-team-tux/blob/submit-design/DESIGN.md](DESIGN.md). We will individually test each module as we code to ensure each individual unit of the program runs smoothly. 
 
 ### integration testing
 
