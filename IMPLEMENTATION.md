@@ -38,15 +38,8 @@ int goldMaxNumPiles = 30; 		// maximum number of gold piles
 } game_t; 
 ```
 
-
-
-> For each new data structure, describe it briefly and provide a code block listing the `struct` definition(s).
-> No need to provide `struct` for existing CS50 data structures like `hashtable`.
-
 ### Definition of function prototypes
 
-> For function, provide a brief description and then a code block with its function prototype.
-> For example:
 
 A function to parse the command-line arguments, initialize the game struct, initialize the message module, and (BEYOND SPEC) initialize analytics module.
 
@@ -69,7 +62,6 @@ bool handleMessage(void* arg, const addr_t from, const char* message);
 ### Detailed pseudo code
 
 #### `parseArgs`:
-
 	validate command-line arguments
 	check if hostname or IP address is valid address by calling message_isAddr()
 	initialize message module by calling message_init() 
@@ -78,6 +70,7 @@ bool handleMessage(void* arg, const addr_t from, const char* message);
 
 #### ‘handleInput’:
 	Parse stdin using ncurses.
+
 #### ‘handleMessage’:
 	Clients shall be prepared to receive these message types:
 		If “OK”:
@@ -102,9 +95,6 @@ bool handleMessage(void* arg, const addr_t from, const char* message);
 
 The _game_ struct, which is a single global variable accessible to both client and server. The struct is provided in the client section of IMPLEMENTATION.spec
 
-> For each new data structure, describe it briefly and provide a code block listing the `struct` definition(s).
-> No need to provide `struct` for existing CS50 data structures like `hashtable`.
-
 ### Definition of function prototypes
 
 A function to parse the command-line arguments, initialize the game struct, initialize the message module, and (BEYOND SPEC) initialize analytics module.
@@ -113,26 +103,47 @@ A function to parse the command-line arguments, initialize the game struct, init
 static int parseArgs(const int argc, char* argv[]);
 ```
 
-A function to read the input message from client and respond accordingly. Called by 
+A function to set up the data structures for the game, including loading the map.txt into a grid, saving it in our `game` struct, and dropping piles of gold on the grid. 
 
 ```c
-
+static void initializeGame(char* mapPathname);
 ```
 
+A function that calls message_loop to accept messages from the client and take the appropriate action. 
+
+```c
+static void acceptMessages(int port);
+```
+
+A function to read the input message from the client and respond accordingly.
 
 ```c
 bool handleMessage(void* arg, const addr_t from, const char* message);
 ```
 
+A function to end the game.
+
+```c 
+void gameOver() 
+```
+
 
 ### Detailed pseudo code
 
-> For each function write pseudocode indented by a tab, which in Markdown will cause it to be rendered in literal form (like a code block).
-> Much easier than writing as a bulleted list!
-> For example:
+
+#### `main`:
+```
+	validate command line arguments using parseArgs()
+	call initializeGame() with map.txt 
+	initialize ‘message module’ 
+	print the port number on which we wait 
+	call acceptMessages()
+  call gameOver() to inform all clients the game has ended
+	clean up
+```
 
 #### `parseArgs`:
-
+```
 	validate command-line arguments
 	verify map file can be opened for reading
 	if seed provided
@@ -140,12 +151,32 @@ bool handleMessage(void* arg, const addr_t from, const char* message);
 		seed the random-number generator with that seed
 	else
 		seed the random-number generator with getpid()
+```
+
+#### `initializeGame `
+```
+	populate the global variable “game” with the given map.txt file by calling gridConvert()
+	while we have not yet dropped GoldMaxNumPiles piles: 
+		if we have dropped at least GoldMinNumPiles piles: 
+			break 
+		generate a random number, x
+		move through the char* grid pointer x times or until you reach a valid room spot
+		generate a random number, y, to determine the size of the pile 
+		drop a pile of size y on this room spot 
+```
+
+#### `acceptMessages`
+```
+  print the port number of the client sending the message
+	call message_loop() with handleMessage() to await clients
+	call visibility 
+```
 
 #### `handleMessage`
-
-The server shall be prepared to receive these types of messages:
+```
+if the messsage from the client is: 
 	“PLAY”
-		If max players,
+		if max players,
 			Respond with “NO”
 		Else:
 			Respond with “OK”. Means, user was allowed 
@@ -157,6 +188,7 @@ The server shall be prepared to receive these types of messages:
 	“KEY”
 		Parse key stroke
 		Make the appropriate move
+```
 	
 	
 ---
@@ -188,35 +220,37 @@ Contents 2D string array representing the map, list of piles representing the go
 
 ### Definition of function prototypes
 
+A function to convert a map file into a 2d Array representing the map.
+
 ```c
 gridConvert(file *fp)
 ```
-Convert a map file into a 2d Array representing the map
 
+A function to update the player's grid based on the serverGrid and the other players. 
 
-updateGrid
 ```c
 bag_t* updateGrid(grid_t* playerGrid, grid_t* serverGrid);
 ```
 
-gridPrint
+A function that takes a grid and the current position of a player and prints the appropriate grid for that player.
+
 ```c
 Void gridPrint(grid_t* grid, currentPosition) 
 ```
-Takes grid structure. Update it based on the player positions and gold pile positions. 
-Position is the the player’s current position
 
 
-gridValidMove
+A function that takes a coordinate and checks if the position is an open space to move to.
+
 ```c
 int gridValidMove(position_t* coordinate)
 ```
-Takes a coordinate and checks if the position is an open space to move to
+ 
 
 
 ### Detailed pseudocode
-gridConvert
-```c
+
+#### `gridConvert`
+```
 Take in file
 Obtain # of rows in file
 Create array of strings with (# of row) slots
@@ -224,7 +258,7 @@ For number of rows in file
 	Add contents of row x into slot x of a the array of strings
 ```
 
-updateGrid
+### `updateGrid`
 ```
 	initialize toVisit bag
 	initialize char** visited as a blank grid with same dimensions as serverGrid
@@ -242,7 +276,7 @@ mark square as visited
 add to toVisit
 ```
 
-gridPrint
+### `gridPrint`
 ```
 	For i < # of players, i++
 		Obtain position of player (x, y)
@@ -257,7 +291,7 @@ Grid[y][x] = “i+65” (ascii conversion in character form)
 		Print the string in a new line
 ```
 
-gridValidMove
+### `gridValidMove`
 ```
 	Given position (x,y)
 	If grid[y][x] = ‘*’ // gold pile
@@ -287,7 +321,7 @@ bool isTalking;
 
 ### Definition of function prototypes
 
-A function to create a new player struct. 
+A function to create a new player struct. It initializes the players location to a random room spot and sets the player's grid to be the empty grid. The server will then call updateGrid on the player's grid and master grid. 
 ```c
 player_t* player_new(char* name, position_t* pos); 
 ```
@@ -331,31 +365,35 @@ grid_t* player_getGrid(player_t* player);
  
 ### Detailed pseudo code
 
-player_new 
+#### `player_new`
 
-```c 
-if given name and position (x,y) is valid
-	allocate memory for a new player
-	return the new player object
-if not
+```
+if given name and grid is valid
+  generate a random room spot on the grid 
+  allocate memory for a new player
+  if memory for player can be created: 
+    set this spot as the players position
+    set the grid for the player to the empty grid 
+	  return the new player object
+if any errors
 	return null 
 ```
 
-player_move 
+#### `player_move` 
 
-```c
+```
 replace the `position` of this player with the given `position`
 ```
 
-player_delete 
+#### `player_delete` 
 
-```c 
+``` 
 if the given player struct is not null
 	free the memory for the `position` and `grid` of this player
 	free the memory for the player object
 ```
 
-player_getPosition
+#### `player_getPosition`
 
 ```
 if player is not null 
@@ -364,14 +402,14 @@ else
 	return null
 ```
 
-player_addGold 
+#### `player_addGold` 
 
 ```
 if player is not null 
 	add the given amount to this player’s _numGold_ count
 ```
 
-player_isTalking
+#### `player_isTalking`
 ```
 if player is not null 
 	return this player’s bool struct _isTalking_ 
@@ -379,7 +417,7 @@ else
 	return false 
 ```
 
-player_getGrid
+#### `player_getGrid`
 
 ```
 if player is not null 
@@ -410,11 +448,8 @@ Finally, we will run `client` and `server` on a Thayer Linux server by giving th
 
 We will test both ‘client’ and ‘server’ using the four programs in the shared directory `~/cs50-dev/shared/nuggets/’. We will also use the `padmap` program, a tool to pad all lines of a mapfile so they have the same length, and the `checkmap` program, which validates a map.
 
-> How will you test the complete main programs: the server, and for teams of 4, the client?
-
 ### system testing
 
-> For teams of 4: How will you test your client and server together?
 
 We will test the client and server together, looking to check:
 The server can take connections
@@ -426,7 +461,6 @@ The server remembers which player a client was, and fills them in as needed
 
 ## Limitations
 
-> Bulleted list of any limitations of your implementation.
 N/A at the moment. 
 
 
