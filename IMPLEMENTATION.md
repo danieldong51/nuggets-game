@@ -184,14 +184,14 @@ if the messsage from the client is:
 	“PLAY”
 		if max players,
 			Respond with “NO”
-		Else:
+		else:
 			Respond with “OK”. Means, user was allowed 
       Add player by calling player_new with the user's real name, letter, and the master grid
       Call updateGrid with this player's grid and the master grid 
 	“SPECTATE”
-		If there is a spot available for spectator,
+		if there is a spot available for spectator,
 			Add the spectator by calling spectator_new 
-		Else:
+		else:
 			Replace the spectator
 	“KEY”
 		Parse key stroke
