@@ -186,7 +186,6 @@ if the messsage from the client is:
 			Respond with “NO”
 		else:
 			Respond with “OK”. Means, user was allowed, add that player with player_new
-      Call updateGrid with this player's grid and the master grid
 	“SPECTATE”
 		if there is a spot available for spectator,
 			Add the spectator by calling spectator_new 
