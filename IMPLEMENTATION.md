@@ -3,7 +3,7 @@
 ### Team Tux, Winter 2022
 
 
-According to the [https://github.com/cs50winter2022/nuggets-info/blob/main/REQUIREMENTS.md](REQUIREMENTS.md), the Nuggets game requires two standalone programs: a client and a server.
+According to the [REQUIREMENTS.md](https://github.com/cs50winter2022/nuggets-info/blob/main/REQUIREMENTS.md), the Nuggets game requires two standalone programs: a client and a server.
 Our design also includes the player, spectator, and grid modules. 
 We describe each program and module separately.
 We do not describe the `support` library nor the modules that enable features that go beyond the spec.
@@ -75,15 +75,15 @@ Parse stdin using ncurses.
 ```
 if the message from the server is: 
   “OK”:
-		User was allowed into game
-	“GRID”:
-		This message shows the GRID’s dimensions.
-	“GOLD”:
-		Allows user to see nuggets collected, current score, and nuggets left.
-	“DISPLAY”:
-		Allows the user to see the map.
-	“QUIT”:
-		Ends the ncurses library
+    User was allowed into game
+  “GRID”:
+    This message shows the GRID’s dimensions.
+  “GOLD”:
+    Allows user to see nuggets collected, current score, and nuggets left.
+  “DISPLAY”:
+    Allows the user to see the map.
+  “QUIT”:
+    Ends the ncurses library
   “ERROR”: 
     Print explanation that should be to the right of the error message.
 ```
@@ -143,13 +143,13 @@ clean up
 
 #### `parseArgs`:
 ```
-	validate command-line arguments
-	verify map file can be opened for reading
-	if seed provided
-		verify it is a valid seed number
-		seed the random-number generator with that seed
-	else
-		seed the random-number generator with getpid()
+validate command-line arguments
+verify map file can be opened for reading
+if seed provided
+  verify it is a valid seed number
+  seed the random-number generator with that seed
+else
+  seed the random-number generator with getpid()
 ```
 
 #### `initializeGame`:
@@ -166,9 +166,9 @@ clean up
 
 #### `acceptMessages`:
 ```
-  print the port number of the client sending the message
-	call message_loop() with handleMessage() to await clients
-	call visibility 
+print the port number of the client sending the message
+call message_loop() with handleMessage() to await clients
+call visibility 
 ```
 
 #### `handleMessage`:
@@ -273,17 +273,17 @@ For number of rows in file
 
 #### `gridPrint`
 ```
-  For i < # of players, i++
-		Obtain position of player (x, y)
-		If (x,y) = currentPostion
-		  Grid[y][x] = “@”
-		Else
-      Grid[y][x] = “i+65” (ascii conversion in character form) 
-	For i < # of gold piles, i++
-		Obtain position of pile, (x, y)
-		Grid[y][x] = “*”
-	For i<slots in grid array
-		Print the string in a new line
+For i < # of players, i++
+  Obtain position of player (x, y)
+  If (x,y) = currentPostion
+    Grid[y][x] = “@”
+  Else
+    Grid[y][x] = “i+65” (ascii conversion in character form) 
+  For i < # of gold piles, i++
+    Obtain position of pile, (x, y)
+    Grid[y][x] = “*”
+  For i<slots in grid array
+    Print the string in a new line
 ```
 
 #### `gridValidMove`
@@ -433,7 +433,7 @@ else
 
 ```
 if player is not null 
-	if isTakling is false, make it true 
+  if isTakling is false, make it true 
   if isTalking is true, make it false 
 else 
   do nothing
@@ -490,7 +490,7 @@ if the given spectator struct is not null:
 
 ### unit testing
 
-We will conduct unit tests according to detailing in the Design Spec, [https://github.com/cs50winter2022/nuggets-team-tux/blob/submit-implementation/DESIGN.md](DESIGN.md). We will individually test each module as we code to ensure each individual unit of the program runs smoothly. 
+We will conduct unit tests according to detailing in the Design Spec, [DESIGN.md](https://github.com/cs50winter2022/nuggets-team-tux/blob/submit-implementation/DESIGN.md). We will individually test each module as we code to ensure each individual unit of the program runs smoothly. 
 
 ### integration testing
 
