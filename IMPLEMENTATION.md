@@ -202,17 +202,20 @@ typedef struct position position_t;
 ```
 Gives (x, y) coordinate position
 
+
 Pile
 ```c
 typedef struct pile pile_t;
 ```
 Gives coordinate of gold pile and the amount of gold in that pile
 
+
 PlayerAndPosition
 ```c
 typedef struct playerAndPosition playerAndPosition_t;
 ```
 Contains position of the player and the players name
+
 
 Grid
 ```c
