@@ -14,7 +14,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <math.h>
-#include "libcs50"
+#include "libcs50/file.h"
 
 /* ***************************************** */
 /* Global types */
