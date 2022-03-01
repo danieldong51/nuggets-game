@@ -1,3 +1,11 @@
+/*
+ *
+ * Team tux
+ *
+ * CS50, winter 2022
+ *
+ */
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,11 +18,28 @@
 
 //spectator struct
 typedef struct spectator {
-  addr_t address;
+  grid_t grid;
 } spectator_t;
 
 
 
+/*
+ * new_spectator
+ */
+
+spectator_t* spectator_new(grid_t* masterGrid);
+
+/*
+ *
+ * delete_spectator
+ *
+ */
+void spectator_delete(spectator_t* spectator);
 
 
+
+
+
+
+ 
 
