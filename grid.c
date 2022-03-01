@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "bag.h"
 
 typedef struct position {
   int x;
@@ -24,7 +25,7 @@ typedef struct grid {
 
 
 /**************** gridConvert ****************/
-void gridConvert(char** grid, file *fp) 
+void gridConvert(char** grid, FILE *fp) 
 {
 // dan is doing
 }
@@ -41,7 +42,7 @@ void gridPrint(grid_t* map, position_t* currentPosition)
   int players = sizeof(map->playerPositions)/sizeof(map->playerPositions[0]);                   // determine number of players that are to be printed
   
   // set the players in the grid array
-  for (i = 0, i < players, i++) {
+  for (int i = 0, i < players, i++) {
     position_t* tempPosition = mem_malloc(sizeof(position_t));
     tempPosition = map->playerPositions[i];
     // print position of the current player
