@@ -2,7 +2,6 @@
 ## Implementation Spec
 ### Team Tux, Winter 2022
 
-> This **template** includes some gray text meant to explain how to use the template; delete all of them in your document!
 
 According to the [https://github.com/cs50winter2022/nuggets-info/blob/main/REQUIREMENTS.md](REQUIREMENTS.md), the Nuggets game requires two standalone programs: a client and a server.
 Our design also includes the player, spectator, and grid modules. 
@@ -12,15 +11,12 @@ We avoid repeating information that is provided in the requirements spec.
 
 ## Plan for division of labor
 
-Emily: Grid module, minus visualizer function
-Daniel: Visualizer, Client
-Georgia: Player
-Jeff: Spectator
-We all do: Server, Testing, Documentation
+- Emily: Grid module, minus visualizer function
+- Daniel: Visualizer, Client
+- Georgia: Player
+- Jeff: Spectator
+- We all do: Server, Testing, Documentation
 
-> Update your plan for distributing the project work among your 3(4) team members.
-> Who writes the client program, the server program, each module?
-> Who is responsible for various aspects of testing, for documentation, etc?
 
 ## Client
 
@@ -91,8 +87,7 @@ if the message from the server is:
   “ERROR”: 
     Print explanation that should be to the right of the error message.
 ```
-    
-			
+    	
 ---
 
 ## Server
@@ -133,9 +128,7 @@ A function to end the game.
 void gameOver() 
 ```
 
-
 ### Detailed pseudo code
-
 
 #### `main`:
 ```
@@ -196,7 +189,6 @@ if the messsage from the client is:
 		Make the appropriate move
 ```
 	
-	
 ---
 
 ## Grid
@@ -221,7 +213,6 @@ Grid
 typedef struct grid;
 ```
 Contents 2D string array representing the map, list of piles representing the gold piles within the map, and list of positions representing the positions of the players
-
 
 
 ### Definition of function prototypes
@@ -250,8 +241,6 @@ A function that takes a coordinate and checks if the position is an open space t
 ```c
 int gridValidMove(position_t* coordinate)
 ```
- 
-
 
 ### Detailed pseudocode
 
@@ -284,10 +273,10 @@ For number of rows in file
 
 #### `gridPrint`
 ```
-	For i < # of players, i++
+  For i < # of players, i++
 		Obtain position of player (x, y)
 		If (x,y) = currentPostion
-			Grid[y][x] = “@”
+		  Grid[y][x] = “@”
 		Else
       Grid[y][x] = “i+65” (ascii conversion in character form) 
 	For i < # of gold piles, i++
@@ -310,6 +299,7 @@ For number of rows in file
 	Return 0
 ```
 
+---
 
 ## Player 
 
@@ -328,6 +318,7 @@ bool isTalking;
 ### Definition of function prototypes
 
 A function to create a new player struct. It initializes the players location to a random room spot and sets the player's grid to be the empty grid. The server will then call updateGrid on the player's grid and master grid. 
+
 ```c
 player_t* player_new(char* name, char* letter, position_t* pos); 
 ```
@@ -367,7 +358,6 @@ A function to return the grid object of a player.
 ```c 
 grid_t* player_getGrid(player_t* player); 
 ```
-
 
 A function to change whether or not the player is talking to the server. 
 
@@ -448,7 +438,8 @@ if player is not null
 else 
   do nothing
 ```
-—
+
+---
 
 ## Spectator
 
@@ -486,7 +477,6 @@ else:
 	Print an error message and return NULL.
 ```
 
-
 #### `spectator_delete` 
 
 ```
@@ -494,13 +484,11 @@ if the given spectator struct is not null:
 	free the memory for the spectator object
 ```
 
-—
+---
 
 ## Testing plan
 
 ### unit testing
-
-> How will you test each unit (module) before integrating them with a main program (client or server)?
 
 We will conduct unit tests according to detailing in the Design Spec, [https://github.com/cs50winter2022/nuggets-team-tux/blob/submit-implementation/DESIGN.md](DESIGN.md). We will individually test each module as we code to ensure each individual unit of the program runs smoothly. 
 
