@@ -14,7 +14,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <math.h>
-#include "../lab-4-gmandell23/tse-crawler-gmandell23/libcs50/file.h"
+#include "libcs50"
 
 /* ***************************************** */
 /* Global types */
