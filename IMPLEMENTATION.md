@@ -203,19 +203,28 @@ The `grid` module is used to update the user interface for all clients each time
 
 Position
 ```c
-typedef struct position; 
+typedef struct position position_t; 
 ```
 Gives (x, y) coordinate position
 
+
 Pile
 ```c
-typedef struct pile;
+typedef struct pile pile_t;
 ```
 Gives coordinate of gold pile and the amount of gold in that pile
 
+
+PlayerAndPosition
+```c
+typedef struct playerAndPosition playerAndPosition_t;
+```
+Contains position of the player and the players name
+
+
 Grid
 ```c
-typedef struct grid;
+typedef struct grid grid_t;
 ```
 Contents 2D string array representing the map, list of piles representing the gold piles within the map, and list of positions representing the positions of the players
 
