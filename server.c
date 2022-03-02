@@ -20,14 +20,6 @@
 /* ***************************************** */
 /* Global types */
 typedef struct game {
-  // NOTE: I actually do not think these constants should be in the game struct, I think we misunderstood that lol 
-  int maxNameLength; //= 50; 		  // max number of chars in playerName
-  int maxPlayers; //= 26;      		// maximum number of players
-  int goldTotal; //= 250;     		// amount of gold in the game
-  int goldMinNumPiles; //= 10; 		// minimum number of gold piles
-  int goldMaxNumPiles; //= 30; 		// maximum number of gold piles
-
-
   // I think this should be what's in the game struct: 
   int goldRemaining;              // amount of gold left in game 
   int numPlayers; 
@@ -129,16 +121,9 @@ static void initializeGame(FILE* mapFile)
   // initialize the game struct 
   game = game_new(); 
 
-  game->maxNameLength = 50; 		  // max number of chars in playerName
-  game->maxPlayers = 26;      		// maximum number of players
-  game->goldTotal = 250;     			// amount of gold in the game
-  game->goldMinNumPiles = 10; 		// minimum number of gold piles
-  game->goldMaxNumPiles = 30; 		// maximum number of gold piles
-
   game->numPlayers = 0; 
   
 
-  
 }
 
 game_t* game_new()

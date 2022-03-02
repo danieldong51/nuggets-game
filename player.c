@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <time.h> 
 #include "../lab-4-gmandell23/tse-crawler-gmandell23/libcs50/mem.h"
+#include "grid.h"
 
 
 /**************** file-local global variables ****************/
@@ -34,6 +35,8 @@ typedef struct player {
   bool isTalking; 
 } player_t;
 
+
+// GRID STRUCTS (for reference, should include these)
 typedef struct grid {
   char** grid2D;                    // 2d string array, each slot represents one row
   pile_t** goldPiles; 
