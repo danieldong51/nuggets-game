@@ -16,21 +16,27 @@
 #include <math.h>
 #include "libcs50/file.h"
 #include "player.h"
+#include "grid.h"
+#include "spectator.h"
+#include "support/message.h"
+#include "support/log.h"
+
+
 
 /* ***************************************** */
 /* Global types */
-typedef struct game {
-  // I think this should be what's in the game struct: 
+struct game {
   int goldRemaining;              // amount of gold left in game 
   int numPlayers; 
   player_t* players[26];
   grid_t* masterGrid; 
+  spectator_t* spectator; 
 
-} game_t; 
+} game; 
 
 /* ***************************************** */
 /* Global variables */
-static game_t* game; 
+
 
 /* ***************************************** */
 /* Global constants */
@@ -51,7 +57,6 @@ static void initializeGame(FILE* mapFile);
 static void acceptMessages(int port);
 bool handleMessage(void* arg, const addr_t from, const char* message);
 void gameOver();
-game_t* game_new();
 
 /* ******************** main() ************************** */
 /* calls parseArgs, initializeGame, acceptMessages, and gameOver before exiting*/ 
@@ -59,15 +64,20 @@ int main(const int argc, char* argv[])
 {
   FILE* mapFile; 
 
-  // LIST OF PLAYERS?
-  // MASTER GRID?
-  // ^ or should those be held in the game struct 
-
   // validate command-line arguments 
   if ( parseArgs(argc, argv, &mapFile) ) {
 
     // call initialize game 
     initializeGame(mapFile); 
+
+    // initialize the message module 
+    int port = message_init(NULL);                 // will provide file pointer(fp), passed through to log_init()
+
+    // print the port number on which we wait 
+    fprintf("Port Number: %d\n", port);
+
+    // call acceptMessages() 
+
   }
   
 }
@@ -114,25 +124,19 @@ static bool parseArgs(const int argc, char* argv[], FILE** mapFile)
 /* verify that mapfile can be opened and call srand() */ 
 static void initializeGame(FILE* mapFile)
 {
-  // call gridConvert to convert the map file into a 2D array 
-  char** masterGrid = gridConvert(mapFile);
-  // TODO: create a masterGrid grid STRUCT and initialize this as the 2D array, save the grid in the game struct 
+  // initialize information about the game 
+  game.numPlayers = 0; 
 
-  // initialize the game struct 
-  game = game_new(); 
+  // initalize master grid 
+  game.masterGrid = grid_new();
 
-  game->numPlayers = 0; 
-  
+  // function to conver the map.txt file into a char** 2D array, and save it in this masterGrid struct 
+  gridMake(game.masterGrid, mapFile);
+
+  // function to initialize game grid by dropping [GoldTotal] amount of nuggets 
+  gridDropGold(game.masterGrid, GoldMinNumPiles, GoldMaxNumPiles, GoldTotal);
 
 }
 
-game_t* game_new()
-{
-  game_t* game = mem_melloc_assert(sizeof(game_t), "Unable to allocate memory for game struct\n");
-  if (game != NULL) {
-    return game; 
-  }
-  return NULL; 
-}
 
 
