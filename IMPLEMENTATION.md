@@ -31,6 +31,11 @@ int maxPlayers = 26;      		// maximum number of players
 int goldTotal = 250;     			// amount of gold in the game
 int goldMinNumPiles = 10; 		// minimum number of gold piles
 int goldMaxNumPiles = 30; 		// maximum number of gold piles
+
+int goldRemaining;              // amount of gold left in game 
+player_t* players[26];          // list of players 
+grid_t* masterGrid;             // master grid object that contains master char 2D array + other info 
+
 } game_t; 
 ```
 
