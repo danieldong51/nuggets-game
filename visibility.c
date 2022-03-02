@@ -98,6 +98,7 @@ gridUpdate(grid_t* masterGrid, grid_t* playerGrid)
 
   // clear players and piles of gold in playerGrid
 
-  // add adjacent squares to toVisit bag
+  // add current squares to toVisit bag and mark as visited 
+  masterGrid->playerPositions
 
 }
