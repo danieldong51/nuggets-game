@@ -31,8 +31,8 @@ typedef struct game {
   // I think this should be what's in the game struct: 
   int goldRemaining;              // amount of gold left in game 
   int numPlayers; 
-  char** grid;                    // this should probably just hold a grid object instead
-  // LIST OF PLAYERS? 
+  player_t* players[26];
+  grid_t* masterGrid; 
 
 } game_t; 
 
@@ -70,7 +70,7 @@ int main(const int argc, char* argv[])
   // LIST OF PLAYERS?
   // MASTER GRID?
   // ^ or should those be held in the game struct 
-  
+
   // validate command-line arguments 
   if ( parseArgs(argc, argv, &mapFile) ) {
 
@@ -135,7 +135,6 @@ static void initializeGame(FILE* mapFile)
   game->goldMinNumPiles = 10; 		// minimum number of gold piles
   game->goldMaxNumPiles = 30; 		// maximum number of gold piles
 
-  game->grid = masterGrid; 
   game->numPlayers = 0; 
   
 
