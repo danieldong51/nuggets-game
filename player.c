@@ -62,7 +62,7 @@ void player_move(player_t* player, position_t* newPosition);
 position_t* player_getPosition(player_t* player);
 void player_addGold(player_t* player, int numGold);
 void player_addGold(player_t* player, int numGold);
-bool player_isTakling(player_t* player);
+bool player_isTalkng(player_t* player);
 void player_changeStatus(player_t* player);
 grid_t* player_getGrid(player_t* player);
 char* player_getName(player_t* player);
@@ -153,7 +153,7 @@ void player_addGold(player_t* player, int numGold)
 
 /**************** player_isTalking() ****************/
 /* see player.h for description */
-bool player_isTakling(player_t* player)
+bool player_isTalkng(player_t* player)
 {
   if (player != NULL) {
     return player->isTalking; 

@@ -33,7 +33,7 @@ player_t* player_new(char* name, char* letter, grid_t* masterGrid);
 void player_move(player_t* player, position_t* newPosition);
 position_t* player_getPosition(player_t* player);
 void player_addGold(player_t* player, int numGold);
-bool player_isTakling(player_t* player);
+bool player_isTalkng(player_t* player);
 void player_changeStatus(player_t* player);
 grid_t* player_getGrid(player_t* player);
 char* player_getName(player_t* player);
@@ -97,7 +97,7 @@ void player_addGold(player_t* player, int numGold);
 * We return: 
 *   if the player is not null, return whether or not the player is talking to the server 
 */
-bool player_isTakling(player_t* player);
+bool player_isTalkng(player_t* player);
 
 /**************** player_changeStatus() ****************/
 /* A function to change whether or not the player is talking to the server. */
