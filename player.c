@@ -11,17 +11,13 @@
 #include <string.h>
 #include <stdbool.h>
 #include <time.h> 
-#include "../lab-4-gmandell23/tse-crawler-gmandell23/libcs50/mem.h"
-
+#include "libcs50/mem.h"
+#include "grid.h"
 
 /**************** file-local global variables ****************/
 /* none */
 
 /**************** local types ****************/
-typedef struct position {
-	int x;
-	int y;
-} position_t;
 
 
 /**************** global types ****************/
@@ -33,23 +29,6 @@ typedef struct player {
   grid_t* grid;
   bool isTalking; 
 } player_t;
-
-typedef struct grid {
-  char** grid2D;                    // 2d string array, each slot represents one row
-  pile_t** goldPiles; 
-  playerAndPosition_t** playerPositions;
-} grid_t;
-
-typedef struct playerAndPosition {
-  char name;
-  position_t* playerPosition;
-} playerAndPosition_t;
-
-typedef struct pile {
-  position_t* location;
-  int amount;
-} pile_t;
-
 
 /**************** global functions ****************/
 /* that is, visible outside this file */

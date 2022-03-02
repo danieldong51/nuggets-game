@@ -12,17 +12,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../lab-4-gmandell23/tse-crawler-gmandell23/libcs50/mem.h"
+#include "libcs50/mem.h"
+#include "grid.h"
 
-/**************** local types ****************/
-typedef struct position_t;  // opaque to users of the module
 
 /**************** global types ****************/
-typedef struct player_t; 
-typedef struct position_t; 
-typedef struct grid_t;
-typedef struct playerAndPosition_t;
-typedef struct pile_t; 
+typedef struct player player_t; 
 
 /**************** global functions ****************/
 /* that is, visible outside this file */
@@ -52,7 +47,7 @@ char* player_getName(player_t* player);
 *   the player, if everything is successful, 
 *   NULL, on error
 */
-player_t* player_new(char* name, grid_t* masterGrid);
+player_t* player_new(char* name, char* letter, grid_t* masterGrid);
 
 /**************** player_move() ****************/
 /* A function to change the position of a player. */
