@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "grid.h"
+#include "bag.h"
 
 static int NROWS = 25;
 static int NCOLS = 100;
@@ -14,6 +16,7 @@ static int CORNER = '+';
 
 static char** newGrid(void);
 static void girdConvert(char** grid, FILE* fp);
+static void gridUpdate(grid_t* master, grid_t* player);
 
 int 
 main(const int argc, char* argv[]) 
@@ -86,3 +89,15 @@ girdConvert(char** grid, FILE* fp)
   }
 }
 
+static void 
+gridUpdate(grid_t* masterGrid, grid_t* playerGrid)
+{
+  // initialize toVisit bag and visited grid
+  bag_t* toVisit = bag_new();
+  char** visited = newGrid();
+
+  // clear players and piles of gold in playerGrid
+
+  // add adjacent squares to toVisit bag
+
+}
