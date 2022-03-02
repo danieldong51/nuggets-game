@@ -15,26 +15,38 @@
 #include <stdbool.h>
 #include <math.h>
 #include "libcs50/file.h"
+#include "player.h"
 
 /* ***************************************** */
 /* Global types */
 typedef struct game {
+  // NOTE: I actually do not think these constants should be in the game struct, I think we misunderstood that lol 
   int maxNameLength; //= 50; 		  // max number of chars in playerName
   int maxPlayers; //= 26;      		// maximum number of players
   int goldTotal; //= 250;     		// amount of gold in the game
   int goldMinNumPiles; //= 10; 		// minimum number of gold piles
   int goldMaxNumPiles; //= 30; 		// maximum number of gold piles
-  char** grid;                    // 2D array representing original game grid 
+
+
+  // I think this should be what's in the game struct: 
+  int goldRemaining;              // amount of gold left in game 
+  int numPlayers; 
+  char** grid;                    // this should probably just hold a grid object instead
+  // LIST OF PLAYERS? 
+
 } game_t; 
 
 /* ***************************************** */
-/* Private types */
+/* Global variables */
+static game_t* game; 
 
-/* *********************************************************************** */
-/* Private function prototypes */
-
-/* *********************************************************************** */
-/* Private global variables */
+/* ***************************************** */
+/* Global constants */
+static const int MaxNameLength = 50;   // max number of chars in playerName
+static const int MaxPlayers = 26;      // maximum number of players
+static const int GoldTotal = 250;      // amount of gold in the game
+static const int GoldMinNumPiles = 10; // minimum number of gold piles
+static const int GoldMaxNumPiles = 30; // maximum number of gold piles 
 
 /* *********************************************************************** */
 /* Public methods */
@@ -54,6 +66,11 @@ game_t* game_new();
 int main(const int argc, char* argv[])
 {
   FILE* mapFile; 
+
+  // LIST OF PLAYERS?
+  // MASTER GRID?
+  // ^ or should those be held in the game struct 
+  
   // validate command-line arguments 
   if ( parseArgs(argc, argv, &mapFile) ) {
 
@@ -107,16 +124,20 @@ static void initializeGame(FILE* mapFile)
 {
   // call gridConvert to convert the map file into a 2D array 
   char** masterGrid = gridConvert(mapFile);
+  // TODO: create a masterGrid grid STRUCT and initialize this as the 2D array, save the grid in the game struct 
 
   // initialize the game struct 
-  game_t* game = game_new(); 
+  game = game_new(); 
 
   game->maxNameLength = 50; 		  // max number of chars in playerName
   game->maxPlayers = 26;      		// maximum number of players
   game->goldTotal = 250;     			// amount of gold in the game
   game->goldMinNumPiles = 10; 		// minimum number of gold piles
   game->goldMaxNumPiles = 30; 		// maximum number of gold piles
+
   game->grid = masterGrid; 
+  game->numPlayers = 0; 
+  
 
   
 }
