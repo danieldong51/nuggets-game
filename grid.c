@@ -35,7 +35,7 @@ static int CORNER = '+';
 
 /**************** newGrid ****************/
 static char**
-newGrid(void)
+newGrid2D(void)
 {
   // allocate a 2-dimensional array of NROWS x NCOLS
   char** grid = calloc(NROWS, sizeof(char*));
@@ -60,7 +60,7 @@ newGrid(void)
 }
 
 static void
-girdConvert(char** grid, FILE* fp)
+gridConvert(char** grid, FILE* fp)
 {
   const int size = NCOLS+2;  // include room for \n\0
   char line[size];           // a line of input
@@ -104,34 +104,93 @@ void gridPrint(grid_t* map, position_t* currentPosition)
     tempPosition = map->playerPositions[i];
     // print position of the current player
     if ( (tempPosition->x == currentPosition->x) && (tempPosition->y == currentPosition->y)) {    
-      map[currentPosition->x][currentPosition->y] = '@';
+      map->grid2D[currentPosition->x][currentPosition->y] = '@';
     }
     // print position of the other players 
     else {
-      map[tempPosition->x][tempPosition->y] = grid->platerPositions[i]->name;
+      map->grid2D[tempPosition->x][tempPosition->y] = grid->platerPositions[i]->name;
     }
   }
   mem_free(tempPosition);
 
   // set the gold in the grid array
   int numPiles = sizeof(map->goldPiles)/sizeof(map->goldPiles[0]);                  
-  for ( i = 0; i< numPiles; i++ ) {
+  for ( int i = 0; i< numPiles; i++ ) {
     position_t* tempPosition = mem_malloc(sizeof(position_t));
     tempPosition = map->goldPiles[i]->location;
-    map[tempPosition->x][tempPosition->y] = '*';
+    map->grid2D[tempPosition->x][tempPosition->y] = '*';
   }
 
   // calculate amount of rows in grid
   int NR = sizeof(map->grid)/sizeof(map->grid[0]);
 
   // print out each row
-  for ( i = 0; i < NR; i ++ ) {
-    fprintf(stdout, "%s", map->grid[i]);
+  for ( int i = 0; i < NR; i ++ ) {
+    fprintf(stdout, "%s", map->grid2D[i]);
   }
 }
 
 /**************** gridValidMove ****************/
-int gridValidMove(position_t* coordinate)
+/* gives an (x,y) position and checks to see if a player can move into that position in the map */
+int gridValidMove(grid_t* map, position_t* coordinate)
 {
-  return 0;
+  int xCord = coordinate->x;
+  int yCord = coordinate->y;
+
+  // if coordinate is an empty room space or passage
+  if ( (map->grid2D[yCord][xCord] == EMPTY) || (map->grid2D[yCord][xCord]) == PASSAGE) ||  (map->grid2D[yCord][xCord]) == PASSAGE) {
+    return 0;
+  }
+
+  // if the coordinate is a pile of gold
+  else if ((map->grid2D[yCord][xCord] == '*')) {
+    int numPiles = sizeof(map->goldPiles)/sizeof(map->goldPiles[0]);  
+    for (int i = 0; i < numPiles, i++) {
+      // loop through and find the pile structure with the same position
+      if ((map->goldPiles[i]->location->x) == xCord) && (map->goldPiles[i]->location->y) == yCord) {
+        return map->goldPiles->amount;
+      }
+    }
+  }
+  else {
+    // not a valid space to move into
+    return 0;
+  }
 }
+
+/**************** gridInit ****************/
+// initializes a new empty grid--mallocs memory
+grid_t* gridInit(){
+  grid_t* map = mem_malloc(sizeof(grid_t));
+  return map;
+}
+
+/**************** gridMakeMaster ****************/
+/* fill up char** array and piles_t** array */
+void gridMakeMaster(grid_t* masterGrid, FILE* fp, int numGold, int minGoldPiles, int maxGoldPiles, int seed) {
+  char** grid2D;                                              // map of walls, paths, and spaces
+  gridConvert(grid2D, fp);
+  masterGrid->grid2D = grid2D;
+
+  int NR = sizeof(grid2D)/sizeof(grid2D[0]);                  // number of rows in grid 
+  int NC = strlen(grid2D[0]);                                 // number of columns in grid
+
+  stand(seed);                                                // not sure what this means but seed is an optional parameter for server
+  // set the number of piles in the map
+  int numPiles = (int)(rand() % (minGoldPiles - maxGoldPiles + 1)) + minGoldPiles; 
+
+  piles_t** goldPiles;
+  // create pile structures bt setting random locations and random amounts for gold
+  for (int i = 0; i < numPiles; i++) {
+    position_t* goldPosition= mem_malloc(position_t);
+    goldPosition->x = 0;
+    goldPosition->y = 0;
+    // find random position that is in an empty room spot
+    while (!((grid2d[y][x] == EMPTY)) {
+      goldPosition->x = ; // need to figure out how to do this
+      goldPosition->y = ;
+    }
+  }
+
+}
+
