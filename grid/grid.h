@@ -7,6 +7,7 @@
 #include "bag.h"
 #include "file.h"
 #include "mem.h"
+#include "../player/player.h"
 #include <math.h>
 
 typedef struct position position_t;

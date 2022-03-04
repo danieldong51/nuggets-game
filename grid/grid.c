@@ -163,6 +163,11 @@ void updateGrid(player_t* player, grid_t* masterGrid)
   }
 }
 
+void clearPlayerArray(grid_t* grid)
+{
+  grid->playerPositions
+}
+
 char gridGetChar(char** grid, position_t* position)
 {
   return grid[position->y][position->x];
@@ -401,6 +406,7 @@ void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGold
     int oversizedAmount = goldPiles[i]->amount;
     goldPiles[i]->amount = round(oversizedAmount * goldScale);
   }
+
   masterGrid->goldPiles=goldPiles;
   fclose(fp);
   // NEED TO THINK ABOUT FREES
