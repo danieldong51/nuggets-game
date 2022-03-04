@@ -33,6 +33,7 @@ static int HORIZONTAL = '-';
 static int VERITAL = '|';
 static int CORNER = '+';
 
+
 /**************** newGrid ****************/
 static char**
 newGrid2D(void)
@@ -58,6 +59,7 @@ newGrid2D(void)
   }
   return grid;
 }
+
 
 static void
 gridConvert(char** grid, FILE* fp)
@@ -87,11 +89,13 @@ gridConvert(char** grid, FILE* fp)
   }
 }
 
+
 /**************** updateGrid ****************/
-bag_t* updateGrid(grid_t* playerGrid, grid_t* serverGrid)
+void updateGrid(grid_t* playerGrid, grid_t* serverGrid)
 {
 // dan is doing
 }
+
 
 /**************** gridPrint ****************/
 void gridPrint(grid_t* map, position_t* currentPosition)
@@ -130,6 +134,7 @@ void gridPrint(grid_t* map, position_t* currentPosition)
   }
 }
 
+
 /**************** gridValidMove ****************/
 /* gives an (x,y) position and checks to see if a player can move into that position in the map */
 int gridValidMove(grid_t* map, position_t* coordinate)
@@ -158,6 +163,7 @@ int gridValidMove(grid_t* map, position_t* coordinate)
   }
 }
 
+
 /**************** gridInit ****************/
 // initializes a new empty grid--mallocs memory
 grid_t* gridInit(){
@@ -168,29 +174,85 @@ grid_t* gridInit(){
 /**************** gridMakeMaster ****************/
 /* fill up char** array and piles_t** array */
 void gridMakeMaster(grid_t* masterGrid, FILE* fp, int numGold, int minGoldPiles, int maxGoldPiles, int seed) {
+  
+  // set 2d char map for grid
   char** grid2D;                                              // map of walls, paths, and spaces
   gridConvert(grid2D, fp);
   masterGrid->grid2D = grid2D;
 
+  // set goldPiles for grid
   int NR = sizeof(grid2D)/sizeof(grid2D[0]);                  // number of rows in grid 
   int NC = strlen(grid2D[0]);                                 // number of columns in grid
 
-  stand(seed);                                                // not sure what this means but seed is an optional parameter for server
+  srand(seed);                                                // not sure what this means but seed is an optional parameter for server
   // set the number of piles in the map
   int numPiles = (int)(rand() % (minGoldPiles - maxGoldPiles + 1)) + minGoldPiles; 
+  int currentGoldAmount;
 
-  piles_t** goldPiles;
+  
+  piles_t*[numPiles] goldPiles; // check this syntax
   // create pile structures bt setting random locations and random amounts for gold
   for (int i = 0; i < numPiles; i++) {
     position_t* goldPosition= mem_malloc(position_t);
+    pile_t* goldPile = mem_malloc(pile_t);
     goldPosition->x = 0;
     goldPosition->y = 0;
     // find random position that is in an empty room spot
-    while (!((grid2d[y][x] == EMPTY)) {
-      goldPosition->x = ; // need to figure out how to do this
-      goldPosition->y = ;
+    while (!((grid2d[goldPosition->y][goldPosition->x ] == EMPTY)) {
+      // set random position for gold
+      goldPosition->x = (rand() % NR) + 1; 
+      goldPosition->y = (rand() % NC) + 1;
     }
+    goldPile->location = goldPosition;
+    goldPile->amount = rand();
+    currentGoldAmount += goldPile->amount;
+    goldPiles[i] = goldPile;
+  }
+  
+  // fraction to scale down gold amount in each pile by
+  int goldScale = numGold/currentGoldAmount;
+
+  // loop through again and scale down gold pile amounts
+  for (int i = 0; i< numPiles; i++) {
+    int oversizedAmount = goldPiles[i]->amount;
+    goldPiles[i]->amount = round(oversizedAmount * goldScale);
+  }
+  masterGrid->goldPiles=goldPiles;
+  // NEED TO THINK ABOUT FREES
+}
+
+
+/**************** gridNewPlayer ****************/
+// returns the new player grid, which will start off as completely empty
+// creates a new playerAndPosition struct representing new player in the masterGrid (map is the masterGrid)
+grid_t* gridNewPlayer(grid_t* map)
+{
+  int NR = sizeof(map->grid2D)/sizeof(map->grid2D[0]);                  // number of rows in grid 
+  int NC = strlen(map->grid2D[0]);                                 // number of columns in grid
+  position_t* playerPosition= mem_malloc(position_t);
+
+  playerPosition->x = 0;
+  playerPosition->y = 0;
+  while ( !(map->grid2D[playerPosition->y][playerPosition->x] == EMPTY) ){
+    playerPosition->x = (rand() % NR) + 1; 
+    playerPosition->y = (rand() % NC) + 1;
   }
 
+  // if this is the first player being intialized
+  if (map->playerPositions == NULL) {
+    playerAndPosition_t*[26] players;
+    map->playerPositions = players;
+  }
+
+  int i = 0;
+  while( !(map->playerPositions[i] == NULL) ) {
+    i++;
+  }
+  map->playerPositions[i]->name = i+'a'; // set char name
+  map->playerPositions[i]->playerPosition = playerPosition;
+
+  playerGrid = gridInit();
+  return playerGrid;
 }
+
 
