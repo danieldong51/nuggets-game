@@ -243,19 +243,10 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
       for (int i = 0; i < game.numPlayers; i++) {
         player_t* player = game.players[i];
 
-<<<<<<< HEAD
-      // set random position for player and add it to list of positions 
-      // initializes 
-      gridNewPlayer(game.masterGrid, letter);
-
-      // call updateGrid on player 
-      updateGrid(player, game.masterGrid);
-=======
         if (player_isTakling(player)) {
           updateGrid(player, game.masterGrid);
         }
       }
->>>>>>> 511a2c8194bcd09365d824380ff9a521af9f9f9a
 
       // server shall then immediately send GRID, GOLD, and DISPLAY messages as described below.
       sendGridMessage(from); 
@@ -271,12 +262,6 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
       // too many players, respond to client with "NO"
       message_send(from, "QUIT Game is full: no more players can join.");
     }
-<<<<<<< HEAD
-  }
-  // SPECTATE 
-  else if (strncmp(message, "SPECTATE ", strlen("SPECTATE ")) == 0) {
-=======
->>>>>>> 511a2c8194bcd09365d824380ff9a521af9f9f9a
 
     return false; 
   }
@@ -321,14 +306,6 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
   else if (strncmp(message, "KEY ", strlen("KEY ")) == 0) {
 
     // call handleKey() function
-<<<<<<< HEAD
-    handleKeyMessage(otherp, message);
-    
-    
-
-  }
-  
-=======
     handleKeyMessage(from, message);
     
   }
@@ -337,60 +314,11 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
   if (game.goldRemaining == 0) {
     return true; 
   }
->>>>>>> 511a2c8194bcd09365d824380ff9a521af9f9f9a
   
   return false;
 
 }
 
-<<<<<<< HEAD
-void handleKeyMessage(const addr_t otherp, char* message, char letter)
-{
-
-  // loop through the list of players 
-  player_t* currPlayer;
-  bool foundPlayer = false; 
-
-  for (int i = 0; i < game.numPlayers; i++) {
-    currPlayer = game.players[i];
-
-    // check if this address if our 'from' address
-    if (message_eqAddress(player_getAddress(currPlayer), otherp)) {
-      // if it is, break - this is our player
-      foundPlayer = true; 
-      break; 
-    }
-  }
-  if (foundPlayer) {
-    // get the letter of this player 
-    char letter = player_getLetter(currPlayer);
-
-    // change the status to say that this player is currently talking to the server
-    //player_changeStatus(currPlayer, true);
-
-    const char* content = message + strlen("KEY "); // pointer to message, starting after "KEY "
-
-    char key; 
-
-    // parse using sscanf 
-    sscanf(content, " %c", &key);
-    int moveResult; 
-
-    // switch value of key 
-    switch(key) {
-      case 'Q':
-        message_send(*otherp, "QUIT Thanks for playing!");
-      case 'h': case 'l': case 'j': case 'k': case 'y': case 'u': case 'b': case 'n':
-        moveResult = gridValidMove(letter, key);
-      default: 
-        //  the server shall ignore that keystroke and may send back an ERROR message as described below
-        sendErrorMessage(*otherp, "Invalid keystroke");
-    }
-
-    // based on moveResult value, send messages to all clients 
-
-    // if the players keystroke causes them to move to a new spot, 
-=======
 void handleKeyMessage(const addr_t otherp, char* message)
 {
   bool foundPlayer = false; 
@@ -456,23 +384,11 @@ void handleKeyMessage(const addr_t otherp, char* message)
 
     // if the players keystroke causes them to move to a new spot, 
     // updateGrid for every player
->>>>>>> 511a2c8194bcd09365d824380ff9a521af9f9f9a
     // inform all clients of a change in the game grid using a DISPLAY message as described below
     if (moveResult == 0) {
       // loop through players, send DISPLAY message to each one 
       for (int i = 0; i < game.numPlayers; i++) {
         player_t* thisPlayer = game.players[i];
-<<<<<<< HEAD
-        // get address of this player 
-        addr_t* address = player_getAddress(thisPlayer);
-        
-        // send display message to player 
-        sendDisplayMessage(player_getGrid(thisPlayer), *address); 
-      }
-    }
-    else if (moveResult == -1) {
-      sendErrorMessage(*otherp, "Player cannot make this move");
-=======
         if (player_isTakling(thisPlayer)){
 
           // update grid for this player 
@@ -489,24 +405,11 @@ void handleKeyMessage(const addr_t otherp, char* message)
     }
     else if (moveResult == -1) {
       sendErrorMessage(otherp, "Player cannot make this move");
->>>>>>> 511a2c8194bcd09365d824380ff9a521af9f9f9a
     }
     else {
       // moveResult = amount of gold this player has just picked up 
       // inform all clients of new gold count by sending a "GOLD" message 
       for (int i = 0; i< game.numPlayers; i++){
-<<<<<<< HEAD
-        player_t* player = game.players[i];
-        if (player == currPlayer) {
-          sendGoldMessage(moveResult, player_getGold(player), game.goldRemaining);
-        }
-        else {
-          sendGoldMessage(0, player_getGold(player), game.goldRemaining); 
-        }
-      }
-    }
-  }
-=======
 
         // check if player is currently talking to server 
         player_t* player = game.players[i];
@@ -545,7 +448,6 @@ void handleKeyMessage(const addr_t otherp, char* message)
     }
 
   }
->>>>>>> 511a2c8194bcd09365d824380ff9a521af9f9f9a
 }
 
 /*  check parameters, construct the message, log about it, and send the message */
