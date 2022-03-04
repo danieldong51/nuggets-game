@@ -192,10 +192,7 @@ bool isVisible(position_t* playerPos, position_t* squarePos, grid_t* masterGrid)
 
       // if intersects at only one place,
       // checking if that spot is a wall
-      position_t* intersectPos = position_new(curCol, curRow);
-      char space = gridGetChar(masterGrid, intersectPos);
-      free(intersectPos);
-      if (space != EMPTY) {
+      if (!isEmpty(masterGrid, (int) curCol, curRow)) {
         return false;
       }
 
@@ -203,21 +200,48 @@ bool isVisible(position_t* playerPos, position_t* squarePos, grid_t* masterGrid)
 
       // else intersects at in between place
       // checking both spots to see if spot is empty
-      position_t* intersectPos = position_new((int) curCol, curRow);
-      char space = gridGetChar(masterGrid, intersectPos);
-      free(intersectPos);
-
-      if (space != EMPTY) {
-        
-        // checking if other spot is also not empty
-        position_t* intersectPos = position_new(((int) curCol) + 1, curRow);
-        space = gridGetChar(masterGrid, intersectPos);
-        free(intersectPos);
-        if (space != EMPTY) {
-          return false;
-        }
+      if (!isEmpty(masterGrid, (int) curCol, curRow) && 
+          !isEmpty(masterGrid, (int) curCol + 1 , curRow)) {
+        return false;
       }
     }
+  }
+
+  // looping over columns
+  int curCol;
+  while ((curCol = increment(curCol, col)) != col) {
+    float curRow = prow + (1 / slope) * (curCol - pcol);
+
+    // checks if intersects at only one place
+    if (isInteger(curRow)) {
+
+      // if intersects at only one place,
+      // checking if that spot is a wall
+      if (!isEmpty(masterGrid, curCol, (int) curRow)) {
+        return false;
+      }
+
+    } else {
+
+      // else intersects at in between place
+      // checking both spots to see if spot is empty
+      if (!isEmpty(masterGrid, curCol, (int) curRow) && 
+          !isEmpty(masterGrid, curCol, (int) curRow + 1)) {
+        return false;
+      }
+    }
+  }
+}
+
+bool isEmpty(grid_t* masterGrid, int col, int row)
+{
+  position_t* intersectPos = position_new(col, row);
+  char space = gridGetChar(masterGrid, intersectPos);
+  free(intersectPos);
+  if (space != EMPTY) {
+    return false;
+  } else {
+    return true;
   }
 }
 
