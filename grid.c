@@ -129,6 +129,35 @@ void updateGrid(player_t* player, grid_t* masterGrid)
       gridMark(playerGrid, position, gridGetChar(masterGrid, position));
 
       // loop over adjacent squares
+      bag_t* adjacentSquares = bag_new();
+
+      int x = position->x;
+      int y = position->y;
+
+      position_t* positionLeft = position_new(x - 1, y);
+      position_t* positionRight = position_new(x + 1, y);
+      position_t* positionUp = position_new(x, y + 1);
+      position_t* positionDown = position_new(x, y - 1);
+
+      bag_add(adjacentSquares, positionLeft);
+      bag_add(adjacentSquares, positionRight);
+      bag_add(adjacentSquares, positionUp);
+      bag_add(adjacentSquares, positionDown);
+
+      position_t* positionAdjacent;
+
+      while ((positionAdjacent = bag_extract(adjacentSquares)) != NULL) {
+
+        // if square not visited
+        if (gridGetChar(visited, positionAdjacent) != '.') {
+
+          // mark square as visitied
+          gridMark(visited, positionAdjacent, '.');
+
+          // add to toVisit
+          bag_add(toVisit, positionAdjacent);
+        }
+      }
     }
   }
 }
@@ -146,6 +175,14 @@ void gridMark(char** grid, position_t* position, char mark)
 bool isVisible(position_t* playerPos, position_t* square, grid_t* masterGrid)
 {
 
+}
+
+position_t* position_new(int x, int y)
+{
+  position_t* position = malloc(sizeof(position_t));
+  position->x = x;
+  position->y = y;
+  return position;
 }
 
 /**************** gridPrint ****************/
