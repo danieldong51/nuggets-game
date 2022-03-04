@@ -15,7 +15,7 @@ typedef struct pile pile_t;
 typedef struct grid grid_t;
 
 /**************** newGrid2D ****************/
-static char** newGrid2D(int NROWS, int NCOLS);
+//static char** newGrid2D(int NROWS, int NCOLS);
 
 
 /**************** gridConvert ****************/
@@ -36,7 +36,7 @@ void gridPrint(grid_t* grid, position_t* currentPosition);
 /**************** gridValidMove ****************/
 /*
  */
-int gridValidMove(position_t* coordinate);
+int gridValidMove(grid_t* map, char letter, char move);
 
 /**************** gridInit ****************/
 /*
@@ -44,7 +44,7 @@ int gridValidMove(position_t* coordinate);
 grid_t* grid_new();
 
 /**************** gridMakeMaster ****************/
-void gridMakeMaster(grid_t* masterGrid, FILE* fp, int numGold, int minGoldPiles, int maxGoldPiles, int seed);
+void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int seed);
 
 /**************** gridNewPlayer ****************/
 grid_t* gridNewPlayer(grid_t* map);

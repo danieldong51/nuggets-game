@@ -14,8 +14,8 @@ MAKE = make
 # for memory-leak tests
 VALGRIND = valgrind --leak-check=full --show-leak-kinds=all
 
-#gridTester: $(OBJS)
-#	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
+gridTester: $(OBJS)
+	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
 
 #gridTester.o: libcs50/libcs50-given.a grid.h
 grid.o: libcs50/libcs50-given.a grid.h
@@ -24,10 +24,10 @@ grid.o: libcs50/libcs50-given.a grid.h
 
 # expects a file `hashtableFile.txt` to exist; it can contain any text.
 test: gridTester 
-	./gridTester
+	./gridTester maps/small.txt
 
 # expects a file `hashtableFile.txt` to exist; it can contain any text.
-valgrind: gridTester 
+valgrind: gridTester maps/small.txt
 	$(VALGRIND) ./gridTester
 
 clean:

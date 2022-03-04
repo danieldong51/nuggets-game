@@ -43,6 +43,7 @@ static int CORNER = '+';
 static char**
 newGrid2D(int NROWS, int NCOLS)
 {
+
   // allocate a 2-dimensional array of NROWS x NCOLS
   char** grid = calloc(NROWS, sizeof(char*));
   char* contents = calloc(NROWS * NCOLS, sizeof(char));
@@ -67,15 +68,16 @@ newGrid2D(int NROWS, int NCOLS)
 
 
 static void
-gridConvert(char** grid, FILE* fp, int NCOLS, int NROWS)
+gridConvert(char** grid, FILE* fp, int NROWS, int NCOLS)
 {
   const int size = NCOLS+2;  // include room for \n\0
   char line[size];           // a line of input
   int y = 0;
-
+  printf("ROWS: %d\n", NROWS);
   // read each line and copy it to the board
-  while ( fgets(line, size, fp) != NULL && y < NROWS) {
+  while ( fgets(line, size, fp) != NULL && y <= NROWS) {
     int len = strlen(line);
+    printf("line: %s\n", line);
     if (line[len-1] == '\n') {
       // normal line
       len--; // don't copy the newline
@@ -86,7 +88,11 @@ gridConvert(char** grid, FILE* fp, int NCOLS, int NROWS)
       for (char c = 0; c != '\n' && c != EOF; c = getc(fp))
         ; // scan off the excess part of the line
     }
-    strncpy(grid[y++], line, len);
+    
+    strncpy(grid[y], line, len);
+    printf("Y: %d\n", y);
+    y++;
+
   }
 
   if (!feof(fp)) {
@@ -140,10 +146,10 @@ void gridPrint(grid_t* map, position_t* currentPosition)
 
 /**************** gridValidMove ****************/
 /* gives an (x,y) position and checks to see if a player can move into that position in the map */
-int gridValidMove(grid_t* map, position_t* coordinate)
+int gridValidMove(grid_t* map, char letter, char move)
 {
-  int xCord = coordinate->x;
-  int yCord = coordinate->y;
+  int xCord = 0;  // need to change, set to 0 for compiling
+  int yCord = 0;
 
   // if coordinate is an empty room space or passage
   if ( (map->grid2D[yCord][xCord] == EMPTY) || ((map->grid2D[yCord][xCord]) == PASSAGE) ||  ((map->grid2D[yCord][xCord]) == PASSAGE)) {
@@ -162,7 +168,7 @@ int gridValidMove(grid_t* map, position_t* coordinate)
     }
   }
   // not a valid space to move into
-  return 0;
+  return -1;
 }
 
 
@@ -189,33 +195,40 @@ void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGold
     // set 2d char map for grid
   char** grid2D;                                              // map of walls, paths, and spaces
   grid2D = newGrid2D(NR, NC);
+  printf("before grid convert\n");
   gridConvert(grid2D, fp, NR, NC);
+  printf("grid converted\n");
   masterGrid->grid2D = grid2D;
-
+  printf("1\n");
   srand(seed);                                                // not sure what this means but seed is an optional parameter for server
   // set the number of piles in the map
   int numPiles = (int)(rand() % (minGoldPiles - maxGoldPiles + 1)) + minGoldPiles; 
   int currentGoldAmount;
-
+  printf("2\n");
   
   pile_t* goldPiles[numPiles]; // check this syntax
   // create pile structures bt setting random locations and random amounts for gold
   for (int i = 0; i < numPiles; i++) {
     position_t* goldPosition= mem_malloc(sizeof(position_t));
     pile_t* goldPile = mem_malloc(sizeof(pile_t));
-    goldPosition->x = 0;
-    goldPosition->y = 0;
+    goldPosition->x = (rand() % NC) + 1;
+    goldPosition->y = (rand() % NR) + 1;
+    printf("3\n");
     // find random position that is in an empty room spot
     while (!((grid2D[goldPosition->y][goldPosition->x ] == EMPTY))) {
       // set random position for gold
-      goldPosition->x = (rand() % NR) + 1; 
-      goldPosition->y = (rand() % NC) + 1;
+      printf("4\n");
+      goldPosition->x = (rand() % NC) + 1; 
+      goldPosition->y = (rand() % NR) + 1;
     }
+    printf("5\n");
     goldPile->location = goldPosition;
     goldPile->amount = rand();
     currentGoldAmount += goldPile->amount;
     goldPiles[i] = goldPile;
+    printf("6\n");
   }
+  printf("7\n");
   
   // fraction to scale down gold amount in each pile by
   int goldScale = numGold/currentGoldAmount;
@@ -251,6 +264,7 @@ grid_t* gridNewPlayer(grid_t* map)
     map->playerPositions = players;
   }
 
+
   int i = 0;
   while( !(map->playerPositions[i] == NULL) ) {
     i++;
@@ -276,3 +290,4 @@ int getNumColumns(grid_t* masterGrid) {
 char** getGrid2D(grid_t* masterGrid) {
   return masterGrid->grid2D;
 }
+
