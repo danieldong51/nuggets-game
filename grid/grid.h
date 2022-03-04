@@ -61,4 +61,7 @@ int getNumColumns(grid_t* masterGrid);
 /**************** getGrid2D ****************/
 char** getGrid2D(grid_t* masterGrid);
 
+void setPosition(position_t* position, int x, int y);
+
+position_t* newPosition();
 #endif

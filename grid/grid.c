@@ -75,9 +75,9 @@ gridConvert(char** grid, FILE* fp, int NROWS, int NCOLS)
   int y = 0;
   printf("ROWS: %d\n", NROWS);
 
+
   while ( fgets(line, size, fp) != NULL && y <= NROWS) {
     int len = strlen(line);
-    printf("line: %s\n", line);
     if (line[len-1] == '\n') {
       // normal line
       len--; // don't copy the newline
@@ -90,6 +90,7 @@ gridConvert(char** grid, FILE* fp, int NROWS, int NCOLS)
     }
     
     strncpy(grid[y], line, len);
+    printf("%s\n",grid[y]);
     printf("Y: %d\n", y);
     y++;
 
@@ -111,29 +112,35 @@ void updateGrid(grid_t* playerGrid, grid_t* serverGrid)
 /**************** gridPrint ****************/
 void gridPrint(grid_t* map, position_t* currentPosition)
 {
+  printf("%ld\n", sizeof(map->playerPositions));
+  printf("%ld\n", sizeof(map->playerPositions[0]));
   int players = sizeof(map->playerPositions)/sizeof(map->playerPositions[0]);                   // determine number of players that are to be printed
   
   // set the players in the grid array
-  for (int i = 0; i < players; i++) {
-    position_t* tempPosition = mem_malloc(sizeof(position_t));
-    tempPosition = map->playerPositions[i]->playerPosition;
-    // print position of the current player
-    if ( (tempPosition->x == currentPosition->x) && (tempPosition->y == currentPosition->y)) {    
-      map->grid2D[currentPosition->x][currentPosition->y] = '@';
+  if (map->playerPositions != NULL) {
+    for (int i = 0; i < players; i++) {
+      position_t* tempPosition = mem_malloc(sizeof(position_t));
+      tempPosition = map->playerPositions[i]->playerPosition;
+      // print position of the current player
+      if ( (tempPosition->x == currentPosition->x) && (tempPosition->y == currentPosition->y)) {    
+        map->grid2D[currentPosition->x][currentPosition->y] = '@';
+      }
+      // print position of the other players 
+      else {
+        map->grid2D[tempPosition->y][tempPosition->x] = map->playerPositions[i]->name;
+      }
+      mem_free(tempPosition);
     }
-    // print position of the other players 
-    else {
-      map->grid2D[tempPosition->x][tempPosition->y] = map->playerPositions[i]->name;
-    }
-    mem_free(tempPosition);
   }
+
 
   // set the gold in the grid array
   int numPiles = sizeof(map->goldPiles)/sizeof(map->goldPiles[0]);                  
   for ( int i = 0; i< numPiles; i++ ) {
     position_t* tempPosition = mem_malloc(sizeof(position_t));
     tempPosition = map->goldPiles[i]->location;
-    map->grid2D[tempPosition->x][tempPosition->y] = '*';
+    printf("%d", tempPosition->x);
+    map->grid2D[tempPosition->y][tempPosition->x] = '*';
   }
 
 
@@ -189,6 +196,8 @@ void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGold
   char* tempColumn = file_readLine(fp);
   int NC = strlen(tempColumn) + 1;                             // number of columns in grid
 
+  fclose(fp);
+  fp = fopen(fileName, "r");
   masterGrid->NROWS = NR;
   masterGrid->NCOLS = NC;
 
@@ -289,5 +298,16 @@ int getNumColumns(grid_t* masterGrid) {
 /**************** getGrid2D ****************/
 char** getGrid2D(grid_t* masterGrid) {
   return masterGrid->grid2D;
+}
+
+void setPosition(position_t* position, int x, int y)
+{
+  position->x = x;
+  position->y = y;
+}
+
+position_t* newPosition(){
+  position_t* position = mem_malloc(sizeof(position_t));
+  return position;
 }
 
