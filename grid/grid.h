@@ -15,18 +15,32 @@ typedef struct pile pile_t;
 typedef struct grid grid_t;
 
 /**************** newGrid2D ****************/
-static char** newGrid2D(int NROWS, int NCOLS);
+static char** newGrid2D(int nrows, int ncols);
 
 
 /**************** gridConvert ****************/
-/*
+/* Converts map.txt file to a grid
+ *
+ * Caller provides:
+ *   a malloc'd grid of size nrows x ncols
+ *   a valid FILE pointer to a map.txt file
+ *   integers nrows and ncols
+ * We guarantee:
+ *   the grid is filled with the map.txt file
  */
-void gridConvert(char** grid, FILE *fp);
+void gridConvert(char** grid, FILE* fp, int nrows, int ncols);
 
 /**************** updateGrid ****************/
-/* 
+/* Updates player grid.
+ *
+ * Caller provides:
+ *   a valid player struct pointer and a valid grid pointer.
+ * We guarantee:
+ *   player's grid is updated to add any new walls it sees.
+ *   player's player and gold list is updated with any players
+ *   or gold piles it sees currently.
  */
-void updateGrid(grid_t* playerGrid, grid_t* serverGrid);
+void updateGrid(player_t* player, grid_t* serverGrid);
 
 /**************** gridPrint ****************/
 /*
