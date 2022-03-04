@@ -2,7 +2,7 @@
 #
 # Emily Gao
 
-OBJS = grid.o gridTester.o
+OBJS = grid.o gridTester.o player.o
 LIBS = libcs50/libcs50-given.a 
 
 # uncomment the following to turn on verbose memory logging
@@ -18,7 +18,8 @@ gridTester: $(OBJS)
 	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
 
 #gridTester.o: libcs50/libcs50-given.a grid.h
-grid.o: libcs50/libcs50-given.a grid/grid.h
+grid.o: $(LIBS) grid/grid.h player/player.h
+player.o: $(LIBS) player/player.h grid/grid.h
 
 .PHONY: test valgrind clean
 
