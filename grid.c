@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "bag.h"
 
 typedef struct position {
@@ -22,6 +23,14 @@ typedef struct grid {
   pile_t** goldPiles; 
   playerAndPosition_t** playerPositions;
 } grid_t;
+
+typedef struct player {
+  int index;
+  char* name;
+  int numGold;
+  grid_t* grid;
+  bool isTalking;
+} player_t;
 
 static int NROWS = 25;
 static int NCOLS = 100;
@@ -88,9 +97,55 @@ girdConvert(char** grid, FILE* fp)
 }
 
 /**************** updateGrid ****************/
-bag_t* updateGrid(grid_t* playerGrid, grid_t* serverGrid)
+void updateGrid(player_t* player, grid_t* masterGrid)
 {
-// dan is doing
+  int playerIndex = player->name;
+  position_t* playerPos = masterGrid->playerPositions[playerIndex];
+  grid_t* playerGrid = player->grid;
+
+  // initialize toVisit bag and visited grid
+  bag_t* toVisit = bag_new();
+  char** visited = newGrid();
+
+  // clear players and piles of gold in playerGrid
+
+  // add current squares to toVisit bag and mark as visited 
+  position_t* curPosition = masterGrid->playerPositions[playerIndex]->playerPosition;
+  bag_add(toVisit, curPosition);
+
+  gridMark(visited, curPosition, '.');
+  
+  // while toVisit is not empty
+  position_t* position;
+  while ((position = bag_extract(toVisit)) != NULL) {
+
+    // if the position is visible
+    if (isVisible(playerPos, position, masterGrid)) {
+
+      // mark square as visible
+      gridMark(visited, curPosition, '.');
+
+      // mark player grid
+      gridMark(playerGrid, position, gridGetChar(masterGrid, position));
+
+      // loop over adjacent squares
+    }
+  }
+}
+
+char gridGetChar(char** grid, position_t* position)
+{
+  return grid[position->y][position->x];
+}
+
+void gridMark(char** grid, position_t* position, char mark) 
+{
+  grid[position->y][position->x] = mark;
+}
+
+bool isVisible(position_t* playerPos, position_t* square, grid_t* masterGrid)
+{
+
 }
 
 /**************** gridPrint ****************/
