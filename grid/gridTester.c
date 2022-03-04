@@ -7,10 +7,14 @@
 #include "file.h"
 #include "mem.h"
 #include <math.h>
-#include "grid/grid.h"
+#include "../player/player.h"
+#include "grid.h"
 
 
-int main(const int argc, char* argv[]){
+int 
+main(const int argc, char* argv[])
+{
+
   grid_t* masterGrid = grid_new();
   //printf("made grid\n");
   char* fileName; 
@@ -26,7 +30,19 @@ int main(const int argc, char* argv[]){
 
   for (int i = 0; i < NR; i++ ) {
     printf("%d\n", i);
-    printf("%s\n", grid2D[i] );
+    printf("%s\n", grid2D[i]);
   }
-  mem_free(masterGrid);
+
+  // Reads main.txt mao
+  FILE* mapFile = fopen("../maps/main.txt", "r");
+  gridConvert(grid2D, mapFile, getNumRows(masterGrid), getNumColumns(masterGrid));
+
+  // Creating new player
+  player_t* playerA = player_new("tempName", "a", masterGrid);
+
+  gridPrint(masterGrid, 'a');
+  
+
+
+  
 }

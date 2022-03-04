@@ -5,9 +5,19 @@
 #include "bag.h"
 #include "file.h"
 #include "mem.h"
-#include "player.h"
 #include <math.h>
 
+/**************** file-local global variables ****************/
+static int ROCK = ' ';
+static int EMPTY = '.';
+static int PASSAGE = '#';
+static int HORIZONTAL = '-';
+static int VERITAL = '|';
+static int CORNER = '+';
+static int MAXPLAYERS = 26;
+static int MAXGOLD = 50;
+
+/**************** local types ****************/
 typedef struct position {
   int x;
   int y;
@@ -23,6 +33,7 @@ typedef struct pile {
   int amount;
 } pile_t;
 
+/**************** global types ****************/
 typedef struct grid {
   char** grid2D;                    // 2d string array, each slot represents one row
   pile_t** goldPiles; 
@@ -31,14 +42,29 @@ typedef struct grid {
   int ncols; 
 } grid_t;
 
+static char** newGrid2D(int nrows, int ncols);
+static void gridConvert(char** grid, FILE* fp, int nrows, int ncols);
+void updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter);
+void gridPrint(grid_t* map, char playerLetter);
+int gridValidMove(grid_t* map, position_t* coordinate);
+void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int seed);
+grid_t* gridNewPlayer(grid_t* map);
 
-static int ROCK = ' ';
-static int EMPTY = '.';
-static int PASSAGE = '#';
-static int HORIZONTAL = '-';
-static int VERITAL = '|';
-static int CORNER = '+';
-
+/**************** local functions ****************/
+/* not visible outside this module */
+bool isVisible(position_t* playerPos, position_t* squarePos, grid_t* masterGrid);
+bool isEmpty(grid_t* masterGrid, int col, int row);
+int increment(int cur, int goal);
+bool isInteger(float num);
+position_t* position_new(int x, int y);
+void clearPlayerArray(grid_t* grid);
+void clearPileArray(grid_t* grid);
+char gridGetChar(char** grid, position_t* position);
+void gridMark(char** grid, position_t* position, char mark);
+grid_t* grid_new();
+int getNumRows(grid_t* masterGrid);
+int getNumColumns(grid_t* masterGrid);
+char** getGrid2D(grid_t* masterGrid);
 
 /**************** newGrid2D ****************/
 static char**
@@ -68,33 +94,14 @@ newGrid2D(int nrows, int ncols)
 
 
 static void
-<<<<<<< HEAD
 gridConvert(char** grid, FILE* fp, int nrows, int ncols)
-=======
-<<<<<<< HEAD:grid/grid.c
-gridConvert(char** grid, FILE* fp, int NROWS, int NCOLS)
-=======
-gridConvert(char** grid, FILE* fp, int nrows, int ncols)
->>>>>>> 0bae35c5a11b6d1fe827e898ffc0745c77b9fc55:grid.c
->>>>>>> origin/dev
 {
   const int size = ncols+2;  // include room for \n\0
   char line[size];           // a line of input
   int y = 0;
-<<<<<<< HEAD
 
   // read each line and copy it to the board
   while ( fgets(line, size, fp) != NULL && y < nrows) {
-=======
-  printf("ROWS: %d\n", NROWS);
-
-<<<<<<< HEAD:grid/grid.c
-  while ( fgets(line, size, fp) != NULL && y <= NROWS) {
-=======
-  // read each line and copy it to the board
-  while ( fgets(line, size, fp) != NULL && y < nrows) {
->>>>>>> 0bae35c5a11b6d1fe827e898ffc0745c77b9fc55:grid.c
->>>>>>> origin/dev
     int len = strlen(line);
     if (line[len-1] == '\n') {
       // normal line
@@ -117,21 +124,23 @@ gridConvert(char** grid, FILE* fp, int nrows, int ncols)
 
 /**************** updateGrid ****************/
 /* See grid.h for details */
-void updateGrid(player_t* player, grid_t* masterGrid)
+void 
+updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter)
 {
-  int playerIndex = player_getLetter(player) - 'a';
-  position_t* playerPos = masterGrid->playerPositions[playerIndex];
-  grid_t* playerGrid = player_getGrid(player);
+  int playerIndex = playerLetter - 'a';
+  position_t* playerPos = masterGrid->playerPositions[playerIndex]->playerPosition;
 
   // initialize toVisit bag and visited grid
   bag_t* toVisit = bag_new();
-  char** visited = newGrid();
+  char** visited = newGrid2D(getNumRows(masterGrid), getNumColumns(masterGrid));
 
   // clear players and piles of gold in playerGrid
+  clearPlayerArray(playerGrid);
+  clearPileArray(playerGrid);
 
   // add current squares to toVisit bag and mark as visited 
   position_t* curPosition = masterGrid->playerPositions[playerIndex]->playerPosition;
-  bag_add(toVisit, curPosition);
+  bag_insert(toVisit, curPosition);
 
   gridMark(visited, curPosition, '.');
   
@@ -146,7 +155,7 @@ void updateGrid(player_t* player, grid_t* masterGrid)
       gridMark(visited, curPosition, '.');
 
       // mark player grid
-      gridMark(playerGrid, position, gridGetChar(masterGrid, position));
+      gridMark(playerGrid->grid2D, position, gridGetChar(masterGrid->grid2D, position));
 
       // loop over adjacent squares
       bag_t* adjacentSquares = bag_new();
@@ -159,10 +168,10 @@ void updateGrid(player_t* player, grid_t* masterGrid)
       position_t* positionUp = position_new(x, y + 1);
       position_t* positionDown = position_new(x, y - 1);
 
-      bag_add(adjacentSquares, positionLeft);
-      bag_add(adjacentSquares, positionRight);
-      bag_add(adjacentSquares, positionUp);
-      bag_add(adjacentSquares, positionDown);
+      bag_insert(adjacentSquares, positionLeft);
+      bag_insert(adjacentSquares, positionRight);
+      bag_insert(adjacentSquares, positionUp);
+      bag_insert(adjacentSquares, positionDown);
 
       position_t* positionAdjacent;
 
@@ -175,31 +184,45 @@ void updateGrid(player_t* player, grid_t* masterGrid)
           gridMark(visited, positionAdjacent, '.');
 
           // add to toVisit
-          bag_add(toVisit, positionAdjacent);
+          bag_insert(toVisit, positionAdjacent);
         }
       }
     }
   }
 }
 
-void clearPlayerArray(grid_t* grid)
+void 
+clearPlayerArray(grid_t* grid)
 {
-  grid->playerPositions
+  for (int i = 0; i < MAXPLAYERS; i++) {
+    grid->playerPositions[i] = NULL;
+  }
 }
 
-char gridGetChar(char** grid, position_t* position)
+void 
+clearPileArray(grid_t* grid)
+{
+  for (int i = 0; i < MAXGOLD; i++) {
+    grid->goldPiles[i] = NULL;
+  }
+}
+
+char 
+gridGetChar(char** grid, position_t* position)
 {
   return grid[position->y][position->x];
 }
 
-void gridMark(char** grid, position_t* position, char mark) 
+void 
+gridMark(char** grid, position_t* position, char mark) 
 {
   grid[position->y][position->x] = mark;
 }
 
 /**************** isVisible ****************/
 /* Helper function for updateGrid */
-bool isVisible(position_t* playerPos, position_t* squarePos, grid_t* masterGrid)
+bool 
+isVisible(position_t* playerPos, position_t* squarePos, grid_t* masterGrid)
 {
   int pcol = playerPos->x;
   int col = squarePos->x;
@@ -258,14 +281,16 @@ bool isVisible(position_t* playerPos, position_t* squarePos, grid_t* masterGrid)
       }
     }
   }
+  return true;
 }
 
 /**************** isEmpty ****************/
 /* Helper function for isVisible */
-bool isEmpty(grid_t* masterGrid, int col, int row)
+bool 
+isEmpty(grid_t* masterGrid, int col, int row)
 {
   position_t* intersectPos = position_new(col, row);
-  char space = gridGetChar(masterGrid, intersectPos);
+  char space = gridGetChar(masterGrid->grid2D, intersectPos);
   free(intersectPos);
   if (space != EMPTY) {
     return false;
@@ -274,7 +299,8 @@ bool isEmpty(grid_t* masterGrid, int col, int row)
   }
 }
 
-int increment(int cur, int goal) 
+int 
+increment(int cur, int goal) 
 {
   if (cur > goal) {
     return --cur;
@@ -283,7 +309,8 @@ int increment(int cur, int goal)
   }
 }
 
-bool isInteger(float num)
+bool 
+isInteger(float num)
 {
   int intNum = (int) num;
   if (num - intNum == 0) {
@@ -303,10 +330,11 @@ position_t* position_new(int x, int y)
 
 
 /**************** gridPrint ****************/
-void gridPrint(grid_t* map, position_t* currentPosition)
+void gridPrint(grid_t* map, char playerLetter)
 {
   int players = sizeof(map->playerPositions)/sizeof(map->playerPositions[0]);                   // determine number of players that are to be printed
-  
+  position_t* currentPosition = map->playerPositions[playerLetter - 'a']->playerPosition;
+
   // set the players in the grid array
   for (int i = 0; i < players; i++) {
     position_t* tempPosition = mem_malloc(sizeof(position_t));
@@ -340,7 +368,8 @@ void gridPrint(grid_t* map, position_t* currentPosition)
 
 /**************** gridValidMove ****************/
 /* gives an (x,y) position and checks to see if a player can move into that position in the map */
-int gridValidMove(grid_t* map, position_t* coordinate)
+int 
+gridValidMove(grid_t* map, position_t* coordinate)
 {
   int xCord = coordinate->x;
   int yCord = coordinate->y;
@@ -368,14 +397,18 @@ int gridValidMove(grid_t* map, position_t* coordinate)
 
 /**************** grid_new ****************/
 // initializes a new empty grid--mallocs memory
-grid_t* grid_new(){
+grid_t* 
+grid_new()
+{
   grid_t* map = mem_malloc(sizeof(grid_t));
   return map;
 }
 
 /**************** gridMakeMaster ****************/
 /* fill up char** array and piles_t** array */
-void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int seed) {
+void 
+gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int seed)
+{
   FILE *fp = fopen(fileName, "r");
 
   // set goldPiles for grid
@@ -435,7 +468,8 @@ void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGold
 /**************** gridNewPlayer ****************/
 // returns the new player grid, which will start off as completely empty
 // creates a new playerAndPosition struct representing new player in the masterGrid (map is the masterGrid)
-grid_t* gridNewPlayer(grid_t* map)
+grid_t* 
+gridNewPlayer(grid_t* map)
 {
   position_t* playerPosition= mem_malloc(sizeof(position_t));
 
@@ -459,7 +493,13 @@ grid_t* gridNewPlayer(grid_t* map)
   map->playerPositions[i]->name = i+'a'; // set char name
   map->playerPositions[i]->playerPosition = playerPosition;
 
-  grid_t* playerGrid = grid_new();
+  // Initialize new playerGrid
+  grid_t* playerGrid = grid_new(); 
+  
+  // malloc space for gold piles and players
+  playerGrid->playerPositions = malloc(MAXPLAYERS * sizeof(playerAndPosition_t*));
+  playerGrid->goldPiles = malloc(MAXGOLD * sizeof(pile_t*));
+
   return playerGrid;
 }
 
@@ -469,11 +509,15 @@ int getNumRows(grid_t* masterGrid) {
 }
 
 /**************** getNumColumns ****************/
-int getNumColumns(grid_t* masterGrid) {
+int 
+getNumColumns(grid_t* masterGrid) 
+{
   return masterGrid->ncols;
 }
 
 /**************** getGrid2D ****************/
-char** getGrid2D(grid_t* masterGrid) {
+char** 
+getGrid2D(grid_t* masterGrid) 
+{
   return masterGrid->grid2D;
 }
