@@ -75,13 +75,8 @@ gridConvert(char** grid, FILE* fp, int nrows, int ncols)
   int y = 0;
   printf("ROWS: %d\n", nrows);
 
-<<<<<<< HEAD
   // read each line and copy it to the board
   while ( fgets(line, size, fp) != NULL && y < nrows) {
-=======
-
-  while ( fgets(line, size, fp) != NULL && y <= NROWS) {
->>>>>>> gridNew
     int len = strlen(line);
     if (line[len-1] == '\n') {
       // normal line
@@ -371,15 +366,10 @@ void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGold
   char* tempColumn = file_readLine(fp);
   int NC = strlen(tempColumn) + 1;                             // number of columns in grid
 
-<<<<<<< HEAD
-  masterGrid->nrows = NR;
-  masterGrid->ncols = NC;
-=======
   fclose(fp);
   fp = fopen(fileName, "r");
   masterGrid->NROWS = NR;
   masterGrid->NCOLS = NC;
->>>>>>> gridNew
 
     // set 2d char map for grid
   char** grid2D;                                              // map of walls, paths, and spaces
