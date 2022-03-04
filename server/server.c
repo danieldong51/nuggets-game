@@ -299,8 +299,7 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
     // send masterGrid to spectator 
     sendDisplayMessage(getGrid2D(game.masterGrid), from);
 
-    return false; 
-
+    return false;
   }
 
   else if (strncmp(message, "KEY ", strlen("KEY ")) == 0) {
