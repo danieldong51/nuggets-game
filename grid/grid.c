@@ -43,7 +43,7 @@ typedef struct grid {
 } grid_t;
 
 static char** newGrid2D(int nrows, int ncols);
-static void gridConvert(char** grid, FILE* fp, int nrows, int ncols);
+void gridConvert(char** grid, FILE* fp, int nrows, int ncols);
 void updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter);
 void gridPrint(grid_t* map, char playerLetter);
 int gridValidMove(grid_t* map, position_t* coordinate);
@@ -93,16 +93,13 @@ newGrid2D(int nrows, int ncols)
 }
 
 
-static void
+void
 gridConvert(char** grid, FILE* fp, int nrows, int ncols)
 {
   const int size = ncols+2;  // include room for \n\0
   char line[size];           // a line of input
   int y = 0;
-<<<<<<< HEAD
-=======
   printf("ROWS: %d\n", nrows);
->>>>>>> dev
 
   // read each line and copy it to the board
   while ( fgets(line, size, fp) != NULL && y < nrows) {
@@ -138,6 +135,9 @@ updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter)
   bag_t* toVisit = bag_new();
   char** visited = newGrid2D(getNumRows(masterGrid), getNumColumns(masterGrid));
 
+  // initialize visible grid
+  char** visible = newGrid2D(getNumRows(masterGrid), getNumColumns(masterGrid));
+
   // clear players and piles of gold in playerGrid
   clearPlayerArray(playerGrid);
   clearPileArray(playerGrid);
@@ -156,7 +156,7 @@ updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter)
     if (isVisible(playerPos, position, masterGrid)) {
 
       // mark square as visible
-      gridMark(visited, curPosition, '.');
+      gridMark(visible, curPosition, '.');
 
       // mark player grid
       gridMark(playerGrid->grid2D, position, gridGetChar(masterGrid->grid2D, position));
@@ -191,6 +191,34 @@ updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter)
           bag_insert(toVisit, positionAdjacent);
         }
       }
+    }
+  }
+
+  // loop through player positions and add to player grid if visible
+  for (int i = 0; i < MAXPLAYERS; i++) {
+
+    // check if not null
+    position_t* otherPlayerPos;
+    if ((otherPlayerPos = masterGrid->playerPositions[i]) != NULL) {
+
+      // check if player position is visible
+      if (gridGetChar(visible, otherPlayerPos) == '.') {
+        
+        // add player to playerGrid's player list
+        playerGrid->playerPositions[i] = otherPlayerPos;
+      }
+    }
+  }
+
+  // loop through gold positions and add to player grid if visible
+  for (int i = 0; i < MAXGOLD; i++) {
+
+    // check if not null
+    pile_t* goldPile;
+    if ((goldPile = masterGrid->goldPiles[i]) != NULL) {
+
+      // check if gold position is visible
+      if (gridGetChar(visible, goldPile->location) == '.') 
     }
   }
 }
