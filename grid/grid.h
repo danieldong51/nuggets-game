@@ -50,7 +50,7 @@ void gridPrint(grid_t* grid, position_t* currentPosition);
 /**************** gridValidMove ****************/
 /*
  */
-int gridValidMove(position_t* coordinate);
+int gridValidMove(grid_t* map, position_t* coordinate);
 
 /**************** gridInit ****************/
 /*
@@ -58,7 +58,7 @@ int gridValidMove(position_t* coordinate);
 grid_t* grid_new();
 
 /**************** gridMakeMaster ****************/
-void gridMakeMaster(grid_t* masterGrid, FILE* fp, int numGold, int minGoldPiles, int maxGoldPiles, int seed);
+void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int seed);
 
 /**************** gridNewPlayer ****************/
 grid_t* gridNewPlayer(grid_t* map);
