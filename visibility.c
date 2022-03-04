@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 #include "grid.h"
 #include "bag.h"
 
@@ -16,7 +17,20 @@ static int CORNER = '+';
 
 static char** newGrid(void);
 static void girdConvert(char** grid, FILE* fp);
-static void gridUpdate(grid_t* master, grid_t* player);
+static void gridUpdate(grid_t* masterGrid, player_t* player);
+
+typedef struct player {
+  char* name;
+  int numGold;
+  grid_t* grid;
+  bool isTalking;
+} player_t;
+
+typedef struct grid {
+  char** grid2D;                    // 2d string array, each slot represents one row
+  pile_t** goldPiles; 
+  playerAndPosition_t** playerPositions;
+} grid_t;
 
 int 
 main(const int argc, char* argv[]) 
@@ -90,7 +104,7 @@ girdConvert(char** grid, FILE* fp)
 }
 
 static void 
-gridUpdate(grid_t* masterGrid, grid_t* playerGrid)
+gridUpdate(grid_t* masterGrid, player_t* player)
 {
   // initialize toVisit bag and visited grid
   bag_t* toVisit = bag_new();
@@ -99,6 +113,6 @@ gridUpdate(grid_t* masterGrid, grid_t* playerGrid)
   // clear players and piles of gold in playerGrid
 
   // add current squares to toVisit bag and mark as visited 
-  masterGrid->playerPositions
+  masterGrid->
 
 }
