@@ -62,7 +62,7 @@ player_t* player_new(char* name, char* letter, grid_t* masterGrid)
     player_t* player = mem_malloc_assert(sizeof(player_t), "Unable to allocate memory for player object\n");
 
     // TODO: change the name of this function to grid_new() 
-    player-grid = gridInit;                 // malloc memory for grid - do not fill 
+    player-grid = grid_new();                 // malloc memory for grid - do not fill 
 
     return player; 
   }
