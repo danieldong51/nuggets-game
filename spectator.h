@@ -9,31 +9,25 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
-
-//Message module
+#include "grid.h"
 #include "message.h" 
 
+/**************** global types ****************/
+typedef struct spectator spectator_t;
 
 
-//spectator struct
-typedef struct spectator {
-  grid_t grid;
-} spectator_t;
+/**************** local functions ****************/
+spectator_t* spectator_new(grid_t* masterGrid);
+void spectator_delete(spectator_t* spectator);
 
 
 
-/*
- * new_spectator
- */
 
+/************spectator_new***********/
 spectator_t* spectator_new(grid_t* masterGrid);
 
-/*
- *
- * delete_spectator
- *
- */
+
+/**********spectator_delete**********/
 void spectator_delete(spectator_t* spectator);
 
 
