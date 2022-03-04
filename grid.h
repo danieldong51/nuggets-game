@@ -10,7 +10,7 @@ typedef struct pile pile_t;
 typedef struct grid grid_t;
 
 /**************** newGrid2D ****************/
-static char** newGrid2D();
+static char** newGrid2D(int NROWS, int NCOLS);
 
 
 /**************** gridConvert ****************/

@@ -21,10 +21,11 @@ typedef struct grid {
   char** grid2D;                    // 2d string array, each slot represents one row
   pile_t** goldPiles; 
   playerAndPosition_t** playerPositions;
+  int NROWS;
+  int NCOLS; 
 } grid_t;
 
-static int NROWS = 25;
-static int NCOLS = 100;
+
 
 static int ROCK = ' ';
 static int EMPTY = '.';
@@ -34,9 +35,9 @@ static int VERITAL = '|';
 static int CORNER = '+';
 
 
-/**************** newGrid ****************/
+/**************** newGrid2D ****************/
 static char**
-newGrid2D(void)
+newGrid2D(int NROWS, int NCOLS)
 {
   // allocate a 2-dimensional array of NROWS x NCOLS
   char** grid = calloc(NROWS, sizeof(char*));
@@ -112,7 +113,7 @@ void gridPrint(grid_t* map, position_t* currentPosition)
     }
     // print position of the other players 
     else {
-      map->grid2D[tempPosition->x][tempPosition->y] = grid->platerPositions[i]->name;
+      map->grid2D[tempPosition->x][tempPosition->y] = grid->playerPositions[i]->name;
     }
   }
   mem_free(tempPosition);
@@ -173,16 +174,22 @@ grid_t* gridInit(){
 
 /**************** gridMakeMaster ****************/
 /* fill up char** array and piles_t** array */
-void gridMakeMaster(grid_t* masterGrid, FILE* fp, int numGold, int minGoldPiles, int maxGoldPiles, int seed) {
-  
-  // set 2d char map for grid
-  char** grid2D;                                              // map of walls, paths, and spaces
-  gridConvert(grid2D, fp);
-  masterGrid->grid2D = grid2D;
+void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int seed) {
+  FILE *fp = fopen(fileName);
 
   // set goldPiles for grid
-  int NR = sizeof(grid2D)/sizeof(grid2D[0]);                  // number of rows in grid 
-  int NC = strlen(grid2D[0]);                                 // number of columns in grid
+  int NR = file_numLines(fp);                                 // number of rows in grid 
+  char* tempColumn = file_readLine(fp);
+  int NC = strlen(tempColumn) + 1;                             // number of columns in grid
+
+  masterGrid->NROWS = NR;
+  masterGrid->NCOLS = NC;
+
+    // set 2d char map for grid
+  char** grid2D;                                              // map of walls, paths, and spaces
+  grid2D = newGrid2D(NR, NC);
+  gridConvert(grid2D, fp);
+  masterGrid->grid2D = grid2D;
 
   srand(seed);                                                // not sure what this means but seed is an optional parameter for server
   // set the number of piles in the map
@@ -218,6 +225,7 @@ void gridMakeMaster(grid_t* masterGrid, FILE* fp, int numGold, int minGoldPiles,
     goldPiles[i]->amount = round(oversizedAmount * goldScale);
   }
   masterGrid->goldPiles=goldPiles;
+  fclose(fp);
   // NEED TO THINK ABOUT FREES
 }
 
@@ -234,8 +242,8 @@ grid_t* gridNewPlayer(grid_t* map)
   playerPosition->x = 0;
   playerPosition->y = 0;
   while ( !(map->grid2D[playerPosition->y][playerPosition->x] == EMPTY) ){
-    playerPosition->x = (rand() % NR) + 1; 
-    playerPosition->y = (rand() % NC) + 1;
+    playerPosition->x = (rand() % map-> NROWS) + 1; 
+    playerPosition->y = (rand() % map-> NCOLS) + 1;
   }
 
   // if this is the first player being intialized
