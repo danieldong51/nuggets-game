@@ -99,6 +99,10 @@ gridConvert(char** grid, FILE* fp, int nrows, int ncols)
   const int size = ncols+2;  // include room for \n\0
   char line[size];           // a line of input
   int y = 0;
+<<<<<<< HEAD
+=======
+  printf("ROWS: %d\n", nrows);
+>>>>>>> dev
 
   // read each line and copy it to the board
   while ( fgets(line, size, fp) != NULL && y < nrows) {
