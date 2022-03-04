@@ -23,8 +23,7 @@
 /**************** global types ****************/
 typedef struct player {
   char* name; 
-  char* letter; 
-  position_t* position; 
+  char letter; 
   int numGold; 
   grid_t* grid;
   bool isTalking; 
@@ -36,15 +35,18 @@ typedef struct player {
 
 /**************** local functions ****************/
 /* not visible outside this file */
-player_t* player_new(char* name, char* letter, grid_t* masterGrid);
-void player_move(player_t* player, position_t* newPosition);
-position_t* player_getPosition(player_t* player);
-void player_addGold(player_t* player, int numGold);
-void player_addGold(player_t* player, int numGold);
 bool player_isTakling(player_t* player);
-void player_changeStatus(player_t* player);
+int player_getGold(player_t* player);
 grid_t* player_getGrid(player_t* player);
 char* player_getName(player_t* player);
+char player_getLetter(player_t* player);
+
+// setter functions 
+void player_addGold(player_t* player, int numGold);
+void player_changeStatus(player_t* player);
+void player_setLetter(player_t* player, char letter);
+void player_setName(player_t* player, char* name);
+void player_setGrid(player_t* player, grid_t* grid);
 
 /**************** player_new() ****************/
 /* see player.h for description */
@@ -55,80 +57,18 @@ player_t* player_new(char* name, char* letter, grid_t* masterGrid)
     // allocate memory for a new player
     player_t* player = mem_malloc_assert(sizeof(player_t), "Unable to allocate memory for player object\n");
 
-    // generate a random roomspot on the grid for the player to start
+    // TODO: change the name of this function to grid_new() 
+    player-grid = gridInit;                 // malloc memory for grid - do not fill 
 
-    int NR = sizeof(masterGrid)/sizeof(masterGrid[0]);                  // number of rows in grid 
-    int NC = sizeof(masterGrid)/sizeof(masterGrid[1]);                  // number of columns in grid 
-    char* spot = "";
-    int x = 0;
-    int y = 0; 
-
-    // until we generate a spot that corresponds to an empty room spot (".")
-    while (strcmp(spot, ".") != 0) {
-
-      // generate a random x between 0 and NC, and a random y between 0 and NR 
-      srand(time(NULL));          // initialize - do only one time
-      x = rand() % NC;
-      y = rand() % NR; 
-
-
-      spot = masterGrid->grid2D[y][x];
-    }
-    if (x >= 0 && y >= 0){
-      // once we have a valid room spot, set this as the position for the player
-      player->position->x = x; 
-      player->position->y = y; 
-
-      // intialize an empty grid object for this player --> empty grid, empty piles, empty playerPositions
-      grid_t* emptyGrid = grid_new(); 
-
-      player->grid = emptyGrid; 
-      player->isTalking = true; 
-      
-      player->numGold = 0;         // initialize this player's gold to 0 
-
-      // set player's real name and server-given letter 
-      player->name = name; 
-      player->letter = letter; 
-
-      return player; 
-    }
-    else {
-      return NULL;
-    }
+    return player; 
+  }
+  else {
+    return NULL;
+  }
     
-    
-  }
 }
 
-/**************** player_move() ****************/
-/* see player.h for description */
-void player_move(player_t* player, position_t* newPosition) 
-{
-  if (player != NULL && newPosition != NULL) {
-    player->position = newPosition; 
-  }
-}
-
-
-/**************** player_getPosition() ****************/
-/* see player.h for description */
-position_t* player_getPosition(player_t* player) 
-{
-  if (player != NULL) {
-    return player->position; 
-  }
-  return NULL;
-}
-
-/**************** player_addGold() ****************/
-/* see player.h for description */
-void player_addGold(player_t* player, int numGold) 
-{
-  if (player != NULL && numGold > 0) {
-    player->numGold += numGold; 
-  }
-}
+// GETTER FUNCTIONS
 
 /**************** player_isTalking() ****************/
 /* see player.h for description */
@@ -140,18 +80,14 @@ bool player_isTakling(player_t* player)
   return NULL;
 }
 
-/**************** player_changeStatus() ****************/
+/**************** player_getGold() ****************/
 /* see player.h for description */
-void player_changeStatus(player_t* player)
+int player_getGold(player_t* player)
 {
   if (player != NULL) {
-    if (player_isTalking(player)){
-      player->isTalking = false; 
-    }
-    else {
-      player->isTalking = true; 
-    }
+    return player->numGold;
   }
+  return -1; 
 }
 
 /**************** player_getGrid() ****************/
@@ -172,4 +108,66 @@ char* player_getName(player_t* player)
     return player->name; 
   }
   return NULL;
+}
+
+/**************** player_getLetter() ****************/
+/* see player.h for description */
+char player_getLetter(player_t* player)
+{
+  if (player != NULL) {
+    return player->letter; 
+  }
+  return NULL;
+}
+
+// SETTER FUNCTIONS
+
+/**************** player_addGold() ****************/
+/* see player.h for description */
+void player_addGold(player_t* player, int numGold) 
+{
+  if (player != NULL && numGold > 0) {
+    player->numGold += numGold; 
+  }
+}
+
+/**************** player_changeStatus() ****************/
+/* see player.h for description */
+void player_changeStatus(player_t* player)
+{
+  if (player != NULL) {
+    if (player_isTalking(player)){
+      player->isTalking = false; 
+    }
+    else {
+      player->isTalking = true; 
+    }
+  }
+}
+
+/**************** player_setName() ****************/
+/* see player.h for description */
+void player_setName(player_t* player, char* name)
+{
+  if (player != NULL && name != NULL) {
+    player->name = name; 
+  }
+}
+
+/**************** player_setLetter() ****************/
+/* see player.h for description */
+void player_setLetter(player_t* player, char letter)
+{
+  if (player != NULL && letter != NULL) {
+    player->letter = letter; 
+  }
+}
+
+/**************** player_setGrid() ****************/
+/* see player.h for description */
+void player_setGrid(player_t* player, grid_t* grid)
+{
+  if (player != NULL && grid != NULL) {
+    player->grid = grid; 
+  }
 }
