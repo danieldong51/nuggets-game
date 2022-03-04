@@ -109,7 +109,7 @@ int main(const int argc, char* argv[])
     addr_t other = message_noAddr(); // no correspondent yet 
 
     // call message_loop() until timeout or error 
-    bool ok = message_loop(&other, timeout, handleTimeout, NULL, handleMessage);
+    bool ok = message_loop(&other, timeout, NULL, NULL, handleMessage);
 
     // shut down message module 
     message_done(); 
@@ -219,6 +219,7 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
       // get the letter of this player from numPlayers
       char letter = game.numPlayers + 'a'; 
 
+
       if (sizeof(name) == 0) {
         message_send(*otherp, "QUIT Sorry - you must provide player's name.");
       }
@@ -226,11 +227,18 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
       // create a new player 
       player_t* player = player_new(name, letter, game.masterGrid);
 
+      // set this player's status to "true" 
+      player_changeStatus(player, true);      
+
       if (player == NULL) {
         fprintf(stderr, "Unable to allocate memory for new player\n");
         return false; 
 
       }
+
+      // iterate numPlayers
+      game.numPlayers++; 
+
       // send ok message 
       sendOkMessage(otherp, letter);
 
@@ -242,12 +250,12 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
       updateGrid(player, game.masterGrid);
 
       // server shall then immediately send GRID, GOLD, and DISPLAY messages as described below.
-      sendGridMessage(otherp); 
+      sendGridMessage(*otherp); 
 
       // creating a new player, so n and p should be 0 
-      sendGoldMessage(0, 0, game.goldRemaining, otherp);
+      sendGoldMessage(0, 0, game.goldRemaining, *otherp);
 
-      sendDisplayMessage(player_getGrid(player),otherp);
+      sendDisplayMessage(player_getGrid(player), *otherp);
 
     }
     else 
@@ -258,7 +266,26 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
   }
   // SPECTATE 
   else if (strncmp(message, "SPECTATE ", strlen("SPECTATE ")) == 0) {
+    
+    // see if we already have a spectator 
+    if (game.spectator != NULL) {
+      // if we do, look at its address 
+      addr_t* specAddress = spectator_getAddress(game.spectator);
 
+      if (!message_eqAddress(specAddress, *otherp)) {
+        // if it is not the same address, create a new spectator, replace our spectator, send message to old spectator
+        message_send(*specAddress, "QUIT You have been replaced by a new spectator.");
+        
+        // delete old spectator
+        spectator_delete(game.spectator); 
+
+        // create new spectator
+        spectator_t* newSpectator = spectator_new(game.masterGrid, *otherp); 
+        
+        // set game spectator as new spectator 
+        game.spectator = newSpectator; 
+      }
+    }
     // initialize game.spectator or replace spectator if it already exists 
     spectator_t* spectator = spectator_new(game.masterGrid);
     game.spectator = spectator; 
@@ -278,8 +305,6 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
     // call handleKey() function
     handleKeyMessage(otherp, message);
     
-    
-
   }
   
   
@@ -288,29 +313,42 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
 
 }
 
-void handleKeyMessage(const addr_t otherp, char* message, char letter)
+void handleKeyMessage(const addr_t otherp, char* message)
 {
+  bool foundPlayer = false; 
+  bool foundSpectator = false; 
+
+  // is this our spectator? 
+  if (message_eqAddress(spectator_getAddress(game.spectator), *otherp)) {
+    foundSpectator = true; 
+  }
 
   // loop through the list of players 
   player_t* currPlayer;
-  bool foundPlayer = false; 
 
   for (int i = 0; i < game.numPlayers; i++) {
     currPlayer = game.players[i];
-
+    
     // check if this address if our 'from' address
-    if (message_eqAddress(player_getAddress(currPlayer), otherp)) {
-      // if it is, break - this is our player
-      foundPlayer = true; 
-      break; 
+    if (message_eqAddress(player_getAddress(currPlayer), *otherp)) {
+
+      // check if this player is still talking to the server 
+      if (player_isTakling(currPlayer)){
+        // if it is, break - this is our player
+        foundPlayer = true; 
+        break; 
+      }
+      else {
+        // if this address exists for a player that has already quit the game, send error messages
+        // previous players cannot rejoin the game 
+        message_send(*otherp, "ERROR players cannot rejoin game");
+      }
+      
     }
   }
   if (foundPlayer) {
     // get the letter of this player 
     char letter = player_getLetter(currPlayer);
-
-    // change the status to say that this player is currently talking to the server
-    //player_changeStatus(currPlayer, true);
 
     const char* content = message + strlen("KEY "); // pointer to message, starting after "KEY "
 
@@ -324,6 +362,11 @@ void handleKeyMessage(const addr_t otherp, char* message, char letter)
     switch(key) {
       case 'Q':
         message_send(*otherp, "QUIT Thanks for playing!");
+
+        // change the player's isTalking status to false 
+        player_changeStatus(currPlayer, false);
+
+        
       case 'h': case 'l': case 'j': case 'k': case 'y': case 'u': case 'b': case 'n':
         moveResult = gridValidMove(letter, key);
       default: 
@@ -339,11 +382,15 @@ void handleKeyMessage(const addr_t otherp, char* message, char letter)
       // loop through players, send DISPLAY message to each one 
       for (int i = 0; i < game.numPlayers; i++) {
         player_t* thisPlayer = game.players[i];
-        // get address of this player 
-        addr_t* address = player_getAddress(thisPlayer);
+        if (player_isTakling(thisPlayer)){
+          
+          // get address of this player 
+          addr_t* address = player_getAddress(thisPlayer);
         
-        // send display message to player 
-        sendDisplayMessage(player_getGrid(thisPlayer), *address); 
+          // send display message to player 
+          sendDisplayMessage(player_getGrid(thisPlayer), *address); 
+        }
+        
       }
     }
     else if (moveResult == -1) {
@@ -353,15 +400,46 @@ void handleKeyMessage(const addr_t otherp, char* message, char letter)
       // moveResult = amount of gold this player has just picked up 
       // inform all clients of new gold count by sending a "GOLD" message 
       for (int i = 0; i< game.numPlayers; i++){
+
+        // check if player is currently talking to server 
         player_t* player = game.players[i];
-        if (player == currPlayer) {
-          sendGoldMessage(moveResult, player_getGold(player), game.goldRemaining);
+
+        if (player_isTakling(player)) {
+          if (player == currPlayer) {
+            sendGoldMessage(moveResult, player_getGold(player), game.goldRemaining);
+          }
+          else {
+            sendGoldMessage(0, player_getGold(player), game.goldRemaining); 
+          }
         }
-        else {
-          sendGoldMessage(0, player_getGold(player), game.goldRemaining); 
-        }
+        
       }
     }
+
+    // change status to say that player is not still talking to server 
+    player_changeStatus(currPlayer, false);
+  }
+
+  else if (foundSpectator) {
+    const char* content = message + strlen("KEY "); // pointer to message, starting after "KEY "
+
+    char key; 
+
+    // parse using sscanf 
+    sscanf(content, " %c", &key);
+
+    // switch value of key  - spectator can only send 'Q' keystroke 
+    switch(key) {
+      case 'Q':
+        // delete spectator  
+        spectator_delete(game.spectator); 
+
+        message_send(*otherp, "QUIT Thanks for watching!");
+      default: 
+        //  the server shall ignore that keystroke and may send back an ERROR message as described below
+        sendErrorMessage(*otherp, "Invalid keystroke");
+    }
+
   }
 }
 
