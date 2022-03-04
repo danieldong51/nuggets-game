@@ -20,7 +20,8 @@ typedef struct spectator spectator_t;
 spectator_t* spectator_new(grid_t* masterGrid, addr_t address);
 void spectator_delete(spectator_t* spectator);
 
-
+//getter
+addr_t* getAddress(spectator_t* spectator);
 
 
 /************spectator_new***********/
