@@ -15,9 +15,9 @@
 #include <stdbool.h>
 #include <math.h>
 #include "libcs50/file.h"
-#include "player.h"
-#include "grid.h"
-#include "spectator.h"
+#include "../player/player.h"
+#include "../grid/grid.h"
+#include "../spectator/spectator.h"
 #include "support/message.h"
 #include "support/log.h"
 
@@ -184,13 +184,17 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
   int portNum = ntohs(from.sin_port);           // port number of the sender
   char* message = message;                      // message from sender 
 
+
+  // PLAY
   if (strncmp(message, "PLAY ", strlen("PLAY ")) == 0) {
-    const char* content = message + strlen("PLAY ");
+
+    const char* content = message + strlen("PLAY ");        // pointer to message, starting after strlen play? 
     
     if (game.numPlayers < MaxPlayers)
     {
       // create a pointer that starts in middle of message
       char* name = strchr(content, SPACE);  
+      // TODO: this is the same as "content" ^ 
       
       // create end pointer and begin it after the space (at first letter of name)
       char* end = ++name;
@@ -230,6 +234,10 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
       // send ok message 
       sendOkMessage(otherp, letter);
 
+      // set random position for player and add it to list of positions 
+      // initializes 
+      gridNewPlayer(game.masterGrid, letter);
+
       // call updateGrid on player 
       updateGrid(player, game.masterGrid);
 
@@ -247,7 +255,8 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
       // too many players, respond to client with "NO"
       message_send(*otherp, "QUIT Game is full: no more players can join.");
     }
-  } 
+  }
+  // SPECTATE 
   else if (strncmp(message, "SPECTATE ", strlen("SPECTATE ")) == 0) {
 
     // initialize game.spectator or replace spectator if it already exists 
@@ -263,17 +272,100 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
     sendDisplayMessage(getGrid2D(game.masterGrid), otherp);
 
   }
+
+  else if (strncmp(message, "KEY ", strlen("KEY ")) == 0) {
+
+    // call handleKey() function
+    handleKeyMessage(otherp, message);
+    
+    
+
+  }
   
-
-
   
   fflush(stdout);
   return false;
 
-
-
 }
 
+void handleKeyMessage(const addr_t otherp, char* message, char letter)
+{
+
+  // loop through the list of players 
+  player_t* currPlayer;
+  bool foundPlayer = false; 
+
+  for (int i = 0; i < game.numPlayers; i++) {
+    currPlayer = game.players[i];
+
+    // check if this address if our 'from' address
+    if (message_eqAddress(player_getAddress(currPlayer), otherp)) {
+      // if it is, break - this is our player
+      foundPlayer = true; 
+      break; 
+    }
+  }
+  if (foundPlayer) {
+    // get the letter of this player 
+    char letter = player_getLetter(currPlayer);
+
+    // change the status to say that this player is currently talking to the server
+    //player_changeStatus(currPlayer, true);
+
+    const char* content = message + strlen("KEY "); // pointer to message, starting after "KEY "
+
+    char key; 
+
+    // parse using sscanf 
+    sscanf(content, " %c", &key);
+    int moveResult; 
+
+    // switch value of key 
+    switch(key) {
+      case 'Q':
+        message_send(*otherp, "QUIT Thanks for playing!");
+      case 'h': case 'l': case 'j': case 'k': case 'y': case 'u': case 'b': case 'n':
+        moveResult = gridValidMove(letter, key);
+      default: 
+        //  the server shall ignore that keystroke and may send back an ERROR message as described below
+        sendErrorMessage(*otherp, "Invalid keystroke");
+    }
+
+    // based on moveResult value, send messages to all clients 
+
+    // if the players keystroke causes them to move to a new spot, 
+    // inform all clients of a change in the game grid using a DISPLAY message as described below
+    if (moveResult == 0) {
+      // loop through players, send DISPLAY message to each one 
+      for (int i = 0; i < game.numPlayers; i++) {
+        player_t* thisPlayer = game.players[i];
+        // get address of this player 
+        addr_t* address = player_getAddress(thisPlayer);
+        
+        // send display message to player 
+        sendDisplayMessage(player_getGrid(thisPlayer), *address); 
+      }
+    }
+    else if (moveResult == -1) {
+      sendErrorMessage(*otherp, "Player cannot make this move");
+    }
+    else {
+      // moveResult = amount of gold this player has just picked up 
+      // inform all clients of new gold count by sending a "GOLD" message 
+      for (int i = 0; i< game.numPlayers; i++){
+        player_t* player = game.players[i];
+        if (player == currPlayer) {
+          sendGoldMessage(moveResult, player_getGold(player), game.goldRemaining);
+        }
+        else {
+          sendGoldMessage(0, player_getGold(player), game.goldRemaining); 
+        }
+      }
+    }
+  }
+}
+
+/*  check parameters, construct the message, log about it, and send the message */
 void sendOkMessage(const addr_t otherp, char letter)
 {
   // send "ok" message
@@ -281,6 +373,8 @@ void sendOkMessage(const addr_t otherp, char letter)
   sprintf(okMessage, "OK %c", letter);
   message_send(*otherp, okMessage);
 }
+
+/*  check parameters, construct the message, log about it, and send the message */
 void sendGridMessage(const addr_t otherp)
 {
   // GRID nrows ncols
@@ -297,7 +391,7 @@ void sendGridMessage(const addr_t otherp)
 
 }
 
-/* arg is a player object, if given */ 
+/*  check parameters, construct the message, log about it, and send the message */
 void sendGoldMessage(int n, int r, int p, const addr_t otherp)
 {
   const char* response = mem_malloc_assert(strlen("GOLD ") + sizeof(int)*3 + 1, "Unable to allocate memory for message\n");
@@ -307,6 +401,7 @@ void sendGoldMessage(int n, int r, int p, const addr_t otherp)
 
 }
 
+/*  check parameters, construct the message, log about it, and send the message */
 void sendDisplayMessage(char* grid, const addr_t otherp) 
 {
   const char* response = mem_malloc_assert(strlen("GOLD ") + strlen(grid) + 1, "Unable to allocate memory for message\n");
@@ -314,5 +409,18 @@ void sendDisplayMessage(char* grid, const addr_t otherp)
 
   message_send(*otherp, response);
 }
+
+/*  check parameters, construct the message, log about it, and send the message */
+void sendErrorMessage(const addr_t otherp, char* explanation)
+{
+  // log an error, ignore message, send error message to client 
+  const char* response = mem_malloc_assert(strlen("ERROR ") + strlen(explanation), "Unable to allocate memory for message\n");
+  sprintf(response, "ERROR %s", explanation); 
+
+  // log an error 
+
+  message_send(*otherp, response); 
+}
+
 
 
