@@ -18,7 +18,7 @@ VALGRIND = valgrind --leak-check=full --show-leak-kinds=all
 #	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
 
 #gridTester.o: libcs50/libcs50-given.a grid.h
-grid.o: libcs50/libcs50-given.a grid.h
+grid.o: libcs50/libcs50-given.a grid/grid.h
 
 .PHONY: test valgrind clean
 
