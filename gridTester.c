@@ -7,7 +7,7 @@
 #include "file.h"
 #include "mem.h"
 #include <math.h>
-#include "grid.h"
+#include "grid/grid.h"
 
 
 int main(const int argc, char* argv[]){
