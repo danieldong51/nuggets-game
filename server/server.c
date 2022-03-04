@@ -26,7 +26,7 @@
 struct game {
   int goldRemaining;              // amount of gold left in game 
   int numPlayers; 
-  player_t* players[26];
+  player_t* players[MaxPlayers];
   grid_t* masterGrid; 
   spectator_t* spectator; 
   int seed;
