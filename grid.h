@@ -3,6 +3,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include "bag.h"
+#include "file.h"
+#include "mem.h"
+#include <math.h>
 
 typedef struct position position_t;
 typedef struct playerAndPosition playerAndPosition_t;
@@ -16,7 +21,7 @@ static char** newGrid2D(int NROWS, int NCOLS);
 /**************** gridConvert ****************/
 /*
  */
-void gridConvert(char** grid, file *fp);
+void gridConvert(char** grid, FILE *fp);
 
 /**************** updateGrid ****************/
 /* 
@@ -36,7 +41,7 @@ int gridValidMove(position_t* coordinate);
 /**************** gridInit ****************/
 /*
  */
-grid_t* gridInit();
+grid_t* grid_new();
 
 /**************** gridMakeMaster ****************/
 void gridMakeMaster(grid_t* masterGrid, FILE* fp, int numGold, int minGoldPiles, int maxGoldPiles, int seed);
@@ -56,3 +61,4 @@ int getNumColumns(grid_t* masterGrid);
 /**************** getGrid2D ****************/
 char** getGrid2D(grid_t* masterGrid);
 
+#endif
