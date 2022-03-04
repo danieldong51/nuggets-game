@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include "bag.h"
 #include "file.h"
 #include "mem.h"
+#include "player.h"
 #include <math.h>
 
 typedef struct position {
@@ -25,10 +27,9 @@ typedef struct grid {
   char** grid2D;                    // 2d string array, each slot represents one row
   pile_t** goldPiles; 
   playerAndPosition_t** playerPositions;
-  int NROWS;
-  int NCOLS; 
+  int nrows;
+  int ncols; 
 } grid_t;
-
 
 
 static int ROCK = ' ';
@@ -41,25 +42,31 @@ static int CORNER = '+';
 
 /**************** newGrid2D ****************/
 static char**
-newGrid2D(int NROWS, int NCOLS)
+newGrid2D(int nrows, int ncols)
 {
+<<<<<<< HEAD:grid/grid.c
 
   // allocate a 2-dimensional array of NROWS x NCOLS
   char** grid = calloc(NROWS, sizeof(char*));
   char* contents = calloc(NROWS * NCOLS, sizeof(char));
+=======
+  // allocate a 2-dimensional array of nrows x ncols
+  char** grid = calloc(nrows, sizeof(char*));
+  char* contents = calloc(nrows * ncols, sizeof(char));
+>>>>>>> 0bae35c5a11b6d1fe827e898ffc0745c77b9fc55:grid.c
   if (grid == NULL || contents == NULL) {
     fprintf(stderr, "cannot allocate memory for map\r\n");
     exit(1);
   }
 
   // set up the array of pointers, one for each row
-  for (int y = 0; y < NROWS; y++) {
-    grid[y] = contents + y * NCOLS;
+  for (int y = 0; y < nrows; y++) {
+    grid[y] = contents + y * ncols;
   }
 
   // fill the board with empty cells
-  for (int y = 0; y < NROWS; y++) {
-    for (int x = 0; x < NCOLS; x++) {
+  for (int y = 0; y < nrows; y++) {
+    for (int x = 0; x < ncols; x++) {
       grid[y][x] = ' ';
     }
   }
@@ -68,14 +75,23 @@ newGrid2D(int NROWS, int NCOLS)
 
 
 static void
+<<<<<<< HEAD:grid/grid.c
 gridConvert(char** grid, FILE* fp, int NROWS, int NCOLS)
+=======
+gridConvert(char** grid, FILE* fp, int nrows, int ncols)
+>>>>>>> 0bae35c5a11b6d1fe827e898ffc0745c77b9fc55:grid.c
 {
-  const int size = NCOLS+2;  // include room for \n\0
+  const int size = ncols+2;  // include room for \n\0
   char line[size];           // a line of input
   int y = 0;
   printf("ROWS: %d\n", NROWS);
 
+<<<<<<< HEAD:grid/grid.c
   while ( fgets(line, size, fp) != NULL && y <= NROWS) {
+=======
+  // read each line and copy it to the board
+  while ( fgets(line, size, fp) != NULL && y < nrows) {
+>>>>>>> 0bae35c5a11b6d1fe827e898ffc0745c77b9fc55:grid.c
     int len = strlen(line);
     printf("line: %s\n", line);
     if (line[len-1] == '\n') {
@@ -83,7 +99,7 @@ gridConvert(char** grid, FILE* fp, int NROWS, int NCOLS)
       len--; // don't copy the newline
     } else {
       // overly wide line
-      len = NCOLS;
+      len = ncols;
       fprintf(stderr, "board line %d too wide for screen; truncated.\r\n", y);
       for (char c = 0; c != '\n' && c != EOF; c = getc(fp))
         ; // scan off the excess part of the line
@@ -102,9 +118,179 @@ gridConvert(char** grid, FILE* fp, int NROWS, int NCOLS)
 
 
 /**************** updateGrid ****************/
-void updateGrid(grid_t* playerGrid, grid_t* serverGrid)
+void updateGrid(player_t* player, grid_t* masterGrid)
 {
-// dan is doing
+  int playerIndex = player_getLetter(player) - 'a';
+  position_t* playerPos = masterGrid->playerPositions[playerIndex];
+  grid_t* playerGrid = player_getGrid(player);
+
+  // initialize toVisit bag and visited grid
+  bag_t* toVisit = bag_new();
+  char** visited = newGrid();
+
+  // clear players and piles of gold in playerGrid
+
+  // add current squares to toVisit bag and mark as visited 
+  position_t* curPosition = masterGrid->playerPositions[playerIndex]->playerPosition;
+  bag_add(toVisit, curPosition);
+
+  gridMark(visited, curPosition, '.');
+  
+  // while toVisit is not empty
+  position_t* position;
+  while ((position = bag_extract(toVisit)) != NULL) {
+
+    // if the position is visible
+    if (isVisible(playerPos, position, masterGrid)) {
+
+      // mark square as visible
+      gridMark(visited, curPosition, '.');
+
+      // mark player grid
+      gridMark(playerGrid, position, gridGetChar(masterGrid, position));
+
+      // loop over adjacent squares
+      bag_t* adjacentSquares = bag_new();
+
+      int x = position->x;
+      int y = position->y;
+
+      position_t* positionLeft = position_new(x - 1, y);
+      position_t* positionRight = position_new(x + 1, y);
+      position_t* positionUp = position_new(x, y + 1);
+      position_t* positionDown = position_new(x, y - 1);
+
+      bag_add(adjacentSquares, positionLeft);
+      bag_add(adjacentSquares, positionRight);
+      bag_add(adjacentSquares, positionUp);
+      bag_add(adjacentSquares, positionDown);
+
+      position_t* positionAdjacent;
+
+      while ((positionAdjacent = bag_extract(adjacentSquares)) != NULL) {
+
+        // if square not visited
+        if (gridGetChar(visited, positionAdjacent) != '.') {
+
+          // mark square as visitied
+          gridMark(visited, positionAdjacent, '.');
+
+          // add to toVisit
+          bag_add(toVisit, positionAdjacent);
+        }
+      }
+    }
+  }
+}
+
+char gridGetChar(char** grid, position_t* position)
+{
+  return grid[position->y][position->x];
+}
+
+void gridMark(char** grid, position_t* position, char mark) 
+{
+  grid[position->y][position->x] = mark;
+}
+
+bool isVisible(position_t* playerPos, position_t* squarePos, grid_t* masterGrid)
+{
+  int pcol = playerPos->x;
+  int col = squarePos->x;
+  int prow = playerPos->y;
+  int row = squarePos->y;
+
+  float slope = (row - prow) / (col - pcol);
+  float rowSlope = (col - pcol) / (row - prow);
+
+  // looping over rows
+  int curRow;
+  while ((curRow = increment(curRow, row)) != row) {
+    float curCol = pcol + (1 / rowSlope) * (curRow - prow);
+
+    // checks if intersects at only one place
+    if (isInteger(curCol)) {
+
+      // if intersects at only one place,
+      // checking if that spot is a wall
+      if (!isEmpty(masterGrid, (int) curCol, curRow)) {
+        return false;
+      }
+
+    } else {
+
+      // else intersects at in between place
+      // checking both spots to see if spot is empty
+      if (!isEmpty(masterGrid, (int) curCol, curRow) && 
+          !isEmpty(masterGrid, (int) curCol + 1 , curRow)) {
+        return false;
+      }
+    }
+  }
+
+  // looping over columns
+  int curCol;
+  while ((curCol = increment(curCol, col)) != col) {
+    float curRow = prow + (1 / slope) * (curCol - pcol);
+
+    // checks if intersects at only one place
+    if (isInteger(curRow)) {
+
+      // if intersects at only one place,
+      // checking if that spot is a wall
+      if (!isEmpty(masterGrid, curCol, (int) curRow)) {
+        return false;
+      }
+
+    } else {
+
+      // else intersects at in between place
+      // checking both spots to see if spot is empty
+      if (!isEmpty(masterGrid, curCol, (int) curRow) && 
+          !isEmpty(masterGrid, curCol, (int) curRow + 1)) {
+        return false;
+      }
+    }
+  }
+}
+
+bool isEmpty(grid_t* masterGrid, int col, int row)
+{
+  position_t* intersectPos = position_new(col, row);
+  char space = gridGetChar(masterGrid, intersectPos);
+  free(intersectPos);
+  if (space != EMPTY) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+int increment(int cur, int goal) 
+{
+  if (cur > goal) {
+    return --cur;
+  } else {
+    return ++cur;
+  }
+}
+
+bool isInteger(float num)
+{
+  int intNum = (int) num;
+  if (num - intNum == 0) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+position_t* position_new(int x, int y)
+{
+  position_t* position = malloc(sizeof(position_t));
+  position->x = x;
+  position->y = y;
+  return position;
 }
 
 
@@ -138,7 +324,7 @@ void gridPrint(grid_t* map, position_t* currentPosition)
 
 
   // print out each row
-  for ( int i = 0; i < map->NROWS; i ++ ) {
+  for ( int i = 0; i < map->nrows; i ++ ) {
     fprintf(stdout, "%s", map->grid2D[i]);
   }
 }
@@ -189,8 +375,8 @@ void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGold
   char* tempColumn = file_readLine(fp);
   int NC = strlen(tempColumn) + 1;                             // number of columns in grid
 
-  masterGrid->NROWS = NR;
-  masterGrid->NCOLS = NC;
+  masterGrid->nrows = NR;
+  masterGrid->ncols = NC;
 
     // set 2d char map for grid
   char** grid2D;                                              // map of walls, paths, and spaces
@@ -254,8 +440,8 @@ grid_t* gridNewPlayer(grid_t* map)
   playerPosition->x = 0;
   playerPosition->y = 0;
   while ( !(map->grid2D[playerPosition->y][playerPosition->x] == EMPTY) ){
-    playerPosition->x = (rand() % map-> NROWS) + 1; 
-    playerPosition->y = (rand() % map-> NCOLS) + 1;
+    playerPosition->x = (rand() % map-> nrows) + 1; 
+    playerPosition->y = (rand() % map-> ncols) + 1;
   }
 
   // if this is the first player being intialized
@@ -278,12 +464,12 @@ grid_t* gridNewPlayer(grid_t* map)
 
 /**************** getNumRows ****************/
 int getNumRows(grid_t* masterGrid) {
-  return masterGrid->NROWS;
+  return masterGrid->nrows;
 }
 
 /**************** getNumColumns ****************/
 int getNumColumns(grid_t* masterGrid) {
-  return masterGrid->NCOLS;
+  return masterGrid->ncols;
 }
 
 /**************** getGrid2D ****************/
