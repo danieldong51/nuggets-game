@@ -13,14 +13,17 @@
 #include "spectator.h"
 #include "grid.h"
 
-
+/**************** global types ****************/
+typedef struct spectator {
+  grid_t grid;
+} spectator_t;
 
 /**************** local functions ****************/
-/*
- *
- * spectator_new = allocates memory for spectator struct
- *
- */
+spectator_t* spectator_new(grid_t* masterGrid);
+void spectator_delete(spectator_t* spectator);
+
+
+/**********spectator_new**************/
 spectator_t* spectator_new(grid_t* masterGrid){
   spectator_t* spectator = malloc(sizeof(spectator_t));
   if (spectator != NULL) {
@@ -28,16 +31,12 @@ spectator_t* spectator_new(grid_t* masterGrid){
     return spectator;
   }
 
-  flog_v(stderr, "Error, memory allocation error for spectator\n");
+  fprintf(stderr, "Error, memory allocation error for spectator\n");
   return NULL;
 }
 
 
-/*
- *
- * spectator_delete = deletes a spectator instance
- *
- */
+/************spectator_delete()************/
 void spectator_delete(spectator_t* spectator){
   if (spectator != NULL) {
     free(spectator);
