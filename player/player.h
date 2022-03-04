@@ -32,13 +32,15 @@ int player_getGold(player_t* player);
 grid_t* player_getGrid(player_t* player);
 char* player_getName(player_t* player);
 char player_getLetter(player_t* player);
+addr_t* player_getAddress(player_t* player);
 
 // setter functions 
 void player_addGold(player_t* player, int numGold);
-void player_changeStatus(player_t* player);
+void player_changeStatus(player_t* player, bool status);
 void player_setLetter(player_t* player, char letter);
 void player_setName(player_t* player, char* name);
 void player_setGrid(player_t* player, grid_t* grid);
+void player_setAddress(player_t* player, addr_t* address); 
 
 /**************** player_new() ****************/
 /* A function to create a new player struct. */
@@ -110,6 +112,16 @@ char* player_getName(player_t* player);
 */
 char player_getLetter(player_t* player);
 
+/**************** player_getLetter() ****************/
+/* A function to return the address of a player*/
+/* 
+* Caller provides: 
+*   a player object
+* We return: 
+*   the player's address, if the player is not null 
+*    null otherwise 
+*/addr_t* player_getAddress(player_t* player);
+
 
 /**************** player_addGold() ****************/
 /* A function to add to the gold count of a player. */
@@ -127,15 +139,11 @@ void player_addGold(player_t* player, int numGold);
 /* A function to change whether or not the player is talking to the server. */
 /* 
 * Caller provides: 
-*   a player object
+*   a player object, a boolean representing whether the player is currently talking to the server
 * We do: 
-*   call player_isTalking to see if the player is currently talking to the server 
-*   if it is: 
-*     change the isTalking boolean to false 
-*   if it is not: 
-*     change the isTalking boolean to true 
+*   change the player's isTalking bool to the given status bool, if they are both not null 
 */
-void player_changeStatus(player_t* player);
+void player_changeStatus(player_t* player, bool status);
 
 /**************** player_setName() ****************/
 /* A function to change the name of a player */
@@ -164,8 +172,20 @@ void player_setLetter(player_t* player, char letter);
 /* A function to change the grid of a player */
 /* 
 * Caller provides: 
+*   a player object 
 *   a grid_t object
 * We do: 
 *   change the player's grid to this grid, as long as the given player and grid aren't NULL
 */
 void player_setGrid(player_t* player, grid_t* grid);
+
+/**************** player_setLetter() ****************/
+/* A function to change the aessddr of a player */
+/* 
+* Caller provides: 
+*   a player object
+*   an addr_t object
+* We do: 
+*   change the player's address to this address, as long as the given player and address aren't NULL
+*/
+addr_t* player_setAddress(player_t* player, addr_t* address);
