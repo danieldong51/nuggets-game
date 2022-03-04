@@ -13,6 +13,7 @@
 #include <time.h> 
 #include "libcs50/mem.h"
 #include "grid.h"
+#include "../support/message.h"
 
 /**************** file-local global variables ****************/
 /* none */
@@ -26,6 +27,7 @@ typedef struct player {
   char letter; 
   int numGold; 
   grid_t* grid;
+  addr_t* address;
   bool isTalking; 
 } player_t;
 
@@ -40,13 +42,15 @@ int player_getGold(player_t* player);
 grid_t* player_getGrid(player_t* player);
 char* player_getName(player_t* player);
 char player_getLetter(player_t* player);
+addr_t* player_getAddress(player_t* player);
 
 // setter functions 
 void player_addGold(player_t* player, int numGold);
-void player_changeStatus(player_t* player);
+void player_changeStatus(player_t* player, bool status);
 void player_setLetter(player_t* player, char letter);
 void player_setName(player_t* player, char* name);
 void player_setGrid(player_t* player, grid_t* grid);
+void player_setAddress(player_t* player, addr_t* address); 
 
 /**************** player_new() ****************/
 /* see player.h for description */
@@ -120,6 +124,16 @@ char player_getLetter(player_t* player)
   return NULL;
 }
 
+/**************** player_getLetter() ****************/
+/* see player.h for description */
+addr_t* player_getAddress(player_t* player)
+{
+  if (player != NULL) {
+    return player->address; 
+  }
+  return NULL;
+}
+
 // SETTER FUNCTIONS
 
 /**************** player_addGold() ****************/
@@ -133,15 +147,10 @@ void player_addGold(player_t* player, int numGold)
 
 /**************** player_changeStatus() ****************/
 /* see player.h for description */
-void player_changeStatus(player_t* player)
+void player_changeStatus(player_t* player, bool status)
 {
   if (player != NULL) {
-    if (player_isTalking(player)){
-      player->isTalking = false; 
-    }
-    else {
-      player->isTalking = true; 
-    }
+    player->isTalking = status; 
   }
 }
 
@@ -169,5 +178,14 @@ void player_setGrid(player_t* player, grid_t* grid)
 {
   if (player != NULL && grid != NULL) {
     player->grid = grid; 
+  }
+}
+
+/**************** player_setLetter() ****************/
+/* see player.h for description */
+addr_t* player_setAddress(player_t* player, addr_t* address)
+{
+  if (player != NULL && address != NULL) {
+    player->address = address; 
   }
 }

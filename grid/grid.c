@@ -44,16 +44,9 @@ static int CORNER = '+';
 static char**
 newGrid2D(int nrows, int ncols)
 {
-<<<<<<< HEAD:grid/grid.c
-
-  // allocate a 2-dimensional array of NROWS x NCOLS
-  char** grid = calloc(NROWS, sizeof(char*));
-  char* contents = calloc(NROWS * NCOLS, sizeof(char));
-=======
   // allocate a 2-dimensional array of nrows x ncols
   char** grid = calloc(nrows, sizeof(char*));
   char* contents = calloc(nrows * ncols, sizeof(char));
->>>>>>> 0bae35c5a11b6d1fe827e898ffc0745c77b9fc55:grid.c
   if (grid == NULL || contents == NULL) {
     fprintf(stderr, "cannot allocate memory for map\r\n");
     exit(1);
@@ -75,25 +68,17 @@ newGrid2D(int nrows, int ncols)
 
 
 static void
-<<<<<<< HEAD:grid/grid.c
-gridConvert(char** grid, FILE* fp, int NROWS, int NCOLS)
-=======
 gridConvert(char** grid, FILE* fp, int nrows, int ncols)
->>>>>>> 0bae35c5a11b6d1fe827e898ffc0745c77b9fc55:grid.c
 {
   const int size = ncols+2;  // include room for \n\0
   char line[size];           // a line of input
   int y = 0;
-  printf("ROWS: %d\n", NROWS);
+  printf("ROWS: %d\n", nrows);
 
-<<<<<<< HEAD:grid/grid.c
-  while ( fgets(line, size, fp) != NULL && y <= NROWS) {
-=======
+
   // read each line and copy it to the board
   while ( fgets(line, size, fp) != NULL && y < nrows) {
->>>>>>> 0bae35c5a11b6d1fe827e898ffc0745c77b9fc55:grid.c
     int len = strlen(line);
-    printf("line: %s\n", line);
     if (line[len-1] == '\n') {
       // normal line
       len--; // don't copy the newline
@@ -106,6 +91,7 @@ gridConvert(char** grid, FILE* fp, int nrows, int ncols)
     }
     
     strncpy(grid[y], line, len);
+    printf("%s\n",grid[y]);
     printf("Y: %d\n", y);
     y++;
 
@@ -297,29 +283,35 @@ position_t* position_new(int x, int y)
 /**************** gridPrint ****************/
 void gridPrint(grid_t* map, position_t* currentPosition)
 {
+  printf("%ld\n", sizeof(map->playerPositions));
+  printf("%ld\n", sizeof(map->playerPositions[0]));
   int players = sizeof(map->playerPositions)/sizeof(map->playerPositions[0]);                   // determine number of players that are to be printed
   
   // set the players in the grid array
-  for (int i = 0; i < players; i++) {
-    position_t* tempPosition = mem_malloc(sizeof(position_t));
-    tempPosition = map->playerPositions[i]->playerPosition;
-    // print position of the current player
-    if ( (tempPosition->x == currentPosition->x) && (tempPosition->y == currentPosition->y)) {    
-      map->grid2D[currentPosition->x][currentPosition->y] = '@';
+  if (map->playerPositions != NULL) {
+    for (int i = 0; i < players; i++) {
+      position_t* tempPosition = mem_malloc(sizeof(position_t));
+      tempPosition = map->playerPositions[i]->playerPosition;
+      // print position of the current player
+      if ( (tempPosition->x == currentPosition->x) && (tempPosition->y == currentPosition->y)) {    
+        map->grid2D[currentPosition->x][currentPosition->y] = '@';
+      }
+      // print position of the other players 
+      else {
+        map->grid2D[tempPosition->y][tempPosition->x] = map->playerPositions[i]->name;
+      }
+      mem_free(tempPosition);
     }
-    // print position of the other players 
-    else {
-      map->grid2D[tempPosition->x][tempPosition->y] = map->playerPositions[i]->name;
-    }
-    mem_free(tempPosition);
   }
+
 
   // set the gold in the grid array
   int numPiles = sizeof(map->goldPiles)/sizeof(map->goldPiles[0]);                  
   for ( int i = 0; i< numPiles; i++ ) {
     position_t* tempPosition = mem_malloc(sizeof(position_t));
     tempPosition = map->goldPiles[i]->location;
-    map->grid2D[tempPosition->x][tempPosition->y] = '*';
+    printf("%d", tempPosition->x);
+    map->grid2D[tempPosition->y][tempPosition->x] = '*';
   }
 
 
@@ -375,6 +367,8 @@ void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGold
   char* tempColumn = file_readLine(fp);
   int NC = strlen(tempColumn) + 1;                             // number of columns in grid
 
+  fclose(fp);
+  fp = fopen(fileName, "r");
   masterGrid->nrows = NR;
   masterGrid->ncols = NC;
 
@@ -475,5 +469,16 @@ int getNumColumns(grid_t* masterGrid) {
 /**************** getGrid2D ****************/
 char** getGrid2D(grid_t* masterGrid) {
   return masterGrid->grid2D;
+}
+
+void setPosition(position_t* position, int x, int y)
+{
+  position->x = x;
+  position->y = y;
+}
+
+position_t* newPosition(){
+  position_t* position = mem_malloc(sizeof(position_t));
+  return position;
 }
 
