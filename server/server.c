@@ -509,5 +509,18 @@ void sendErrorMessage(const addr_t otherp, char* explanation)
   message_send(otherp, response); 
 }
 
+/*  check parameters, construct the message, log about it, and send the message */
+void sendErrorMessage(const addr_t otherp, char* explanation)
+{
+  // log an error, ignore message, send error message to client 
+  const char* response = mem_malloc_assert(strlen("ERROR ") + strlen(explanation), "Unable to allocate memory for message\n");
+  sprintf(response, "ERROR %s", explanation); 
+
+  // log an error 
+
+  message_send(*otherp, response); 
+}
+
+
 
 
