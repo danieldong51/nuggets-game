@@ -9,13 +9,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "message.h"
+#include "support/message.h"
 #include "spectator.h"
 #include "grid.h"
 
 /**************** global types ****************/
 typedef struct spectator {
-  grid_t grid;
+  grid_t* grid;
 } spectator_t;
 
 /**************** local functions ****************/
