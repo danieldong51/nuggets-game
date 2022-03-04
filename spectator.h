@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "grid.h"
-#include "message.h" 
+#include "support/message.h" 
 
 /**************** global types ****************/
 typedef struct spectator spectator_t;
