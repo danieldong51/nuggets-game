@@ -97,6 +97,7 @@ gridConvert(char** grid, FILE* fp, int nrows, int ncols)
 
 
 /**************** updateGrid ****************/
+/* See grid.h for details */
 void updateGrid(player_t* player, grid_t* masterGrid)
 {
   int playerIndex = player_getLetter(player) - 'a';
@@ -172,6 +173,8 @@ void gridMark(char** grid, position_t* position, char mark)
   grid[position->y][position->x] = mark;
 }
 
+/**************** isVisible ****************/
+/* Helper function for updateGrid */
 bool isVisible(position_t* playerPos, position_t* squarePos, grid_t* masterGrid)
 {
   int pcol = playerPos->x;
@@ -233,6 +236,8 @@ bool isVisible(position_t* playerPos, position_t* squarePos, grid_t* masterGrid)
   }
 }
 
+/**************** isEmpty ****************/
+/* Helper function for isVisible */
 bool isEmpty(grid_t* masterGrid, int col, int row)
 {
   position_t* intersectPos = position_new(col, row);
