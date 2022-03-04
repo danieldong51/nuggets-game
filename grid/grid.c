@@ -1,13 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-<<<<<<< HEAD
 #include <stdbool.h>
-=======
 #include <string.h>
->>>>>>> origin/dev
 #include "bag.h"
 #include "file.h"
 #include "mem.h"
+#include "player.h"
 #include <math.h>
 
 typedef struct position {
@@ -33,20 +31,6 @@ typedef struct grid {
   int NCOLS; 
 } grid_t;
 
-<<<<<<< HEAD
-typedef struct player {
-  int index;
-  char* name;
-  int numGold;
-  grid_t* grid;
-  bool isTalking;
-} player_t;
-
-static int NROWS = 25;
-static int NCOLS = 100;
-=======
-
->>>>>>> origin/dev
 
 static int ROCK = ' ';
 static int EMPTY = '.';
@@ -113,7 +97,6 @@ gridConvert(char** grid, FILE* fp, int NCOLS, int NROWS)
 
 
 /**************** updateGrid ****************/
-<<<<<<< HEAD
 void updateGrid(player_t* player, grid_t* masterGrid)
 {
   int playerIndex = player->name;
@@ -195,9 +178,6 @@ bool isVisible(position_t* playerPos, position_t* square, grid_t* masterGrid)
 }
 
 position_t* position_new(int x, int y)
-=======
-void updateGrid(grid_t* playerGrid, grid_t* serverGrid)
->>>>>>> origin/dev
 {
   position_t* position = malloc(sizeof(position_t));
   position->x = x;
