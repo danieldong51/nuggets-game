@@ -14,9 +14,6 @@ typedef struct playerAndPosition playerAndPosition_t;
 typedef struct pile pile_t;
 typedef struct grid grid_t;
 
-/**************** newGrid2D ****************/
-static char** newGrid2D(int nrows, int ncols);
-
 
 /**************** gridConvert ****************/
 /* Converts map.txt file to a grid
@@ -40,12 +37,12 @@ void gridConvert(char** grid, FILE* fp, int nrows, int ncols);
  *   player's player and gold list is updated with any players
  *   or gold piles it sees currently.
  */
-void updateGrid(player_t* player, grid_t* serverGrid);
+void updateGrid(grid_t* playerGrid, grid_t* serverGrid, char playerLetter);
 
 /**************** gridPrint ****************/
 /*
  */
-void gridPrint(grid_t* grid, position_t* currentPosition);
+void gridPrint(grid_t* grid, char playerLetter);
 
 /**************** gridValidMove ****************/
 /*

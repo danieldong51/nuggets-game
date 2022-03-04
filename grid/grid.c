@@ -5,9 +5,19 @@
 #include "bag.h"
 #include "file.h"
 #include "mem.h"
-#include "player.h"
 #include <math.h>
 
+/**************** file-local global variables ****************/
+static int ROCK = ' ';
+static int EMPTY = '.';
+static int PASSAGE = '#';
+static int HORIZONTAL = '-';
+static int VERITAL = '|';
+static int CORNER = '+';
+static int MAXPLAYERS = 26;
+static int MAXGOLD = 50;
+
+/**************** local types ****************/
 typedef struct position {
   int x;
   int y;
@@ -23,6 +33,7 @@ typedef struct pile {
   int amount;
 } pile_t;
 
+/**************** global types ****************/
 typedef struct grid {
   char** grid2D;                    // 2d string array, each slot represents one row
   pile_t** goldPiles; 
@@ -31,14 +42,29 @@ typedef struct grid {
   int ncols; 
 } grid_t;
 
+static char** newGrid2D(int nrows, int ncols);
+void gridConvert(char** grid, FILE* fp, int nrows, int ncols);
+void updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter);
+void gridPrint(grid_t* map, char playerLetter);
+int gridValidMove(grid_t* map, position_t* coordinate);
+void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int seed);
+grid_t* gridNewPlayer(grid_t* map);
 
-static int ROCK = ' ';
-static int EMPTY = '.';
-static int PASSAGE = '#';
-static int HORIZONTAL = '-';
-static int VERITAL = '|';
-static int CORNER = '+';
-
+/**************** local functions ****************/
+/* not visible outside this module */
+bool isVisible(position_t* playerPos, position_t* squarePos, grid_t* masterGrid);
+bool isEmpty(grid_t* masterGrid, int col, int row);
+int increment(int cur, int goal);
+bool isInteger(float num);
+position_t* position_new(int x, int y);
+void clearPlayerArray(grid_t* grid);
+void clearPileArray(grid_t* grid);
+char gridGetChar(char** grid, position_t* position);
+void gridMark(char** grid, position_t* position, char mark);
+grid_t* grid_new();
+int getNumRows(grid_t* masterGrid);
+int getNumColumns(grid_t* masterGrid);
+char** getGrid2D(grid_t* masterGrid);
 
 /**************** newGrid2D ****************/
 static char**
@@ -67,7 +93,7 @@ newGrid2D(int nrows, int ncols)
 }
 
 
-static void
+void
 gridConvert(char** grid, FILE* fp, int nrows, int ncols)
 {
   const int size = ncols+2;  // include room for \n\0
@@ -103,21 +129,27 @@ gridConvert(char** grid, FILE* fp, int nrows, int ncols)
 
 
 /**************** updateGrid ****************/
-void updateGrid(player_t* player, grid_t* masterGrid)
+/* See grid.h for details */
+void 
+updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter)
 {
-  int playerIndex = player_getLetter(player) - 'a';
-  position_t* playerPos = masterGrid->playerPositions[playerIndex];
-  grid_t* playerGrid = player_getGrid(player);
+  int playerIndex = playerLetter - 'a';
+  position_t* playerPos = masterGrid->playerPositions[playerIndex]->playerPosition;
 
   // initialize toVisit bag and visited grid
   bag_t* toVisit = bag_new();
-  char** visited = newGrid();
+  char** visited = newGrid2D(getNumRows(masterGrid), getNumColumns(masterGrid));
+
+  // initialize visible grid
+  char** visible = newGrid2D(getNumRows(masterGrid), getNumColumns(masterGrid));
 
   // clear players and piles of gold in playerGrid
+  clearPlayerArray(playerGrid);
+  clearPileArray(playerGrid);
 
   // add current squares to toVisit bag and mark as visited 
   position_t* curPosition = masterGrid->playerPositions[playerIndex]->playerPosition;
-  bag_add(toVisit, curPosition);
+  bag_insert(toVisit, curPosition);
 
   gridMark(visited, curPosition, '.');
   
@@ -129,10 +161,10 @@ void updateGrid(player_t* player, grid_t* masterGrid)
     if (isVisible(playerPos, position, masterGrid)) {
 
       // mark square as visible
-      gridMark(visited, curPosition, '.');
+      gridMark(visible, curPosition, '.');
 
       // mark player grid
-      gridMark(playerGrid, position, gridGetChar(masterGrid, position));
+      gridMark(playerGrid->grid2D, position, gridGetChar(masterGrid->grid2D, position));
 
       // loop over adjacent squares
       bag_t* adjacentSquares = bag_new();
@@ -145,10 +177,10 @@ void updateGrid(player_t* player, grid_t* masterGrid)
       position_t* positionUp = position_new(x, y + 1);
       position_t* positionDown = position_new(x, y - 1);
 
-      bag_add(adjacentSquares, positionLeft);
-      bag_add(adjacentSquares, positionRight);
-      bag_add(adjacentSquares, positionUp);
-      bag_add(adjacentSquares, positionDown);
+      bag_insert(adjacentSquares, positionLeft);
+      bag_insert(adjacentSquares, positionRight);
+      bag_insert(adjacentSquares, positionUp);
+      bag_insert(adjacentSquares, positionDown);
 
       position_t* positionAdjacent;
 
@@ -161,24 +193,77 @@ void updateGrid(player_t* player, grid_t* masterGrid)
           gridMark(visited, positionAdjacent, '.');
 
           // add to toVisit
-          bag_add(toVisit, positionAdjacent);
+          bag_insert(toVisit, positionAdjacent);
         }
+      }
+    }
+  }
+
+  // loop through player positions and add to player grid if visible
+  for (int i = 0; i < MAXPLAYERS; i++) {
+
+    // check if not null
+    position_t* otherPlayerPos;
+    if ((otherPlayerPos = masterGrid->playerPositions[i]) != NULL) {
+
+      // check if player position is visible
+      if (gridGetChar(visible, otherPlayerPos) == '.') {
+        
+        // add player to playerGrid's player list
+        playerGrid->playerPositions[i] = otherPlayerPos;
+      }
+    }
+  }
+
+  // loop through gold positions and add to player grid if visible
+  for (int i = 0; i < MAXGOLD; i++) {
+
+    // check if not null
+    pile_t* goldPile;
+    if ((goldPile = masterGrid->goldPiles[i]) != NULL) {
+
+      // check if gold position is visible
+      if (gridGetChar(visible, goldPile->location) == '.') {
+
+        // add gold to playerGrid's gold list
+        playerGrid->goldPiles[i] = goldPile;
       }
     }
   }
 }
 
-char gridGetChar(char** grid, position_t* position)
+void 
+clearPlayerArray(grid_t* grid)
+{
+  for (int i = 0; i < MAXPLAYERS; i++) {
+    grid->playerPositions[i] = NULL;
+  }
+}
+
+void 
+clearPileArray(grid_t* grid)
+{
+  for (int i = 0; i < MAXGOLD; i++) {
+    grid->goldPiles[i] = NULL;
+  }
+}
+
+char 
+gridGetChar(char** grid, position_t* position)
 {
   return grid[position->y][position->x];
 }
 
-void gridMark(char** grid, position_t* position, char mark) 
+void 
+gridMark(char** grid, position_t* position, char mark) 
 {
   grid[position->y][position->x] = mark;
 }
 
-bool isVisible(position_t* playerPos, position_t* squarePos, grid_t* masterGrid)
+/**************** isVisible ****************/
+/* Helper function for updateGrid */
+bool 
+isVisible(position_t* playerPos, position_t* squarePos, grid_t* masterGrid)
 {
   int pcol = playerPos->x;
   int col = squarePos->x;
@@ -237,12 +322,16 @@ bool isVisible(position_t* playerPos, position_t* squarePos, grid_t* masterGrid)
       }
     }
   }
+  return true;
 }
 
-bool isEmpty(grid_t* masterGrid, int col, int row)
+/**************** isEmpty ****************/
+/* Helper function for isVisible */
+bool 
+isEmpty(grid_t* masterGrid, int col, int row)
 {
   position_t* intersectPos = position_new(col, row);
-  char space = gridGetChar(masterGrid, intersectPos);
+  char space = gridGetChar(masterGrid->grid2D, intersectPos);
   free(intersectPos);
   if (space != EMPTY) {
     return false;
@@ -251,7 +340,8 @@ bool isEmpty(grid_t* masterGrid, int col, int row)
   }
 }
 
-int increment(int cur, int goal) 
+int 
+increment(int cur, int goal) 
 {
   if (cur > goal) {
     return --cur;
@@ -260,7 +350,8 @@ int increment(int cur, int goal)
   }
 }
 
-bool isInteger(float num)
+bool 
+isInteger(float num)
 {
   int intNum = (int) num;
   if (num - intNum == 0) {
@@ -280,12 +371,13 @@ position_t* position_new(int x, int y)
 
 
 /**************** gridPrint ****************/
-void gridPrint(grid_t* map, position_t* currentPosition)
+void gridPrint(grid_t* map, char playerLetter)
 {
   printf("%ld\n", sizeof(map->playerPositions));
   printf("%ld\n", sizeof(map->playerPositions[0]));
   int players = sizeof(map->playerPositions)/sizeof(map->playerPositions[0]);                   // determine number of players that are to be printed
-  
+  position_t* currentPosition = map->playerPositions[playerLetter - 'a']->playerPosition;
+
   // set the players in the grid array
   if (map->playerPositions != NULL) {
     for (int i = 0; i < players; i++) {
@@ -323,10 +415,11 @@ void gridPrint(grid_t* map, position_t* currentPosition)
 
 /**************** gridValidMove ****************/
 /* gives an (x,y) position and checks to see if a player can move into that position in the map */
-int gridValidMove(grid_t* map, char letter, char move)
+int 
+gridValidMove(grid_t* map, position_t* coordinate)
 {
-  int xCord = 0;  // need to change, set to 0 for compiling
-  int yCord = 0;
+  int xCord = coordinate->x;
+  int yCord = coordinate->y;
 
   // if coordinate is an empty room space or passage
   if ( (map->grid2D[yCord][xCord] == EMPTY) || ((map->grid2D[yCord][xCord]) == PASSAGE) ||  ((map->grid2D[yCord][xCord]) == PASSAGE)) {
@@ -345,20 +438,24 @@ int gridValidMove(grid_t* map, char letter, char move)
     }
   }
   // not a valid space to move into
-  return -1;
+  return 0;
 }
 
 
 /**************** grid_new ****************/
 // initializes a new empty grid--mallocs memory
-grid_t* grid_new(){
+grid_t* 
+grid_new()
+{
   grid_t* map = mem_malloc(sizeof(grid_t));
   return map;
 }
 
 /**************** gridMakeMaster ****************/
 /* fill up char** array and piles_t** array */
-void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int seed) {
+void 
+gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int seed)
+{
   FILE *fp = fopen(fileName, "r");
 
   // set goldPiles for grid
@@ -368,46 +465,44 @@ void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGold
 
   fclose(fp);
   fp = fopen(fileName, "r");
+<<<<<<< HEAD
   masterGrid->NROWS = NR;
   masterGrid->NCOLS = NC;
+=======
+  masterGrid->nrows = NR;
+  masterGrid->ncols = NC;
+>>>>>>> 17b37603d79c2cfd957721bfcd6579b315240573
 
     // set 2d char map for grid
   char** grid2D;                                              // map of walls, paths, and spaces
   grid2D = newGrid2D(NR, NC);
-  printf("before grid convert\n");
   gridConvert(grid2D, fp, NR, NC);
-  printf("grid converted\n");
   masterGrid->grid2D = grid2D;
-  printf("1\n");
+
   srand(seed);                                                // not sure what this means but seed is an optional parameter for server
   // set the number of piles in the map
   int numPiles = (int)(rand() % (minGoldPiles - maxGoldPiles + 1)) + minGoldPiles; 
   int currentGoldAmount;
-  printf("2\n");
+
   
   pile_t* goldPiles[numPiles]; // check this syntax
   // create pile structures bt setting random locations and random amounts for gold
   for (int i = 0; i < numPiles; i++) {
     position_t* goldPosition= mem_malloc(sizeof(position_t));
     pile_t* goldPile = mem_malloc(sizeof(pile_t));
-    goldPosition->x = (rand() % NC) + 1;
-    goldPosition->y = (rand() % NR) + 1;
-    printf("3\n");
+    goldPosition->x = 0;
+    goldPosition->y = 0;
     // find random position that is in an empty room spot
     while (!((grid2D[goldPosition->y][goldPosition->x ] == EMPTY))) {
       // set random position for gold
-      printf("4\n");
-      goldPosition->x = (rand() % NC) + 1; 
-      goldPosition->y = (rand() % NR) + 1;
+      goldPosition->x = (rand() % NR) + 1; 
+      goldPosition->y = (rand() % NC) + 1;
     }
-    printf("5\n");
     goldPile->location = goldPosition;
     goldPile->amount = rand();
     currentGoldAmount += goldPile->amount;
     goldPiles[i] = goldPile;
-    printf("6\n");
   }
-  printf("7\n");
   
   // fraction to scale down gold amount in each pile by
   int goldScale = numGold/currentGoldAmount;
@@ -417,6 +512,7 @@ void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGold
     int oversizedAmount = goldPiles[i]->amount;
     goldPiles[i]->amount = round(oversizedAmount * goldScale);
   }
+
   masterGrid->goldPiles=goldPiles;
   fclose(fp);
   // NEED TO THINK ABOUT FREES
@@ -426,7 +522,8 @@ void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGold
 /**************** gridNewPlayer ****************/
 // returns the new player grid, which will start off as completely empty
 // creates a new playerAndPosition struct representing new player in the masterGrid (map is the masterGrid)
-grid_t* gridNewPlayer(grid_t* map)
+grid_t* 
+gridNewPlayer(grid_t* map)
 {
   position_t* playerPosition= mem_malloc(sizeof(position_t));
 
@@ -443,7 +540,6 @@ grid_t* gridNewPlayer(grid_t* map)
     map->playerPositions = players;
   }
 
-
   int i = 0;
   while( !(map->playerPositions[i] == NULL) ) {
     i++;
@@ -451,7 +547,13 @@ grid_t* gridNewPlayer(grid_t* map)
   map->playerPositions[i]->name = i+'a'; // set char name
   map->playerPositions[i]->playerPosition = playerPosition;
 
-  grid_t* playerGrid = grid_new();
+  // Initialize new playerGrid
+  grid_t* playerGrid = grid_new(); 
+  
+  // malloc space for gold piles and players
+  playerGrid->playerPositions = malloc(MAXPLAYERS * sizeof(playerAndPosition_t*));
+  playerGrid->goldPiles = malloc(MAXGOLD * sizeof(pile_t*));
+
   return playerGrid;
 }
 
@@ -461,12 +563,16 @@ int getNumRows(grid_t* masterGrid) {
 }
 
 /**************** getNumColumns ****************/
-int getNumColumns(grid_t* masterGrid) {
+int 
+getNumColumns(grid_t* masterGrid) 
+{
   return masterGrid->ncols;
 }
 
 /**************** getGrid2D ****************/
-char** getGrid2D(grid_t* masterGrid) {
+char** 
+getGrid2D(grid_t* masterGrid) 
+{
   return masterGrid->grid2D;
 }
 
