@@ -174,7 +174,7 @@ void gridMark(char** grid, position_t* position, char mark)
 
 bool isVisible(position_t* playerPos, position_t* square, grid_t* masterGrid)
 {
-
+  
 }
 
 position_t* position_new(int x, int y)
