@@ -223,7 +223,11 @@ updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter)
     if ((goldPile = masterGrid->goldPiles[i]) != NULL) {
 
       // check if gold position is visible
-      if (gridGetChar(visible, goldPile->location) == '.');
+      if (gridGetChar(visible, goldPile->location) == '.') {
+
+        // add gold to playerGrid's gold list
+        playerGrid->goldPiles[i] = goldPile;
+      }
     }
   }
 }
