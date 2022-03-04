@@ -263,4 +263,17 @@ grid_t* gridNewPlayer(grid_t* map)
   return playerGrid;
 }
 
+/**************** getNumRows ****************/
+int getNumRows(grid_t* masterGrid) {
+  return masterGrid->NROWS;
+}
 
+/**************** getNumColumns ****************/
+int getNumColumns(grid_t* masterGrid) {
+  return masterGrid->NCOLS;
+}
+
+/**************** getGrid2D ****************/
+char** getGrid2D(grid_t* masterGrid) {
+  return masterGrid->grid2D;
+}

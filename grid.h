@@ -41,11 +41,18 @@ grid_t* gridInit();
 /**************** gridMakeMaster ****************/
 void gridMakeMaster(grid_t* masterGrid, FILE* fp, int numGold, int minGoldPiles, int maxGoldPiles, int seed);
 
-
 /**************** gridNewPlayer ****************/
 grid_t* gridNewPlayer(grid_t* map);
 
 
+/**************** getNumRows ****************/
+int getNumRows(grid_t* masterGrid);
 
 
+/**************** getNumColumns ****************/
+int getNumColumns(grid_t* masterGrid);
+
+
+/**************** getGrid2D ****************/
+char** getGrid2D(grid_t* masterGrid);
 
