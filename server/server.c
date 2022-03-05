@@ -79,8 +79,10 @@ void sendGoldToAll(int moveResult, player_t* currPlayer);
 
 void sendOkMessage(const addr_t otherp, char letter);
 void sendGridMessage(const addr_t otherp);
+void sendErrorMessage(const addr_t otherp, char* explanation);
 void sendGoldMessage(int n, int r, int p, const addr_t otherp);
 void sendDisplayMessage(player_t* player, const addr_t otherp);
+void sendSpecDisplayMessage(const addr_t otherp);
 
 /* ******************** main() ************************** */
 /* calls parseArgs, initializeGame, acceptMessages, and gameOver before exiting*/ 
@@ -338,7 +340,7 @@ void handleKeyMessage(const addr_t otherp, const char* message)
   bool foundSpectator = false; 
 
   // is this our spectator? 
-  if (message_eqAddress(spectator_getAddress(game.spectator), otherp)) {
+  if (message_eqAddr(spectator_getAddress(game.spectator), otherp)) {
     foundSpectator = true; 
   }
 
@@ -425,7 +427,7 @@ void handleKeyMessage(const addr_t otherp, const char* message)
 /*  check parameters, construct the message, log about it, and send the message */
 void sendOkMessage(const addr_t otherp, char letter)
 {
-  if (letter != NULL) {
+  if (letter != ' ') {
     // send "ok" message
     char okMessage[message_MaxBytes];
     sprintf(okMessage, "OK %c", letter);
@@ -567,7 +569,7 @@ player_t* findPlayer(const addr_t address)
     if (player_isTalking(player)) {
       addr_t playerAddress = player_getAddress(player);
 
-      if (message_eqAddress(playerAddress, address)) {
+      if (message_eqAddr(playerAddress, address)) {
         return player;
       }
     }
