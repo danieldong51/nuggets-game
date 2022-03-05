@@ -14,6 +14,7 @@
 #include "../libcs50/mem.h"
 #include "../grid/grid.h"
 #include "../support/message.h"
+#include "player.h"
 
 /**************** file-local global variables ****************/
 /* none */

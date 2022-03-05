@@ -14,10 +14,6 @@ MAKE = make
 # for memory-leak tests
 VALGRIND = valgrind --leak-check=full --show-leak-kinds=all
 
-spectator: $(OBJS)
-	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
-
-
 spectator.o: spectator.h ../libcs50/libcs50-given.a ../grid/grid.h ../libcs50/mem.h ../support/message.h
 
 .PHONY: clean

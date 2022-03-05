@@ -579,7 +579,12 @@ player_t* findPlayer(const addr_t address)
 void gameOver()
 {
   // construct and broadcast game over message
-
+  /*
+  The game-over summary shall be the phrase "GAME OVER:" 
+  followed by a simple textual table with one row for every player (including any who quit early) 
+  and with three columns: player letter, player purse, and player name. 
+  The list may be sorted by player letter, or by score, or unsorted.
+  */
   // call player_delete on players
   deleteAllPlayers();
 
