@@ -12,8 +12,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "libcs50/mem.h"
-#include "grid.h"
+#include "../libcs50/mem.h"
+#include "../grid/grid.h"
 #include "../support/message.h"
 
 
