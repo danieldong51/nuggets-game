@@ -40,7 +40,7 @@ typedef struct player {
 
 player_t* player_new();
 void player_delete(player_t* player); 
-bool player_isTakling(player_t* player);
+bool player_isTalking(player_t* player);
 int player_getGold(player_t* player);
 grid_t* player_getGrid(player_t* player);
 char* player_getName(player_t* player);
@@ -78,7 +78,7 @@ player_t* player_new()
 
 /**************** player_isTalking() ****************/
 /* see player.h for description */
-bool player_isTakling(player_t* player)
+bool player_isTalking(player_t* player)
 {
   if (player != NULL) {
     return player->isTalking; 
