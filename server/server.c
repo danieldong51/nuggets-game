@@ -398,22 +398,7 @@ void handleKeyMessage(const addr_t otherp, char* message)
     // updateGrid for every player
     // inform all clients of a change in the game grid using a DISPLAY message as described below
     if (moveResult == 0) {
-      // loop through players, send DISPLAY message to each one 
-      for (int i = 0; i < game.numPlayers; i++) {
-        player_t* thisPlayer = game.players[i];
-        if (player_isTakling(thisPlayer)) {
-
-          // update grid for this player 
-          updateGrid(thisPlayer, game.masterGrid, player_getLetter(thisPlayer));
-          
-          // get address of this player 
-          addr_t* address = player_getAddress(thisPlayer);
-        
-          // send display message to player 
-          sendDisplayMessage(player_getGrid(thisPlayer), *address); 
-        }
-        
-      }
+      sendDisplayToAll();
     }
     else if (moveResult == -1) {
       sendErrorMessage(otherp, "Player cannot make this move");
@@ -427,7 +412,7 @@ void handleKeyMessage(const addr_t otherp, char* message)
         player_t* player = game.players[i];
 
         if (player_isTakling(player)) {
-          if (player == currPlayer) {
+          if (player_getLetter(player) == player_getLetter(currPlayer)) {
             sendGoldMessage(moveResult, player_getGold(player), game.goldRemaining, otherp);
           }
           else {
@@ -534,6 +519,48 @@ void sendErrorMessage(const addr_t otherp, char* explanation)
   message_send(otherp, response); 
 }
 
+void sendDisplayToAll()
+{
+  // loop through players, send DISPLAY message to each one 
+  for (int i = 0; i < game.numPlayers; i++) {
+    player_t* thisPlayer = game.players[i];
+    if (player_isTakling(thisPlayer)) {
+
+      // update grid for this player 
+      updateGrid(thisPlayer, game.masterGrid, player_getLetter(thisPlayer));
+      
+      // get address of this player 
+      addr_t* address = player_getAddress(thisPlayer);
+    
+      // send display message to player 
+      sendDisplayMessage(player_getGrid(thisPlayer), *address); 
+    }
+    
+  }
+}
+
+void sendGoldToAll(int moveResult, player_t* currPlayer) 
+{
+  for (int i = 0; i< game.numPlayers; i++){
+    // check if player is currently talking to server 
+    player_t* player = game.players[i];
+
+    // get address of player 
+    addr_t* address = player_getAddress(player);
+
+    if (player_isTakling(player)) {
+
+      if (player == currPlayer) {
+        sendGoldMessage(moveResult, player_getGold(player), game.goldRemaining, *address);
+      }
+      else {
+        sendGoldMessage(0, player_getGold(player), game.goldRemaining, *address); 
+      }
+    }
+    
+  }
+
+}
 
 
 
