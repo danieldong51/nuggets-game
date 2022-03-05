@@ -16,18 +16,29 @@
 /**************** global types ****************/
 typedef struct spectator {
   grid_t* grid;
+  addr_t* address;
 } spectator_t;
 
 /**************** local functions ****************/
-spectator_t* spectator_new(grid_t* masterGrid);
+spectator_t* spectator_new(grid_t* masterGrid, addr_t address);
 void spectator_delete(spectator_t* spectator);
 
 
+/********get Address ************/
+addr_t* getAddress(spectator_t* spectator){
+  if(spectator != NULL) {
+    return spectator->address;
+  }
+  return NULL;
+}
+
+
 /**********spectator_new**************/
-spectator_t* spectator_new(grid_t* masterGrid){
+spectator_t* spectator_new(grid_t* masterGrid, addr_t address){
   spectator_t* spectator = malloc(sizeof(spectator_t));
   if (spectator != NULL) {
     spectator->grid = masterGrid;
+    spectator->address = address;
     return spectator;
   }
 

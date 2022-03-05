@@ -11,8 +11,13 @@
 #include <string.h>
 #include <stdbool.h>
 #include <time.h> 
+<<<<<<< HEAD
 #include "libcs50/mem.h"
 #include "grid.h"
+=======
+#include "../libcs50/mem.h"
+#include "../grid/grid.h"
+>>>>>>> 1b13dd87950160721b34e0e244062a16cf462fae
 #include "../support/message.h"
 
 /**************** file-local global variables ****************/
@@ -37,6 +42,9 @@ typedef struct player {
 
 /**************** local functions ****************/
 /* not visible outside this file */
+
+player_t* player_new();
+void player_delete(player_t* player); 
 bool player_isTakling(player_t* player);
 int player_getGold(player_t* player);
 grid_t* player_getGrid(player_t* player);
@@ -54,21 +62,20 @@ void player_setAddress(player_t* player, addr_t* address);
 
 /**************** player_new() ****************/
 /* see player.h for description */
-player_t* player_new(char* name, char* letter, grid_t* masterGrid)
+player_t* player_new()
 {
-  if (name != NULL && letter != NULL && masterGrid != NULL) {
+  // malloc memory for new player 
+  player_t* player = mem_malloc_assert(sizeof(player_t*), "Unable to allocate memory for player\n");
 
-    // allocate memory for a new player
-    player_t* player = mem_malloc_assert(sizeof(player_t), "Unable to allocate memory for player object\n");
+  // initialize attributes of player to nothing
+  player->name = "";
+  player->letter = ' ';
+  player->numGold = 0; 
+  player->grid = NULL;
+  *player->address = message_noAddr();
+  player->isTalking = false; 
 
-    // TODO: change the name of this function to grid_new() 
-    player->grid = grid_new();                 // malloc memory for grid - do not fill 
-
-    return player; 
-  }
-  else {
-    return NULL;
-  }
+  return player; 
     
 }
 
@@ -188,4 +195,17 @@ void player_setAddress(player_t* player, addr_t* address)
   if (player != NULL && address != NULL) {
     player->address = address; 
   }
+}
+
+void player_delete(player_t* player)
+{
+  if (player != NULL) {
+    // check if the grid object is NULL, free if not 
+    if (player->grid != NULL) {
+      grid_delete(player->grid);
+    }
+    
+    mem_free(player);
+  }
+  
 }

@@ -12,8 +12,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "libcs50/mem.h"
-#include "grid.h"
+#include "../libcs50/mem.h"
+#include "../grid/grid.h"
 #include "../support/message.h"
 
 
@@ -26,7 +26,8 @@ typedef struct player player_t;
 
 /**************** local functions ****************/
 /* not visible outside this file */
-player_t* player_new(char* name, char* letter, grid_t* masterGrid);
+player_t* player_new();
+void player_delete();
 
 // getter functions 
 bool player_isTakling(player_t* player);
@@ -57,7 +58,12 @@ void player_setAddress(player_t* player, addr_t* address);
 *   the player, if everything is successful, 
 *   NULL, on error
 */
-player_t* player_new(char* name, char* letter, grid_t* masterGrid);
+player_t* player_new();
+
+
+/**************** player_delete() ****************/
+/* A function to delete a player struct and free all of its memory */
+void player_delete(player_t* player);
 
 
 /**************** player_isTakling() ****************/
