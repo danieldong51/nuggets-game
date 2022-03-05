@@ -12,7 +12,7 @@ CC = gcc
 VALGRIND = valgrind --leak-check=full --show-leak-kinds=all
 CFLAGS = -Wall -pedantic -std=c11 -ggdb -I$L
 LIBS = -lm 
-LLIBS = ../libcs50/libcs50.a ../support/support.a
+LLIBS = ../libcs50/libcs50.a 
 
 all: server
 

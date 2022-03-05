@@ -61,7 +61,6 @@ typedef struct position {
 int main(const int argc, char* argv[]);
 static bool parseArgs(const int argc, char* argv[]);
 static void initializeGame(char* mapPathname);
-static void acceptMessages();
 static bool handleMessage(void* arg, const addr_t from, const char* message);
 void gameOver();
 
@@ -585,7 +584,7 @@ void gameOver()
   deleteAllPlayers();
 
   // delete master grid
-  grid_delete(game.masterGrid);
+  gridDelete(game.masterGrid);
 
   // delete spectator object
   if (game.spectator != NULL) {
