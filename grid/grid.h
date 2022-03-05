@@ -4,9 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "bag.h"
-#include "file.h"
-#include "mem.h"
+#include "../libcs50/bag.h"
+#include "../libcs50/file.h"
+#include "../libcs50/mem.h"
 #include <math.h>
 
 typedef struct position position_t;

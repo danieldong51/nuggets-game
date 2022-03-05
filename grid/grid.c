@@ -2,17 +2,18 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include "bag.h"
-#include "file.h"
-#include "mem.h"
+#include "../libcs50/bag.h"
+#include "../libcs50/file.h"
+#include "../libcs50/mem.h"
 #include <math.h>
+#include "grid.h"
 
 /**************** file-local global variables ****************/
 static int ROCK = ' ';
 static int EMPTY = '.';
 static int PASSAGE = '#';
 static int HORIZONTAL = '-';
-static int VERITAL = '|';
+static int VERTICAL = '|';
 static int CORNER = '+';
 static int GOLDPILE = '*';
 static int MAXPLAYERS = 26;
@@ -62,10 +63,10 @@ static void clearPlayerArray(grid_t* grid);
 static void clearPileArray(grid_t* grid);
 static char gridGetChar(char** grid, position_t* position);
 static void gridMark(char** grid, position_t* position, char mark);
-static grid_t* grid_new();
-static int getNumRows(grid_t* masterGrid);
-static int getNumColumns(grid_t* masterGrid);
-static char** getGrid2D(grid_t* masterGrid);
+grid_t* grid_new();
+int getNumRows(grid_t* masterGrid);
+int getNumColumns(grid_t* masterGrid);
+char** getGrid2D(grid_t* masterGrid);
 
 /**************** newGrid2D ****************/
 static char**
@@ -205,13 +206,13 @@ updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter)
 
     // check if not null
     position_t* otherPlayerPos;
-    if ((otherPlayerPos = masterGrid->playerPositions[i]) != NULL) {
+    if ((otherPlayerPos = masterGrid->playerPositions[i]->playerPosition) != NULL) {
 
       // check if player position is visible
       if (gridGetChar(visible, otherPlayerPos) == '.') {
         
         // add player to playerGrid's player list
-        playerGrid->playerPositions[i] = otherPlayerPos;
+        playerGrid->playerPositions[i]->playerPosition = otherPlayerPos;
       }
     }
   }
@@ -374,8 +375,8 @@ position_t* position_new(int x, int y)
 /**************** gridPrint ****************/
 char** gridPrint(grid_t* playerGrid, char playerLetter)
 {
-  printf("%ld\n", sizeof(playerGrid->playerPositions));
-  printf("%ld\n", sizeof(playerGrid->playerPositions[0]));
+  // printf("%ld\n", sizeof(playerGrid->playerPositions));
+  // printf("%ld\n", sizeof(playerGrid->playerPositions[0]));
   // int players = sizeof(playerGrid->playerPositions)/sizeof(playerGrid->playerPositions[0]);                   // determine number of players that are to be printed
   // position_t* currentPosition = playerGrid->playerPositions[playerLetter - 'a']->playerPosition;
 
@@ -392,24 +393,24 @@ char** gridPrint(grid_t* playerGrid, char playerLetter)
 
   // printing player positions to returnGrid
   // using the playerPositions list in playerGrid
-  position_t** playerPositions = playerGrid->playerPositions;
+  playerAndPosition_t** playerPositions = playerGrid->playerPositions;
   if (playerPositions != NULL) {
     
     // loop over players
     for (int i = 0; i < MAXPLAYERS; i++) {
 
       // if player position exists, add to returnGrid
-      if (playerPositions[i] != NULL) {
+      if (playerPositions[i]->playerPosition != NULL) {
 
-        position_t* playerPosition = playerPositions[i];
+        position_t* playerPosition = playerPositions[i]->playerPosition;
 
         // if player is current player, set char to '@'
         if (i == playerLetter - 'a') {
           gridMark(returnGrid, playerPosition, '@');
         } else {
-
+          char playerLetter = i + 'a';
           // set char of player to its player letter
-          gridMark(returnGrid, playerPosition, ('%c', (i + 'a')));
+          gridMark(returnGrid, playerPosition, playerLetter);
         }
       }
     }
@@ -488,13 +489,8 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
 
   fclose(fp);
   fp = fopen(fileName, "r");
-<<<<<<< HEAD
-  masterGrid->NROWS = NR;
-  masterGrid->NCOLS = NC;
-=======
   masterGrid->nrows = NR;
   masterGrid->ncols = NC;
->>>>>>> 17b37603d79c2cfd957721bfcd6579b315240573
 
     // set 2d char map for grid
   char** grid2D;                                              // map of walls, paths, and spaces
