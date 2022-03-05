@@ -7,7 +7,6 @@
 #include "file.h"
 #include "mem.h"
 #include <math.h>
-#include "../player/player.h"
 #include "grid.h"
 
 

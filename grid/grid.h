@@ -50,7 +50,8 @@ void updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter);
  */
 char** gridPrint(grid_t* playerGrid, char playerLetter);
 
-/**************** gridValidMove ****************/
+/**************** gridValidMove ****************/ 
+// NEED TO UPDATE!!
 /* Checks if move is valid, and makes move if valid.
  *
  * Caller provides:
@@ -62,7 +63,7 @@ char** gridPrint(grid_t* playerGrid, char playerLetter);
  *   a positive integer of how much gold the player collects, if the player
  *   moves to a gold pile
  */
-int gridValidMove(grid_t* masterGrid, position_t* coordinate, char playerLetter);
+int gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter);
 
 /**************** gridInit ****************/
 /*
@@ -91,7 +92,8 @@ void setPosition(position_t* position, int x, int y);
 
 
 void gridDelete(grid_t* map);
-void pileDelete(pile_t* pile);
-void playerAndPositionDelete(pile_t* pile);
+void goldPilesDelete(pile_t** goldPiles);
+void playerAndPositionDelete(playerAndPosition_t** playerPositions);
+
 position_t* newPosition();
 #endif

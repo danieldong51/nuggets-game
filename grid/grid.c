@@ -47,7 +47,7 @@ typedef struct grid {
 void gridConvert(char** grid, FILE* fp, int nrows, int ncols);
 void updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter);
 char** gridPrint(grid_t* map, char playerLetter);
-int gridValidMove(grid_t* map, position_t* coordinate, char playerLetter);
+int gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter);
 void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int seed);
 grid_t* gridNewPlayer(grid_t* map);
 grid_t* grid_new();
@@ -55,8 +55,8 @@ int getNumRows(grid_t* masterGrid);
 int getNumColumns(grid_t* masterGrid);
 char** getGrid2D(grid_t* masterGrid);
 void gridDelete(grid_t* map);
-void pileDelete(pile_t* pile);
-void playerAndPositionDelete(pile_t* pile);
+void goldPilesDelete(pile_t** goldPiles);
+void playerAndPositionDelete(playerAndPosition_t** playerPositions);
 
 /**************** local functions ****************/
 /* not visible outside this module */
@@ -443,29 +443,79 @@ char** gridPrint(grid_t* playerGrid, char playerLetter)
 /**************** gridValidMove ****************/
 /* gives an (x,y) position and checks to see if a player can move into that position in the map */
 int 
-gridValidMove(grid_t* masterGrid, position_t* coordinate, char playerLetter)
+gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter)
 {
+  // find the current location of the player
+  int i;
+  position_t* coordinate = position_new(0,0);
+  for (i =0; i<26; i++) {
+    if (masterGrid->playerPositions[i]->name == playerLetter) {
+      coordinate = masterGrid->playerPositions[i]->playerPosition;
+    }
+  }
+  
+  // change to the location based on moveLetter
+  if (moveLetter == 'h') {    
+    // left
+    coordinate->x --;
+  }
+  else if (moveLetter == 'l') {
+    // right
+    coordinate->x ++;
+  }
+  else if (moveLetter == 'j') {
+    // down
+    coordinate->y --;
+  }
+  else if (moveLetter == 'k') {
+    // up
+    coordinate->y ++;
+  }
+  else if (moveLetter = 'y') {
+    // diagonally up and left
+    coordinate->x --;
+    coordinate->y ++;
+  }
+  else if (moveLetter = 'u') {
+    // diagonally up and right
+    coordinate->x ++;
+    coordinate->y ++;
+  }
+  else if (moveLetter = 'b') {
+    // diagonally down and left
+    coordinate->x --;
+    coordinate->y --;
+  }
+  else if (moveLetter = 'n') {
+    // diagonally down and right
+    coordinate->x ++;
+    coordinate->y --;
+  }
+
+
   int xCord = coordinate->x;
   int yCord = coordinate->y;
 
   // if coordinate is an empty room space or passage
   if ( (masterGrid->grid2D[yCord][xCord] == EMPTY) || ((masterGrid->grid2D[yCord][xCord]) == PASSAGE) ||  ((masterGrid->grid2D[yCord][xCord]) == PASSAGE)) {
+    masterGrid->playerPositions[i]->playerPosition = coordinate;
     return 0;
   }
 
   // if the coordinate is a pile of gold
   else if ((masterGrid->grid2D[yCord][xCord] == '*')) {
     int numPiles = sizeof(masterGrid->goldPiles)/sizeof(masterGrid->goldPiles[0]);  
-    for (int i = 0; i < numPiles; i++) {
+    for (int x = 0; x < numPiles; x++) {
       // loop through and find the pile structure with the same position
       if (((masterGrid->goldPiles[i]->location->x) == xCord) && ((masterGrid->goldPiles[i]->location->y) == yCord)) {
+        masterGrid->playerPositions[i]->playerPosition = coordinate;
         int goldAmount = masterGrid->goldPiles[i]->amount;
         return goldAmount;
       }
     }
   }
   // not a valid space to move into
-  return 0;
+  return -1;
 }
 
 
@@ -615,7 +665,8 @@ void gridDelete(grid_t* map) {
   mem_free(map);
 }
 
-void goldPilesDelete(pile_t** goldPiles) {
+void goldPilesDelete(pile_t** goldPiles) 
+{
   int numPiles = sizeof(goldPiles) / sizeof(goldPiles[0]);
   for (int i = 0; i < numPiles; i++) {
     mem_free(goldPiles[i]);
