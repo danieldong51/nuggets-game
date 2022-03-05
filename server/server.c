@@ -22,6 +22,16 @@
 #include "support/log.h"
 
 /* ***************************************** */
+/* Global constants */
+static const int MaxNameLength = 50;   // max number of chars in playerName
+static const int MaxPlayers = 26;      // maximum number of players
+static const int GoldTotal = 250;      // amount of gold in the game
+static const int GoldMinNumPiles = 10; // minimum number of gold piles
+static const int GoldMaxNumPiles = 30; // maximum number of gold piles 
+const float timeout = 90; 
+const char SPACE = ' ';
+
+/* ***************************************** */
 /* Global types */
 struct game {
   int goldRemaining;              // amount of gold left in game 
@@ -55,15 +65,6 @@ typedef struct position {
 /* Global variables */
 
 
-/* ***************************************** */
-/* Global constants */
-static const int MaxNameLength = 50;   // max number of chars in playerName
-static const int MaxPlayers = 26;      // maximum number of players
-static const int GoldTotal = 250;      // amount of gold in the game
-static const int GoldMinNumPiles = 10; // minimum number of gold piles
-static const int GoldMaxNumPiles = 30; // maximum number of gold piles 
-const float timeout = 90; 
-const char SPACE = ' ';
 /* *********************************************************************** */
 /* Public methods */
 

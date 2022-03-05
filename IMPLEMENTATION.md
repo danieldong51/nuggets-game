@@ -463,12 +463,6 @@ grid_t* grid;
 
 ### Definition of function prototypes
 
-<<<<<<< HEAD
-A function to create a new spectator struct. 
-
-```c
-spectator_t* spectator_new(grid_t* masterGrid); 
-=======
 A function to create a new player struct. 
 ```c
 player_t* player_new(char* name, position_t* pos); 
@@ -478,37 +472,11 @@ A function to update the players `position` struct to register a player’s move
 
 ```c
 void player_move(player_t* player, position_t* newPosition); 
->>>>>>> origin/dev
 ```
 
 A function to delete a player and free all of its memory. 
 
 ```c
-<<<<<<< HEAD
-void spectator_delete(spectator_t* spectator); 
-``` 
-
-### Detailed pseudo code
-
-#### `spectator_new`
-
-```
-if the spectator given is not NULL,
-	 set the grid for the player to be an empty grid
- return the spectator.
-else:
-	Print an error message and return NULL.
-```
-
-#### `spectator_delete` 
-
-```
-if the given spectator struct is not null:
-	free the memory for the spectator object
-```
-
----
-=======
 void player_delete(player_t* player); 
 ``` 
 
@@ -597,7 +565,6 @@ else
 ```
 —
 
->>>>>>> origin/dev
 
 ## Testing plan
 

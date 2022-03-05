@@ -14,6 +14,8 @@
 #include <string.h>
 #include "libcs50/mem.h"
 #include "grid.h"
+#include "../support/message.h"
+
 
 
 /**************** global types ****************/
@@ -120,7 +122,8 @@ char player_getLetter(player_t* player);
 * We return: 
 *   the player's address, if the player is not null 
 *    null otherwise 
-*/addr_t* player_getAddress(player_t* player);
+*/
+addr_t* player_getAddress(player_t* player);
 
 
 /**************** player_addGold() ****************/
@@ -188,4 +191,4 @@ void player_setGrid(player_t* player, grid_t* grid);
 * We do: 
 *   change the player's address to this address, as long as the given player and address aren't NULL
 */
-addr_t* player_setAddress(player_t* player, addr_t* address);
+void player_setAddress(player_t* player, addr_t* address); 
