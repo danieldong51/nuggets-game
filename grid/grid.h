@@ -37,17 +37,32 @@ void gridConvert(char** grid, FILE* fp, int nrows, int ncols);
  *   player's player and gold list is updated with any players
  *   or gold piles it sees currently.
  */
-void updateGrid(grid_t* playerGrid, grid_t* serverGrid, char playerLetter);
+void updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter);
 
 /**************** gridPrint ****************/
-/*
+/* Prints grid with locations of players and gold piles.
+ *
+ * Caller provides:
+ *   a valid player grid struct and the playerLetter char.
+ * We return:
+ *   the char** representation of the grid that the player sees,
+ *   with the visible players and gold piles.
  */
-void gridPrint(grid_t* grid, char playerLetter);
+char** gridPrint(grid_t* playerGrid, char playerLetter);
 
 /**************** gridValidMove ****************/
-/*
+/* Checks if move is valid, and makes move if valid.
+ *
+ * Caller provides:
+ *   a valid master map pointer, and a valid position pointer of the
+ *   move it is trying to make.
+ * We return:
+ *   0 if the move is valid and the player moves to an empty space
+ *   -1 if the move is invalid
+ *   a positive integer of how much gold the player collects, if the player
+ *   moves to a gold pile
  */
-int gridValidMove(grid_t* map, position_t* coordinate);
+int gridValidMove(grid_t* masterGrid, position_t* coordinate, char playerLetter);
 
 /**************** gridInit ****************/
 /*

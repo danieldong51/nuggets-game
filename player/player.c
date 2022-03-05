@@ -11,8 +11,14 @@
 #include <string.h>
 #include <stdbool.h>
 #include <time.h> 
+<<<<<<< HEAD
+#include "mem.h"
+#include "../grid/grid.h"
+=======
 #include "libcs50/mem.h"
 #include "grid.h"
+#include "../support/message.h"
+>>>>>>> 26210d46943172e3bcc22c6dd4f1b2941b8b8c92
 
 /**************** file-local global variables ****************/
 /* none */
@@ -26,6 +32,7 @@ typedef struct player {
   char letter; 
   int numGold; 
   grid_t* grid;
+  addr_t* address;
   bool isTalking; 
 } player_t;
 
@@ -40,13 +47,15 @@ int player_getGold(player_t* player);
 grid_t* player_getGrid(player_t* player);
 char* player_getName(player_t* player);
 char player_getLetter(player_t* player);
+addr_t* player_getAddress(player_t* player);
 
 // setter functions 
 void player_addGold(player_t* player, int numGold);
-void player_changeStatus(player_t* player);
+void player_changeStatus(player_t* player, bool status);
 void player_setLetter(player_t* player, char letter);
 void player_setName(player_t* player, char* name);
 void player_setGrid(player_t* player, grid_t* grid);
+void player_setAddress(player_t* player, addr_t* address); 
 
 /**************** player_new() ****************/
 /* see player.h for description */
@@ -58,7 +67,7 @@ player_t* player_new(char* name, char* letter, grid_t* masterGrid)
     player_t* player = mem_malloc_assert(sizeof(player_t), "Unable to allocate memory for player object\n");
 
     // TODO: change the name of this function to grid_new() 
-    player-grid = gridInit;                 // malloc memory for grid - do not fill 
+    player->grid = grid_new();                 // malloc memory for grid - do not fill 
 
     return player; 
   }
@@ -120,6 +129,16 @@ char player_getLetter(player_t* player)
   return NULL;
 }
 
+/**************** player_getLetter() ****************/
+/* see player.h for description */
+addr_t* player_getAddress(player_t* player)
+{
+  if (player != NULL) {
+    return player->address; 
+  }
+  return NULL;
+}
+
 // SETTER FUNCTIONS
 
 /**************** player_addGold() ****************/
@@ -133,15 +152,10 @@ void player_addGold(player_t* player, int numGold)
 
 /**************** player_changeStatus() ****************/
 /* see player.h for description */
-void player_changeStatus(player_t* player)
+void player_changeStatus(player_t* player, bool status)
 {
   if (player != NULL) {
-    if (player_isTalking(player)){
-      player->isTalking = false; 
-    }
-    else {
-      player->isTalking = true; 
-    }
+    player->isTalking = status; 
   }
 }
 
@@ -169,5 +183,14 @@ void player_setGrid(player_t* player, grid_t* grid)
 {
   if (player != NULL && grid != NULL) {
     player->grid = grid; 
+  }
+}
+
+/**************** player_setLetter() ****************/
+/* see player.h for description */
+void player_setAddress(player_t* player, addr_t* address)
+{
+  if (player != NULL && address != NULL) {
+    player->address = address; 
   }
 }
