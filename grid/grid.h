@@ -89,5 +89,9 @@ char** getGrid2D(grid_t* masterGrid);
 
 void setPosition(position_t* position, int x, int y);
 
+
+void gridDelete(grid_t* map);
+void pileDelete(pile_t* pile);
+void playerAndPositionDelete(pile_t* pile);
 position_t* newPosition();
 #endif

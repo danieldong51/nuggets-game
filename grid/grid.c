@@ -50,6 +50,13 @@ char** gridPrint(grid_t* map, char playerLetter);
 int gridValidMove(grid_t* map, position_t* coordinate, char playerLetter);
 void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int seed);
 grid_t* gridNewPlayer(grid_t* map);
+grid_t* grid_new();
+int getNumRows(grid_t* masterGrid);
+int getNumColumns(grid_t* masterGrid);
+char** getGrid2D(grid_t* masterGrid);
+void gridDelete(grid_t* map);
+void pileDelete(pile_t* pile);
+void playerAndPositionDelete(pile_t* pile);
 
 /**************** local functions ****************/
 /* not visible outside this module */
@@ -63,10 +70,6 @@ static void clearPlayerArray(grid_t* grid);
 static void clearPileArray(grid_t* grid);
 static char gridGetChar(char** grid, position_t* position);
 static void gridMark(char** grid, position_t* position, char mark);
-grid_t* grid_new();
-int getNumRows(grid_t* masterGrid);
-int getNumColumns(grid_t* masterGrid);
-char** getGrid2D(grid_t* masterGrid);
 
 /**************** newGrid2D ****************/
 static char**
@@ -606,3 +609,23 @@ position_t* newPosition(){
   return position;
 }
 
+void gridDelete(grid_t* map) {
+  goldPilesDelete(map->goldPiles); // delete the goldPiles
+  playerAndPositionDelete(map->playerPositions);
+  mem_free(map);
+}
+
+void goldPilesDelete(pile_t** goldPiles) {
+  int numPiles = sizeof(goldPiles) / sizeof(goldPiles[0]);
+  for (int i = 0; i < numPiles; i++) {
+    mem_free(goldPiles[i]);
+  }
+}
+
+void playerAndPositionDelete(playerAndPosition_t** playerPositions)
+{
+  int numPlayers = sizeof(playerPositions) / sizeof(playerPositions[0]);
+  for (int i = 0; i < numPlayers; i++) {
+    mem_free(playerPositions[i]);
+  }
+}
