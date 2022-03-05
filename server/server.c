@@ -80,7 +80,7 @@ void sendGoldToAll(int moveResult, player_t* currPlayer);
 void sendOkMessage(const addr_t otherp, char letter);
 void sendGridMessage(const addr_t otherp);
 void sendGoldMessage(int n, int r, int p, const addr_t otherp);
-void sendDisplayMessage(char* grid, const addr_t otherp);
+void sendDisplayMessage(player_t* player, const addr_t otherp);
 
 /* ******************** main() ************************** */
 /* calls parseArgs, initializeGame, acceptMessages, and gameOver before exiting*/ 
@@ -305,11 +305,11 @@ void handleSpectateMessage(const addr_t from, const char* message)
   // see if we already have a spectator 
   if (game.spectator != NULL) {
     // if we do, look at its address 
-    addr_t* specAddress = spectator_getAddress(game.spectator);
+    addr_t specAddress = spectator_getAddress(game.spectator);
 
     if (message_eqAddr(specAddress, from) == false) {
       // if it is not the same address, create a new spectator, replace our spectator, send message to old spectator
-      message_send(*specAddress, "QUIT You have been replaced by a new spectator.");
+      message_send(specAddress, "QUIT You have been replaced by a new spectator.");
       
       // delete old spectator
       spectator_delete(game.spectator); 
@@ -328,7 +328,7 @@ void handleSpectateMessage(const addr_t from, const char* message)
   sendGoldMessage(0, 0, game.goldRemaining, from);
 
   // send masterGrid to spectator 
-  sendDisplayMessage(getGrid2D(game.masterGrid), from);
+  sendSpecDisplayMessage(from);
 
 }
 
@@ -462,12 +462,26 @@ void sendGoldMessage(int n, int r, int p, const addr_t otherp)
 }
 
 /*  check parameters, construct the message, log about it, and send the message */
-void sendDisplayMessage(char* grid, const addr_t otherp) 
-{
+void sendDisplayMessage(player_t* player, const addr_t otherp) 
+{ 
+  char** grid2D = gridPrint(player_getGrid(player), player_getLetter(player));
+
   char response[message_MaxBytes];
-  sprintf(response, "DISPLAY\n%s", grid);
+  sprintf(response, "DISPLAY\n%s", grid2D);
 
   message_send(otherp, response);
+}
+
+/* check parameters, construct message, and send message */
+void sendSpecDisplayMessage(const addr_t otherp)
+{
+  char** grid2D = gridPrint(game.masterGrid, '.');
+
+  char response[message_MaxBytes];
+  sprintf(response, "DISPLAY\n%s", grid2D);
+
+  message_send(otherp, response);
+
 }
 
 /*  check parameters, construct the message, log about it, and send the message */
@@ -497,12 +511,13 @@ void sendDisplayToAll()
       addr_t address = player_getAddress(thisPlayer);
     
       // send display message to player 
-      sendDisplayMessage(player_getGrid(thisPlayer), address); 
+      sendDisplayMessage(thisPlayer, address); 
     }
   }
   // send to spectator
-  addr_t* specAddress = spectator_getAddress(game.spectator);
-  sendDisplayMessage(spectator_getGrid(game.spectator), *specAddress);
+  addr_t specAddress = spectator_getAddress(game.spectator);
+  
+  sendSpecDisplayMessage(specAddress);
 
 }
 void sendGoldToAll(int moveResult, player_t* currPlayer) 
@@ -525,9 +540,9 @@ void sendGoldToAll(int moveResult, player_t* currPlayer)
     }
   }
 
-  addr_t* specAddress = spectator_getAddress(game.spectator);
+  addr_t specAddress = spectator_getAddress(game.spectator);
   // send to spectator 
-  sendGoldMessage(0, 0, game.goldRemaining, *specAddress);
+  sendGoldMessage(0, 0, game.goldRemaining, specAddress);
 
 }
 
