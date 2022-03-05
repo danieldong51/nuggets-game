@@ -273,7 +273,7 @@ void handlePlayMessage(const addr_t from, const char* message)
     player_setName(player, name);
     player_setLetter(player, letter);
     player_changeStatus(player, true);
-    player_setAddress(player, &from);
+    player_setAddress(player, from);
     
     /// set random position for player and add it to list of positions, also create empty grid for player with grid_new()
     player_setGrid(player, gridNewPlayer(game.masterGrid));
@@ -307,7 +307,7 @@ void handleSpectateMessage(const addr_t from, const char* message)
     // if we do, look at its address 
     addr_t* specAddress = spectator_getAddress(game.spectator);
 
-    if (!message_eqAddress(specAddress, from)) {
+    if (message_eqAddr(specAddress, from) == false) {
       // if it is not the same address, create a new spectator, replace our spectator, send message to old spectator
       message_send(*specAddress, "QUIT You have been replaced by a new spectator.");
       
@@ -371,7 +371,7 @@ void handleKeyMessage(const addr_t otherp, const char* message)
 
         
       case 'h': case 'l': case 'j': case 'k': case 'y': case 'u': case 'b': case 'n':
-        moveResult = gridValidMove(letter, key);
+        moveResult = gridValidMove(game.masterGrid, letter, key);
       default: 
         //  the server shall ignore that keystroke and may send back an ERROR message as described below
         sendErrorMessage(otherp, "Invalid keystroke");
@@ -494,10 +494,10 @@ void sendDisplayToAll()
       updateGrid(player_getGrid(thisPlayer), game.masterGrid, player_getLetter(thisPlayer));
       
       // get address of this player 
-      addr_t* address = player_getAddress(thisPlayer);
+      addr_t address = player_getAddress(thisPlayer);
     
       // send display message to player 
-      sendDisplayMessage(player_getGrid(thisPlayer), *address); 
+      sendDisplayMessage(player_getGrid(thisPlayer), address); 
     }
   }
   // send to spectator
@@ -512,15 +512,15 @@ void sendGoldToAll(int moveResult, player_t* currPlayer)
     player_t* player = game.players[i];
 
     // get address of player 
-    addr_t* address = player_getAddress(player);
+    addr_t address = player_getAddress(player);
 
     if (player_isTakling(player)) {
 
       if (player_getLetter(player) == player_getLetter(currPlayer)) {
-        sendGoldMessage(moveResult, player_getGold(player), game.goldRemaining, *address);
+        sendGoldMessage(moveResult, player_getGold(player), game.goldRemaining, address);
       }
       else {
-        sendGoldMessage(0, player_getGold(player), game.goldRemaining, *address); 
+        sendGoldMessage(0, player_getGold(player), game.goldRemaining, address); 
       }
     }
   }
@@ -550,9 +550,9 @@ player_t* findPlayer(const addr_t address)
     player_t* player = game.players[i];
 
     if (player_isTalking(player)) {
-      addr_t* playerAddress = player_getAddress(player);
+      addr_t playerAddress = player_getAddress(player);
 
-      if (message_eqAddress(*playerAddress, address)) {
+      if (message_eqAddress(playerAddress, address)) {
         return player;
       }
     }
