@@ -93,11 +93,7 @@ newGrid2D(int nrows, int ncols)
 }
 
 
-<<<<<<< HEAD
-static void
-=======
 void
->>>>>>> 17b37603d79c2cfd957721bfcd6579b315240573
 gridConvert(char** grid, FILE* fp, int nrows, int ncols)
 {
   const int size = ncols+2;  // include room for \n\0
@@ -105,10 +101,6 @@ gridConvert(char** grid, FILE* fp, int nrows, int ncols)
   int y = 0;
   printf("ROWS: %d\n", nrows);
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 17b37603d79c2cfd957721bfcd6579b315240573
   // read each line and copy it to the board
   while ( fgets(line, size, fp) != NULL && y < nrows) {
     int len = strlen(line);

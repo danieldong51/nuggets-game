@@ -180,124 +180,14 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
   // PLAY
   if (strncmp(message, "PLAY ", strlen("PLAY ")) == 0) {
 
-    const char* content = message + strlen("PLAY ");        // pointer to message, starting after strlen play? 
-    
-    if (game.numPlayers < MaxPlayers)
-    {
-      // create a pointer that starts in middle of message
-      char* name = strchr(content, SPACE);  
-      // TODO: this is the same as "content" ^ 
-      
-      // create end pointer and begin it after the space (at first letter of name)
-      char* end = ++name;
-
-      // move pointer along, keep track of name length 
-      int nameLen = 0; 
-      while (*end != '\0' && nameLen < MaxNameLength) {
-        //  replace with an underscore _ any character for which both isgraph() and isblank() are false
-        if (!isgraph(*end) || !(isblank(*end))) {
-          *end = "_";
-        }
-        // slide pointer until it is null or we have reached max name length
-        end++; 
-      }
-      // once we reach end of name or max name length, squash with pointer 
-      if (*end != '\0')
-      {
-        *end = '\0';
-      }
-      
-
-      // get the letter of this player from numPlayers
-      char letter = game.numPlayers + 'a'; 
-
-
-      if (sizeof(name) == 0) {
-        message_send(from, "QUIT Sorry - you must provide player's name.");
-      }
-
-      // create a new player 
-      player_t* player = player_new(name, letter, game.masterGrid);
-
-      // set this player's status to "true" 
-      player_changeStatus(player, true);      
-
-      if (player == NULL) {
-        fprintf(stderr, "Unable to allocate memory for new player\n");
-        return false; 
-
-      }
-
-      // iterate numPlayers
-      game.players[game.numPlayers] = player; 
-      game.numPlayers++; 
-
-      // send ok message 
-      sendOkMessage(from, letter);
-
-      // set random position for player and add it to list of positions 
-      // initializes 
-      gridNewPlayer(game.masterGrid, letter);
-
-      // call updateGrid on EVERY player  
-      for (int i = 0; i < game.numPlayers; i++) {
-        player_t* player = game.players[i];
-
-        if (player_isTakling(player)) {
-          updateGrid(player, game.masterGrid);
-        }
-      }
-
-      // server shall then immediately send GRID, GOLD, and DISPLAY messages as described below.
-      sendGridMessage(from); 
-
-      // creating a new player, so n and p should be 0 
-      sendGoldMessage(0, 0, game.goldRemaining, from);
-
-      sendDisplayMessage(player_getGrid(player), from);
-
-    }
-    else 
-    {
-      // too many players, respond to client with "NO"
-      message_send(from, "QUIT Game is full: no more players can join.");
-    }
+    handlePlayMessage(from, message);
 
     return false; 
   }
   // SPECTATE 
   else if (strncmp(message, "SPECTATE ", strlen("SPECTATE ")) == 0) {
     
-    // see if we already have a spectator 
-    if (game.spectator != NULL) {
-      // if we do, look at its address 
-      addr_t* specAddress = spectator_getAddress(game.spectator);
-
-      if (!message_eqAddress(specAddress, from)) {
-        // if it is not the same address, create a new spectator, replace our spectator, send message to old spectator
-        message_send(*specAddress, "QUIT You have been replaced by a new spectator.");
-        
-        // delete old spectator
-        spectator_delete(game.spectator); 
-
-        // create new spectator
-        spectator_t* newSpectator = spectator_new(game.masterGrid, from); 
-        
-        // set game spectator as new spectator 
-        game.spectator = newSpectator; 
-      }
-    }
-    // initialize game.spectator or replace spectator if it already exists 
-    spectator_t* spectator = spectator_new(game.masterGrid);
-    game.spectator = spectator; 
-
-    // server shall then immediately send GRID, GOLD, and DISPLAY messages as described below.
-    sendGridMessage(from);
-
-    sendGoldMessage(0, 0, game.goldRemaining, from);
-
-    // send masterGrid to spectator 
-    sendDisplayMessage(getGrid2D(game.masterGrid), from);
+    handleSpectateMessage(from, message);
 
     return false; 
 
@@ -307,6 +197,8 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
 
     // call handleKey() function
     handleKeyMessage(from, message);
+
+    return false;   // return false to keep looping 
     
   }
 
@@ -316,6 +208,126 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
   }
   
   return false;
+
+}
+
+void handlePlayMessage(const addr_t from, char* message)
+{
+  const char* content = message + strlen("PLAY ");        // pointer to message, starting after strlen play? 
+    
+  if (game.numPlayers < MaxPlayers)
+  {
+    // create a pointer that starts in middle of message
+    char* name = strchr(content, SPACE);  
+    // TODO: this is the same as "content" ^ 
+      
+    // create end pointer and begin it after the space (at first letter of name)
+    char* end = ++name;
+
+    // move pointer along, keep track of name length 
+    int nameLen = 0; 
+    while (*end != '\0' && nameLen < MaxNameLength) {
+      //  replace with an underscore _ any character for which both isgraph() and isblank() are false
+      if (!isgraph(*end) || !(isblank(*end))) {
+        *end = "_";
+      }
+      // slide pointer until it is null or we have reached max name length
+      end++; 
+    }
+    // once we reach end of name or max name length, squash with pointer 
+    if (*end != '\0')
+    {
+      *end = '\0';
+    }
+      
+
+    // get the letter of this player from numPlayers
+    char letter = game.numPlayers + 'a'; 
+
+
+    if (sizeof(name) == 0) {
+      message_send(from, "QUIT Sorry - you must provide player's name.");
+    }
+
+    // create a new player 
+    player_t* player = player_new(name, letter, game.masterGrid);
+
+    // set this player's status to "true" 
+    player_changeStatus(player, true);      
+
+    if (player == NULL) {
+      fprintf(stderr, "Unable to allocate memory for new player\n");
+      return false; 
+    }
+
+    // iterate numPlayers
+    game.players[game.numPlayers] = player; 
+    game.numPlayers++; 
+
+    // send ok message 
+    sendOkMessage(from, letter);
+
+    // set random position for player and add it to list of positions 
+    // initializes 
+    gridNewPlayer(game.masterGrid);
+
+    // call updateGrid on EVERY player  
+    for (int i = 0; i < game.numPlayers; i++) {
+      player_t* player = game.players[i];
+
+      if (player_isTakling(player)) {
+        updateGrid(player, game.masterGrid, player_getLetter(player));
+      }
+    }
+
+    // server shall then immediately send GRID, GOLD, and DISPLAY messages as described below.
+    sendGridMessage(from); 
+
+    // creating a new player, so n and p should be 0 
+    sendGoldMessage(0, 0, game.goldRemaining, from);
+
+    sendDisplayMessage(player_getGrid(player), from);
+
+  }
+  else 
+  {
+    // too many players, respond to client with "NO"
+    message_send(from, "QUIT Game is full: no more players can join.");
+  }
+}
+
+void handleSpectateMessage(const addr_t from, char* message)
+{
+  // see if we already have a spectator 
+  if (game.spectator != NULL) {
+    // if we do, look at its address 
+    addr_t* specAddress = spectator_getAddress(game.spectator);
+
+    if (!message_eqAddress(specAddress, from)) {
+      // if it is not the same address, create a new spectator, replace our spectator, send message to old spectator
+      message_send(*specAddress, "QUIT You have been replaced by a new spectator.");
+      
+      // delete old spectator
+      spectator_delete(game.spectator); 
+
+      // create new spectator
+      spectator_t* newSpectator = spectator_new(game.masterGrid, from); 
+      
+      // set game spectator as new spectator 
+      game.spectator = newSpectator; 
+    }
+  }
+  // initialize game.spectator or replace spectator if it already exists 
+  spectator_t* spectator = spectator_new(game.masterGrid);
+  game.spectator = spectator; 
+
+  // server shall then immediately send GRID, GOLD, and DISPLAY messages as described below.
+  sendGridMessage(from);
+
+  sendGoldMessage(0, 0, game.goldRemaining, from);
+
+  // send masterGrid to spectator 
+  sendDisplayMessage(getGrid2D(game.masterGrid), from);
 
 }
 
@@ -389,10 +401,10 @@ void handleKeyMessage(const addr_t otherp, char* message)
       // loop through players, send DISPLAY message to each one 
       for (int i = 0; i < game.numPlayers; i++) {
         player_t* thisPlayer = game.players[i];
-        if (player_isTakling(thisPlayer)){
+        if (player_isTakling(thisPlayer)) {
 
           // update grid for this player 
-          updateGrid(thisPlayer, game.masterGrid);
+          updateGrid(thisPlayer, game.masterGrid, player_getLetter(thisPlayer));
           
           // get address of this player 
           addr_t* address = player_getAddress(thisPlayer);
@@ -518,7 +530,7 @@ void sendErrorMessage(const addr_t otherp, char* explanation)
 
   // log an error 
 
-  message_send(*otherp, response); 
+  message_send(otherp, response); 
 }
 
 
