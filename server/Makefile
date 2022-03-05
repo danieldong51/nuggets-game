@@ -1,8 +1,4 @@
-# Makefile for CS50 'crawler' module 
-#
-# Georgia Mandell 
-# CS50, Winter 2022, Lab 4 
-# TSE Crawler 
+# Makefile for CS50 nuggests
 
 # object files, and the target library
 OBJS = server.o 
