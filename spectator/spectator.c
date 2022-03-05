@@ -22,19 +22,30 @@ typedef struct spectator {
 /**************** local functions ****************/
 spectator_t* spectator_new(grid_t* masterGrid, addr_t address);
 void spectator_delete(spectator_t* spectator);
+addr_t* spectator_getAddress(spectator_t* spectator);
+grid_t* spectator_getGrid(spectator_t* spectator);
 
-
-/********get Address ************/
-addr_t* getAddress(spectator_t* spectator){
+/******** spectator_getAddress ************/
+addr_t* spectator_getAddress(spectator_t* spectator)
+{
   if(spectator != NULL) {
     return spectator->address;
   }
   return NULL;
 }
 
+/******** spectator_getGrid ************/
+grid_t* spectator_getGrid(spectator_t* spectator) 
+{
+  if (spectator != NULL) {
+    return spectator->grid;
+  }
 
-/**********spectator_new**************/
-spectator_t* spectator_new(grid_t* masterGrid, addr_t address){
+}
+
+/********** spectator_new **************/
+spectator_t* spectator_new(grid_t* masterGrid, addr_t address)
+{
   spectator_t* spectator = malloc(sizeof(spectator_t));
   if (spectator != NULL) {
     spectator->grid = masterGrid;
@@ -47,9 +58,13 @@ spectator_t* spectator_new(grid_t* masterGrid, addr_t address){
 }
 
 
-/************spectator_delete()************/
-void spectator_delete(spectator_t* spectator){
+/************ spectator_delete() ************/
+void spectator_delete(spectator_t* spectator)
+{
   if (spectator != NULL) {
+    if (spectator->grid != NULL) {
+      mem_free(spectator->grid);
+    }
     free(spectator);
   }
 }
