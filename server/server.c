@@ -98,7 +98,7 @@ int main(const int argc, char* argv[])
     int port = message_init(NULL);                // will eventually pass a log file pointer into here 
 
     if (port == 0) {
-      fprintf("Failure to initialize message module\n");
+      fprintf(stderr, "Failure to initialize message module\n");
       exit(1);
     }
 
@@ -318,7 +318,7 @@ void handleSpectateMessage(const addr_t from, char* message)
     }
   }
   // initialize game.spectator or replace spectator if it already exists 
-  spectator_t* spectator = spectator_new(game.masterGrid);
+  spectator_t* spectator = spectator_new(game.masterGrid, from);
   game.spectator = spectator; 
 
   // server shall then immediately send GRID, GOLD, and DISPLAY messages as described below.
@@ -428,10 +428,10 @@ void handleKeyMessage(const addr_t otherp, char* message)
 
         if (player_isTakling(player)) {
           if (player == currPlayer) {
-            sendGoldMessage(moveResult, player_getGold(player), game.goldRemaining);
+            sendGoldMessage(moveResult, player_getGold(player), game.goldRemaining, otherp);
           }
           else {
-            sendGoldMessage(0, player_getGold(player), game.goldRemaining); 
+            sendGoldMessage(0, player_getGold(player), game.goldRemaining, otherp); 
           }
         }
         
