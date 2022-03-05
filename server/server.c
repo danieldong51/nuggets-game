@@ -515,7 +515,6 @@ void sendDisplayToAll()
       // send display message to player 
       sendDisplayMessage(player_getGrid(thisPlayer), *address); 
     }
-    
   }
 }
 
