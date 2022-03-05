@@ -133,7 +133,7 @@ addr_t player_getAddress(player_t* player)
   if (player != NULL) {
     return player->address; 
   }
-  return NULL;
+  return message_noAddr();
 }
 
 // SETTER FUNCTIONS
