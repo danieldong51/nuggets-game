@@ -488,8 +488,13 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
 
   fclose(fp);
   fp = fopen(fileName, "r");
+<<<<<<< HEAD
+  masterGrid->NROWS = NR;
+  masterGrid->NCOLS = NC;
+=======
   masterGrid->nrows = NR;
   masterGrid->ncols = NC;
+>>>>>>> 17b37603d79c2cfd957721bfcd6579b315240573
 
     // set 2d char map for grid
   char** grid2D;                                              // map of walls, paths, and spaces
