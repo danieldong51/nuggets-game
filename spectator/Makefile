@@ -2,7 +2,7 @@
 #
 # Emily Gao
 
-OBJS = spectator.o
+OBJS = spectator.o ../grid/grid.o
 LIBS = ../libcs50/libcs50-given.a 
 
 # uncomment the following to turn on verbose memory logging
