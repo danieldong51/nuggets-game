@@ -27,7 +27,7 @@ typedef struct player {
   char letter; 
   int numGold; 
   grid_t* grid;
-  addr_t* address;
+  addr_t address;
   bool isTalking; 
 } player_t;
 
@@ -45,7 +45,7 @@ int player_getGold(player_t* player);
 grid_t* player_getGrid(player_t* player);
 char* player_getName(player_t* player);
 char player_getLetter(player_t* player);
-addr_t* player_getAddress(player_t* player);
+addr_t player_getAddress(player_t* player);
 
 // setter functions 
 void player_addGold(player_t* player, int numGold);
@@ -53,7 +53,7 @@ void player_changeStatus(player_t* player, bool status);
 void player_setLetter(player_t* player, char letter);
 void player_setName(player_t* player, char* name);
 void player_setGrid(player_t* player, grid_t* grid);
-void player_setAddress(player_t* player, addr_t* address); 
+void player_setAddress(player_t* player, addr_t address); 
 
 /**************** player_new() ****************/
 /* see player.h for description */
@@ -67,7 +67,7 @@ player_t* player_new()
   player->letter = ' ';
   player->numGold = 0; 
   player->grid = NULL;
-  *player->address = message_noAddr();
+  player->address = message_noAddr();
   player->isTalking = false; 
 
   return player; 
@@ -128,12 +128,12 @@ char player_getLetter(player_t* player)
 
 /**************** player_getLetter() ****************/
 /* see player.h for description */
-addr_t* player_getAddress(player_t* player)
+addr_t player_getAddress(player_t* player)
 {
   if (player != NULL) {
     return player->address; 
   }
-  return NULL;
+  return message_noAddr();
 }
 
 // SETTER FUNCTIONS
@@ -185,9 +185,9 @@ void player_setGrid(player_t* player, grid_t* grid)
 
 /**************** player_setLetter() ****************/
 /* see player.h for description */
-void player_setAddress(player_t* player, addr_t* address)
+void player_setAddress(player_t* player, const addr_t address)
 {
-  if (player != NULL && address != NULL) {
+  if (player != NULL && message_isAddr(address) == false) {
     player->address = address; 
   }
 }
