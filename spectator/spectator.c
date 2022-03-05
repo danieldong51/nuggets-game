@@ -9,9 +9,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "support/message.h"
-#include "spectator.h"
-#include "grid.h"
+#include "../support/message.h"
+#include "../grid/grid.h"
+#include "../libcs50/mem.h"
 
 /**************** global types ****************/
 typedef struct spectator {
@@ -38,7 +38,7 @@ spectator_t* spectator_new(grid_t* masterGrid, addr_t address){
   spectator_t* spectator = malloc(sizeof(spectator_t));
   if (spectator != NULL) {
     spectator->grid = masterGrid;
-    spectator->address = address;
+    spectator->address = &address;
     return spectator;
   }
 

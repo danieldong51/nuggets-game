@@ -9,8 +9,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "grid.h"
-#include "support/message.h" 
+#include "../grid/grid.h"
+#include "../support/message.h" 
+#include "../libcs50/mem.h"
 
 /**************** global types ****************/
 typedef struct spectator spectator_t;
