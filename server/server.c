@@ -42,19 +42,7 @@ struct game {
   int seed;
 } game; 
 
-/****************** types *********************/
-/* A type representing an Internet address, suitable for use in message_send().
- * Although not technically opaque (because struct sockaddr_in is well
- * documented and not made opaque by the include file <arpa/inet.h> that
- * defines it), users of this module should treat addr_t as an opaque type.
- * Module users can declare variables of type addr_t, and initialize them
- * to the value returned by message_noAddr, or initialize them in a call to
- * message_setAddr, or receive them as a parameter in one of the handler
- * functions.  Addresses can be passed by value to and from functions, but they
- * cannot be compared directly for equality; to compare two addresses,
- * use message_eqAddr.
- */
-//typedef struct sockaddr_in addr_t;
+
 
 typedef struct position {
   int x;
@@ -222,7 +210,7 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
 
 }
 
-bool handlePlayMessage(const addr_t from, char* message)
+void handlePlayMessage(const addr_t from, char* message)
 {
   const char* content = message + strlen("PLAY ");        // pointer to message, starting after strlen play? 
     
@@ -258,29 +246,29 @@ bool handlePlayMessage(const addr_t from, char* message)
 
     if (sizeof(name) == 0) {
       message_send(from, "QUIT Sorry - you must provide player's name.");
+      return;
     }
 
     // check to see if we already have this player 
-
-    player_t* player = player_new(name, letter, game.masterGrid);
-
-    // set this player's status to "true" 
-    player_changeStatus(player, true);      
-
-    if (player == NULL) {
-      fprintf(stderr, "Unable to allocate memory for new player\n");
+    if (findPlayer(from) != NULL) {
+      message_send(from, "ERROR Sorry - you cannot rejoin the same game.");
+      return;
     }
 
-    // iterate numPlayers
-    game.players[game.numPlayers] = player; 
-    game.numPlayers++; 
+    game.numPlayers++;
+    player_t* player = game.players[game.numPlayers];
+
+    // set this player's status to "true" 
+    player_setName(player, name);
+    player_setLetter(player, letter);
+    player_changeStatus(player, true);
+    player_setAddress(player, &from);
+    
+    /// set random position for player and add it to list of positions, also create empty grid for player with grid_new()
+    player_setGrid(player, gridNewPlayer(game.masterGrid));
 
     // send ok message 
     sendOkMessage(from, letter);
-
-    // set random position for player and add it to list of positions 
-    // initializes 
-    gridNewPlayer(game.masterGrid);
 
     updateAllGrids();
 
