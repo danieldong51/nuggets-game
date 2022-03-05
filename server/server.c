@@ -36,7 +36,7 @@ const char SPACE = ' ';
 struct game {
   int goldRemaining;              // amount of gold left in game 
   int numPlayers; 
-  player_t* players[MaxPlayers];
+  player_t* players[MaxPlayers + 1];
   grid_t* masterGrid; 
   spectator_t* spectator; 
   int seed;
@@ -272,14 +272,7 @@ void handlePlayMessage(const addr_t from, char* message)
     // initializes 
     gridNewPlayer(game.masterGrid);
 
-    // call updateGrid on EVERY player  
-    for (int i = 0; i < game.numPlayers; i++) {
-      player_t* player = game.players[i];
-
-      if (player_isTakling(player)) {
-        updateGrid(player, game.masterGrid, player_getLetter(player));
-      }
-    }
+    updateAllGrids();
 
     // server shall then immediately send GRID, GOLD, and DISPLAY messages as described below.
     sendGridMessage(from); 
@@ -287,7 +280,9 @@ void handlePlayMessage(const addr_t from, char* message)
     // creating a new player, so n and p should be 0 
     sendGoldMessage(0, 0, game.goldRemaining, from);
 
-    sendDisplayMessage(player_getGrid(player), from);
+
+    // send display message to all clients 
+    sendDisplayToAll();
 
   }
   else 
@@ -318,9 +313,6 @@ void handleSpectateMessage(const addr_t from, char* message)
       game.spectator = newSpectator; 
     }
   }
-  // initialize game.spectator or replace spectator if it already exists 
-  spectator_t* spectator = spectator_new(game.masterGrid, from);
-  game.spectator = spectator; 
 
   // server shall then immediately send GRID, GOLD, and DISPLAY messages as described below.
   sendGridMessage(from);
@@ -399,6 +391,7 @@ void handleKeyMessage(const addr_t otherp, char* message)
     // updateGrid for every player
     // inform all clients of a change in the game grid using a DISPLAY message as described below
     if (moveResult == 0) {
+      updateAllGrids();
       sendDisplayToAll();
     }
     else if (moveResult == -1) {
@@ -407,21 +400,9 @@ void handleKeyMessage(const addr_t otherp, char* message)
     else {
       // moveResult = amount of gold this player has just picked up 
       // inform all clients of new gold count by sending a "GOLD" message 
-      for (int i = 0; i< game.numPlayers; i++){
-
-        // check if player is currently talking to server 
-        player_t* player = game.players[i];
-
-        if (player_isTakling(player)) {
-          if (player_getLetter(player) == player_getLetter(currPlayer)) {
-            sendGoldMessage(moveResult, player_getGold(player), game.goldRemaining, otherp);
-          }
-          else {
-            sendGoldMessage(0, player_getGold(player), game.goldRemaining, otherp); 
-          }
-        }
-        
-      }
+      player_addGold(currPlayer, moveResult);
+      game.goldRemaining = game.goldRemaining - moveResult;
+      sendGoldToAll(moveResult, currPlayer);
     }
   }
 
@@ -528,7 +509,7 @@ void sendDisplayToAll()
     if (player_isTakling(thisPlayer)) {
 
       // update grid for this player 
-      updateGrid(thisPlayer, game.masterGrid, player_getLetter(thisPlayer));
+      updateGrid(player_getGrid(thisPlayer), game.masterGrid, player_getLetter(thisPlayer));
       
       // get address of this player 
       addr_t* address = player_getAddress(thisPlayer);
@@ -536,10 +517,12 @@ void sendDisplayToAll()
       // send display message to player 
       sendDisplayMessage(player_getGrid(thisPlayer), *address); 
     }
-    
   }
-}
+  // send to spectator
+  addr_t* specAddress = spectator_getAddress(game.spectator);
+  sendDisplayMessage(spectator_getGrid(game.spectator), *specAddress);
 
+}
 void sendGoldToAll(int moveResult, player_t* currPlayer) 
 {
   for (int i = 0; i< game.numPlayers; i++){
@@ -551,16 +534,31 @@ void sendGoldToAll(int moveResult, player_t* currPlayer)
 
     if (player_isTakling(player)) {
 
-      if (player == currPlayer) {
+      if (player_getLetter(player) == player_getLetter(currPlayer)) {
         sendGoldMessage(moveResult, player_getGold(player), game.goldRemaining, *address);
       }
       else {
         sendGoldMessage(0, player_getGold(player), game.goldRemaining, *address); 
       }
     }
-    
   }
 
+  addr_t* specAddress = spectator_getAddress(game.spectator);
+  // send to spectator 
+  sendGoldMessage(0, 0, game.goldRemaining, *specAddress);
+
+}
+
+void updateAllGrids()
+{
+  // call updateGrid on EVERY player  
+  for (int i = 0; i < game.numPlayers; i++) {
+    player_t* player = game.players[i];
+
+    if (player_isTakling(player)) {
+      updateGrid(player_getGrid(player), game.masterGrid, player_getLetter(player));
+    }
+  }
 }
 
 
