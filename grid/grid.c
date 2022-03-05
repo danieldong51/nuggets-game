@@ -50,7 +50,7 @@ char** gridPrint(grid_t* map, char playerLetter);
 int gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter);
 void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int seed);
 grid_t* gridNewPlayer(grid_t* map);
-grid_t* grid_new();
+grid_t* grid_new(int nrows, int ncols);
 int getNumRows(grid_t* masterGrid);
 int getNumColumns(grid_t* masterGrid);
 char** getGrid2D(grid_t* masterGrid);
@@ -104,7 +104,7 @@ gridConvert(char** grid, FILE* fp, int nrows, int ncols)
   const int size = ncols+2;  // include room for \n\0
   char line[size];           // a line of input
   int y = 0;
-  printf("ROWS: %d\n", nrows);
+  // printf("ROWS: %d\n", nrows);
 
   // read each line and copy it to the board
   while ( fgets(line, size, fp) != NULL && y < nrows) {
@@ -121,8 +121,8 @@ gridConvert(char** grid, FILE* fp, int nrows, int ncols)
     }
     
     strncpy(grid[y], line, len);
-    printf("%s\n",grid[y]);
-    printf("Y: %d\n", y);
+    // printf("%s\n",grid[y]);
+    // printf("Y: %d\n", y);
     y++;
 
   }
@@ -522,9 +522,10 @@ gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter)
 /**************** grid_new ****************/
 // initializes a new empty grid--mallocs memory
 grid_t* 
-grid_new()
+grid_new(int nrows, int ncols)
 {
   grid_t* map = mem_malloc(sizeof(grid_t));
+  map->grid2D = newGrid2D(nrows, ncols);
   return map;
 }
 
@@ -620,7 +621,7 @@ gridNewPlayer(grid_t* map)
   map->playerPositions[i]->playerPosition = playerPosition;
 
   // Initialize new playerGrid
-  grid_t* playerGrid = grid_new(); 
+  grid_t* playerGrid = grid_new(getNumRows(map), getNumColumns(map)); 
   
   // malloc space for gold piles and players
   playerGrid->playerPositions = malloc(MAXPLAYERS * sizeof(playerAndPosition_t*));
