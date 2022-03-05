@@ -203,7 +203,7 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
     return false; 
 
   }
-
+  // KEY
   else if (strncmp(message, "KEY ", strlen("KEY ")) == 0) {
 
     // call handleKey() function
@@ -222,7 +222,7 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
 
 }
 
-void handlePlayMessage(const addr_t from, char* message)
+bool handlePlayMessage(const addr_t from, char* message)
 {
   const char* content = message + strlen("PLAY ");        // pointer to message, starting after strlen play? 
     
@@ -269,7 +269,6 @@ void handlePlayMessage(const addr_t from, char* message)
 
     if (player == NULL) {
       fprintf(stderr, "Unable to allocate memory for new player\n");
-      return false; 
     }
 
     // iterate numPlayers
@@ -290,7 +289,6 @@ void handlePlayMessage(const addr_t from, char* message)
 
     // creating a new player, so n and p should be 0 
     sendGoldMessage(0, 0, game.goldRemaining, from);
-
 
     // send display message to all clients 
     sendDisplayToAll();
@@ -416,6 +414,7 @@ void handleKeyMessage(const addr_t otherp, char* message)
         spectator_delete(game.spectator); 
 
         message_send(otherp, "QUIT Thanks for watching!");
+        game.spectator = NULL;
       default: 
         //  the server shall ignore that keystroke and may send back an ERROR message as described below
         sendErrorMessage(otherp, "Invalid keystroke");
@@ -499,7 +498,7 @@ void sendErrorMessage(const addr_t otherp, char* explanation)
 void sendDisplayToAll()
 {
   // loop through players, send DISPLAY message to each one 
-  for (int i = 0; i < game.numPlayers; i++) {
+  for (int i = 0; i < MaxPlayers; i++) {
     player_t* thisPlayer = game.players[i];
     if (player_isTakling(thisPlayer)) {
 
@@ -520,7 +519,7 @@ void sendDisplayToAll()
 }
 void sendGoldToAll(int moveResult, player_t* currPlayer) 
 {
-  for (int i = 0; i< game.numPlayers; i++){
+  for (int i = 0; i< MaxPlayers; i++){
     // check if player is currently talking to server 
     player_t* player = game.players[i];
 
@@ -571,6 +570,30 @@ player_t* findPlayer(const addr_t address)
     }
   }
   return NULL;
+}
+
+void gameOver()
+{
+  // construct and broadcast game over message
+
+  // call player_delete on players
+  deleteAllPlayers();
+
+  // delete master grid
+  grid_delete(game.masterGrid);
+
+  // delete spectator object
+  if (game.spectator != NULL) {
+    spectator_delete(game.spectator);
+  }
+  
+}
+
+void deleteAllPlayers()
+{
+  for (int i = 0; i < MaxPlayers; i++) {
+    player_delete(game.players[i]);
+  }
 }
 
 
