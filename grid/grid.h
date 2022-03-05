@@ -42,7 +42,7 @@ void updateGrid(grid_t* playerGrid, grid_t* serverGrid, char playerLetter);
 /**************** gridPrint ****************/
 /*
  */
-void gridPrint(grid_t* grid, char playerLetter);
+char** gridPrint(grid_t* grid, char playerLetter);
 
 /**************** gridValidMove ****************/
 /*
