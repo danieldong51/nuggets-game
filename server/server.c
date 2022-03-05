@@ -503,7 +503,7 @@ void sendDisplayToAll()
   // loop through players, send DISPLAY message to each one 
   for (int i = 0; i < MaxPlayers; i++) {
     player_t* thisPlayer = game.players[i];
-    if (player_isTakling(thisPlayer)) {
+    if (player_isTalking(thisPlayer)) {
 
       // update grid for this player 
       updateGrid(player_getGrid(thisPlayer), game.masterGrid, player_getLetter(thisPlayer));
@@ -530,7 +530,7 @@ void sendGoldToAll(int moveResult, player_t* currPlayer)
     // get address of player 
     addr_t address = player_getAddress(player);
 
-    if (player_isTakling(player)) {
+    if (player_isTalking(player)) {
 
       if (player_getLetter(player) == player_getLetter(currPlayer)) {
         sendGoldMessage(moveResult, player_getGold(player), game.goldRemaining, address);
@@ -553,7 +553,7 @@ void updateAllGrids()
   for (int i = 0; i < MaxPlayers; i++) {
     player_t* player = game.players[i];
 
-    if (player_isTakling(player)) {
+    if (player_isTalking(player)) {
       updateGrid(player_getGrid(player), game.masterGrid, player_getLetter(player));
     }
   }
