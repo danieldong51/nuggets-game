@@ -14,6 +14,7 @@ static int PASSAGE = '#';
 static int HORIZONTAL = '-';
 static int VERITAL = '|';
 static int CORNER = '+';
+static int GOLDPILE = '*';
 static int MAXPLAYERS = 26;
 static int MAXGOLD = 50;
 
@@ -375,41 +376,63 @@ char** gridPrint(grid_t* playerGrid, char playerLetter)
 {
   printf("%ld\n", sizeof(playerGrid->playerPositions));
   printf("%ld\n", sizeof(playerGrid->playerPositions[0]));
-  int players = sizeof(playerGrid->playerPositions)/sizeof(playerGrid->playerPositions[0]);                   // determine number of players that are to be printed
-  position_t* currentPosition = playerGrid->playerPositions[playerLetter - 'a']->playerPosition;
+  // int players = sizeof(playerGrid->playerPositions)/sizeof(playerGrid->playerPositions[0]);                   // determine number of players that are to be printed
+  // position_t* currentPosition = playerGrid->playerPositions[playerLetter - 'a']->playerPosition;
 
-  // set the players in the grid array
-  if (playerGrid->playerPositions != NULL) {
-    for (int i = 0; i < players; i++) {
-      position_t* tempPosition = mem_malloc(sizeof(position_t));
-      tempPosition = playerGrid->playerPositions[i]->playerPosition;
-      // print position of the current player
-      if ( (tempPosition->x == currentPosition->x) && (tempPosition->y == currentPosition->y)) {    
-        playerGrid->grid2D[currentPosition->x][currentPosition->y] = '@';
+
+  // initialize return grid
+  int nrows = getNumRows(playerGrid);
+  int ncols = getNumColumns(playerGrid);
+  char** returnGrid = newGrid2D(nrows, ncols);
+
+  // fill in returnGrid with walls and spaces
+  for (int i = 0; i < nrows; i++) {
+    strcpy(returnGrid[i], playerGrid->grid2D[i]);
+  }
+
+  // printing player positions to returnGrid
+  // using the playerPositions list in playerGrid
+  position_t** playerPositions = playerGrid->playerPositions;
+  if (playerPositions != NULL) {
+    
+    // loop over players
+    for (int i = 0; i < MAXPLAYERS; i++) {
+
+      // if player position exists, add to returnGrid
+      if (playerPositions[i] != NULL) {
+
+        position_t* playerPosition = playerPositions[i];
+
+        // if player is current player, set char to '@'
+        if (i == playerLetter - 'a') {
+          gridMark(returnGrid, playerPosition, '@');
+        } else {
+
+          // set char of player to its player letter
+          gridMark(returnGrid, playerPosition, ('%c', (i + 'a')));
+        }
       }
-      // print position of the other players 
-      else {
-        playerGrid->grid2D[tempPosition->y][tempPosition->x] = playerGrid->playerPositions[i]->name;
-      }
-      mem_free(tempPosition);
     }
   }
 
+  // printing gold positions to returnGrid
+  // using the goldPiles list in playerGrid
+  pile_t** goldPiles = playerGrid->goldPiles;
+  if (goldPiles != NULL) {
+    
+    // loop over gold piles
+    for (int i = 0; i < MAXGOLD; i++) {
 
-  // set the gold in the grid array
-  int numPiles = sizeof(playerGrid->goldPiles)/sizeof(map->goldPiles[0]);                  
-  for ( int i = 0; i< numPiles; i++ ) {
-    position_t* tempPosition = mem_malloc(sizeof(position_t));
-    tempPosition = map->goldPiles[i]->location;
-    printf("%d", tempPosition->x);
-    map->grid2D[tempPosition->y][tempPosition->x] = '*';
+      // if gold pile exists, add to returnGrid
+      if (goldPiles[i] != NULL) {
+
+        position_t* pilePosition = goldPiles[i]->location;
+        gridMark(returnGrid, pilePosition, GOLDPILE);
+      }
+    }
   }
 
-
-  // print out each row
-  for ( int i = 0; i < map->nrows; i ++ ) {
-    fprintf(stdout, "%s", map->grid2D[i]);
-  }
+  return returnGrid;
 }
 
 
