@@ -35,7 +35,7 @@ int player_getGold(player_t* player);
 grid_t* player_getGrid(player_t* player);
 char* player_getName(player_t* player);
 char player_getLetter(player_t* player);
-addr_t* player_getAddress(player_t* player);
+addr_t player_getAddress(player_t* player);
 
 // setter functions 
 void player_addGold(player_t* player, int numGold);
@@ -43,7 +43,7 @@ void player_changeStatus(player_t* player, bool status);
 void player_setLetter(player_t* player, char letter);
 void player_setName(player_t* player, char* name);
 void player_setGrid(player_t* player, grid_t* grid);
-void player_setAddress(player_t* player, addr_t* address); 
+void player_setAddress(player_t* player, addr_t address); 
 
 /**************** player_new() ****************/
 /* A function to create a new player struct. */
@@ -129,7 +129,7 @@ char player_getLetter(player_t* player);
 *   the player's address, if the player is not null 
 *    null otherwise 
 */
-addr_t* player_getAddress(player_t* player);
+addr_t player_getAddress(player_t* player);
 
 
 /**************** player_addGold() ****************/
@@ -197,4 +197,4 @@ void player_setGrid(player_t* player, grid_t* grid);
 * We do: 
 *   change the player's address to this address, as long as the given player and address aren't NULL
 */
-void player_setAddress(player_t* player, addr_t* address); 
+void player_setAddress(player_t* player, addr_t address); 
