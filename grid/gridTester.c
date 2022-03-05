@@ -36,17 +36,6 @@ main(const int argc, char* argv[])
   char** grid2D = getGrid2D(masterGrid);
   int NR = getNumRows(masterGrid);
 
-<<<<<<< HEAD
-  // for (int i = 0; i < NR; i++ ) {
-  //   printf("%d\n", i);
-  //   printf("%s\n", grid2D[i] );
-  // }
-  position_t* position = newPosition(); 
-  setPosition(position, 2, 2);
-
-  gridPrint(masterGrid, position);
-  mem_free(masterGrid);
-=======
   for (int i = 0; i < NR; i++ ) {
     printf("%d\n", i);
     printf("%s\n", grid2D[i]);
@@ -63,5 +52,4 @@ main(const int argc, char* argv[])
   gridPrint(masterGrid, 'a');
 
   
->>>>>>> visibility
 }
