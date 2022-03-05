@@ -27,8 +27,8 @@ main(const int argc, char* argv[])
   //char line[15];
   //fgets(line, 15, fp);
   //printf("tester line: %s\n", line);
-  gridMakeMaster(masterGrid, fileName, 10, 1 ,3, 1);
-  //printf("made master\n");
+  gridMakeMaster(masterGrid, fileName, 10, 1 ,5, 1);
+  printf("made master\n");
 
   printf("line 29\n");
 
