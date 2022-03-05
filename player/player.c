@@ -123,7 +123,7 @@ char player_getLetter(player_t* player)
   if (player != NULL) {
     return player->letter; 
   }
-  return NULL;
+  return ' ';
 }
 
 /**************** player_getLetter() ****************/
@@ -169,7 +169,7 @@ void player_setName(player_t* player, char* name)
 /* see player.h for description */
 void player_setLetter(player_t* player, char letter)
 {
-  if (player != NULL && letter != NULL) {
+  if (player != NULL && letter != ' ') {
     player->letter = letter; 
   }
 }
@@ -197,7 +197,7 @@ void player_delete(player_t* player)
   if (player != NULL) {
     // check if the grid object is NULL, free if not 
     if (player->grid != NULL) {
-      grid_delete(player->grid);
+      gridDelete(player->grid);
     }
     
     mem_free(player);
