@@ -36,7 +36,7 @@ const char SPACE = ' ';
 struct game {
   int goldRemaining;              // amount of gold left in game 
   int numPlayers; 
-  player_t* players[MaxPlayers];
+  player_t** players;
   grid_t* masterGrid; 
   spectator_t* spectator; 
   int seed;
@@ -154,6 +154,16 @@ static void initializeGame(FILE* mapFile)
   // initialize information about the game 
   game.numPlayers = 0; 
 
+  // initialize player list 
+  player_t* playersList[MaxPlayers + 1];
+  game.players = playersList;
+
+  // intialize each player struct
+  for (int i = 0; i < MaxPlayers + 1; i++) {
+    player_t* p = player_new();
+    game.players[i] = p;
+  }
+
   // initalize master grid 
   game.masterGrid = grid_new();
 
@@ -250,7 +260,8 @@ void handlePlayMessage(const addr_t from, char* message)
       message_send(from, "QUIT Sorry - you must provide player's name.");
     }
 
-    // create a new player 
+    // check to see if we already have this player 
+
     player_t* player = player_new(name, letter, game.masterGrid);
 
     // set this player's status to "true" 
@@ -280,7 +291,9 @@ void handlePlayMessage(const addr_t from, char* message)
     // creating a new player, so n and p should be 0 
     sendGoldMessage(0, 0, game.goldRemaining, from);
 
-    sendDisplayMessage(player_getGrid(player), from);
+
+    // send display message to all clients 
+    sendDisplayToAll();
 
   }
   else 
@@ -335,26 +348,10 @@ void handleKeyMessage(const addr_t otherp, char* message)
   // loop through the list of players 
   player_t* currPlayer;
 
-  for (int i = 0; i < game.numPlayers; i++) {
-    currPlayer = game.players[i];
-    
-    // check if this address if our 'from' address
-    if (message_eqAddress(player_getAddress(currPlayer), otherp)) {
-
-      // check if this player is still talking to the server 
-      if (player_isTakling(currPlayer)){
-        // if it is, break - this is our player
-        foundPlayer = true; 
-        break; 
-      }
-      else {
-        // if this address exists for a player that has already quit the game, send error messages
-        // previous players cannot rejoin the game 
-        message_send(otherp, "ERROR players cannot rejoin game");
-      }
-      
-    }
+  if ((currPlayer = findPlayer(otherp)) != NULL) {
+    foundPlayer = true; 
   }
+
   if (foundPlayer) {
     // get the letter of this player 
     char letter = player_getLetter(currPlayer);
@@ -516,8 +513,11 @@ void sendDisplayToAll()
       sendDisplayMessage(player_getGrid(thisPlayer), *address); 
     }
   }
-}
+  // send to spectator
+  addr_t* specAddress = spectator_getAddress(game.spectator);
+  sendDisplayMessage(spectator_getGrid(game.spectator), *specAddress);
 
+}
 void sendGoldToAll(int moveResult, player_t* currPlayer) 
 {
   for (int i = 0; i< game.numPlayers; i++){
@@ -536,21 +536,41 @@ void sendGoldToAll(int moveResult, player_t* currPlayer)
         sendGoldMessage(0, player_getGold(player), game.goldRemaining, *address); 
       }
     }
-    
   }
+
+  addr_t* specAddress = spectator_getAddress(game.spectator);
+  // send to spectator 
+  sendGoldMessage(0, 0, game.goldRemaining, *specAddress);
 
 }
 
 void updateAllGrids()
 {
   // call updateGrid on EVERY player  
-  for (int i = 0; i < game.numPlayers; i++) {
+  for (int i = 0; i < MaxPlayers; i++) {
     player_t* player = game.players[i];
 
     if (player_isTakling(player)) {
-      updateGrid(player, game.masterGrid, player_getLetter(player));
+      updateGrid(player_getGrid(player), game.masterGrid, player_getLetter(player));
     }
   }
+}
+
+player_t* findPlayer(const addr_t address) 
+{
+  for (int i = 0; i < MaxPlayers ; i++)
+  {
+    player_t* player = game.players[i];
+
+    if (player_isTalking(player)) {
+      addr_t* playerAddress = player_getAddress(player);
+
+      if (message_eqAddress(*playerAddress, address)) {
+        return player;
+      }
+    }
+  }
+  return NULL;
 }
 
 
