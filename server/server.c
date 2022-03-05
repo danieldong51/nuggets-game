@@ -109,11 +109,11 @@ int main(const int argc, char* argv[])
 
     // call message_loop() until timeout or error 
     bool ok = message_loop(&other, timeout, NULL, NULL, handleMessage);
+    
+    gameover();
 
     // shut down message module 
     message_done(); 
-    
-    gameover();
 
   }
   
@@ -467,7 +467,7 @@ void sendOkMessage(const addr_t otherp, char letter)
 {
   if (letter != NULL) {
     // send "ok" message
-    char* okMessage = mem_malloc_assert(strlen("OK") + 2, "Unable to allocate memory for message\n");
+    char okMessage[message_MaxBytes];
     sprintf(okMessage, "OK %c", letter);
     message_send(otherp, okMessage);
   }
@@ -480,7 +480,7 @@ void sendGridMessage(const addr_t otherp)
   int numRows = getNumRows(game.masterGrid); 
   int numCols = getNumColumns(game.masterGrid);
 
-  const char* response = mem_malloc_assert(strlen("GRID ") + sizeof(int) + sizeof(int) + 1, "Unable to allocate memory for message content\n");
+  char response[message_MaxBytes];
     
   // construct content of message 
   sprintf(response, "%s %d %d", "GRID ", numRows, numCols);
@@ -493,7 +493,8 @@ void sendGridMessage(const addr_t otherp)
 /*  check parameters, construct the message, log about it, and send the message */
 void sendGoldMessage(int n, int r, int p, const addr_t otherp)
 {
-  const char* response = mem_malloc_assert(strlen("GOLD ") + sizeof(int)*3 + 1, "Unable to allocate memory for message\n");
+  char response[message_MaxBytes];
+
   sprintf(response, "GOLD %d %d %d", n, r, p);
 
   message_send(otherp, response); 
@@ -503,7 +504,7 @@ void sendGoldMessage(int n, int r, int p, const addr_t otherp)
 /*  check parameters, construct the message, log about it, and send the message */
 void sendDisplayMessage(char* grid, const addr_t otherp) 
 {
-  const char* response = mem_malloc_assert(strlen("GOLD ") + strlen(grid) + 1, "Unable to allocate memory for message\n");
+  char response[message_MaxBytes];
   sprintf(response, "DISPLAY\n%s", grid);
 
   message_send(otherp, response);
@@ -513,7 +514,7 @@ void sendDisplayMessage(char* grid, const addr_t otherp)
 void sendErrorMessage(const addr_t otherp, char* explanation)
 {
   // log an error, ignore message, send error message to client 
-  const char* response = mem_malloc_assert(strlen("ERROR ") + strlen(explanation), "Unable to allocate memory for message\n");
+  char response[message_MaxBytes];
   sprintf(response, "ERROR %s", explanation); 
 
   // log an error 
@@ -525,7 +526,7 @@ void sendErrorMessage(const addr_t otherp, char* explanation)
 void sendErrorMessage(const addr_t otherp, char* explanation)
 {
   // log an error, ignore message, send error message to client 
-  const char* response = mem_malloc_assert(strlen("ERROR ") + strlen(explanation), "Unable to allocate memory for message\n");
+  char response[message_MaxBytes];
   sprintf(response, "ERROR %s", explanation); 
 
   // log an error 
