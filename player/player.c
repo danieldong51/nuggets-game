@@ -11,14 +11,9 @@
 #include <string.h>
 #include <stdbool.h>
 #include <time.h> 
-<<<<<<< HEAD
-#include "mem.h"
-#include "../grid/grid.h"
-=======
 #include "libcs50/mem.h"
 #include "grid.h"
 #include "../support/message.h"
->>>>>>> 26210d46943172e3bcc22c6dd4f1b2941b8b8c92
 
 /**************** file-local global variables ****************/
 /* none */
