@@ -14,12 +14,12 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <math.h>
-#include "libcs50/file.h"
+#include "../libcs50/file.h"
 #include "../player/player.h"
 #include "../grid/grid.h"
 #include "../spectator/spectator.h"
-#include "support/message.h"
-#include "support/log.h"
+#include "../support/message.h"
+#include "../support/log.h"
 
 /* ***************************************** */
 /* Global constants */
@@ -35,8 +35,8 @@ const char SPACE = ' ';
 /* Global types */
 struct game {
   int goldRemaining;              // amount of gold left in game 
-  int numPlayers; 
-  player_t** players;
+  int numPlayers;                 // amount of players that have joined so far 
+  player_t** players; 
   grid_t* masterGrid; 
   spectator_t* spectator; 
   int seed;
@@ -97,13 +97,16 @@ int main(const int argc, char* argv[])
     addr_t other = message_noAddr(); // no correspondent yet 
 
     // call message_loop() until timeout or error 
-    bool ok = message_loop(&other, timeout, NULL, NULL, handleMessage);
+    message_loop(&other, timeout, NULL, NULL, handleMessage);
     
-    gameover();
+    gameOver();
 
     // shut down message module 
     message_done(); 
 
+  }
+  else {
+    fprintf(stderr, "Invalid number of arguments\n");
   }
   
 }
@@ -113,11 +116,10 @@ int main(const int argc, char* argv[])
 static bool parseArgs(const int argc, char* argv[], FILE** mapFile)
 {
   if (argc >= 2) {
-    // first argument is pathname for map file 
-    char* mapPathname = argv[1];
 
     // verify that map file can be opened for reading 
-    if ( (*mapFile = fopen(*mapPathname,'r')) == NULL ) {
+    *mapFile = fopen(argv[1],"r");
+    if ( *mapFile == NULL ) {
       fprintf(stderr, "Unable to open map file\n");
       return false; 
     }
@@ -125,11 +127,12 @@ static bool parseArgs(const int argc, char* argv[], FILE** mapFile)
     if (argc == 3) {
       // if a seed is provided, verify that it is a positive integer, and then set in game struct 
       int seed = atoi(argv[2]);
-
-      if (seed != NULL && seed >= 0) {
+        
+      if (seed >= 0) {
         game.seed = seed; 
-      } 
-    }
+      }
+     }
+  
     return true; 
   }
   return false; 
