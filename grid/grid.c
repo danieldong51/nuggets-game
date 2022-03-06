@@ -46,7 +46,7 @@ typedef struct grid {
 
 void gridConvert(char** grid, FILE* fp, int nrows, int ncols);
 void updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter);
-char** gridPrint(grid_t* map, char playerLetter);
+char* gridPrint(grid_t* map, char playerLetter);
 int gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter);
 void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int seed);
 grid_t* gridNewPlayer(grid_t* map);
@@ -377,7 +377,7 @@ position_t* position_new(int x, int y)
 
 
 /**************** gridPrint ****************/
-char** gridPrint(grid_t* playerGrid, char playerLetter)
+char* gridPrint(grid_t* playerGrid, char playerLetter)
 {
   // printf("%ld\n", sizeof(playerGrid->playerPositions));
   // printf("%ld\n", sizeof(playerGrid->playerPositions[0]));
@@ -437,7 +437,14 @@ char** gridPrint(grid_t* playerGrid, char playerLetter)
     }
   }
 
-  return returnGrid;
+  char returnString[(nrows*ncols) + 1 ] ;
+  for ( int i = 0; i < nrows; i++ ){
+    for ( int x = 0; x < ncols; x++ ) {
+      returnString[((i-1)*nrows) + x] = returnGrid[i][x];
+    }
+  }
+
+  return returnString;
 }
 
 
@@ -571,7 +578,7 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
     goldPosition->x = 0;
     goldPosition->y = 0;
     char* c = grid2D[0];
-    printf('%s', c);
+    printf("%s", c);
     printf("before setting positions\n");
     // find random position that is in an empty room spot
     while (!((grid2D[goldPosition->y][goldPosition->x ] == EMPTY))) {
@@ -630,6 +637,7 @@ gridNewPlayer(grid_t* map)
   while( !(map->playerPositions[i] == NULL) ) {
     i++;
   }
+
   map->playerPositions[i]->name = i+'a'; // set char name
   map->playerPositions[i]->playerPosition = playerPosition;
 
