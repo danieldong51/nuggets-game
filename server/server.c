@@ -75,7 +75,7 @@ void updateAllGrids();
 void sendDisplayToAll();
 void sendGoldToAll(int moveResult, player_t* currPlayer);
 
-
+void sendQuitMessage(const addr_t otherp, char* explanation);
 void sendOkMessage(const addr_t otherp, char letter);
 void sendGridMessage(const addr_t otherp);
 void sendErrorMessage(const addr_t otherp, char* explanation);
@@ -99,12 +99,7 @@ int main(const int argc, char* argv[])
 
 
     // initialize the message module  
-    int port = message_init(NULL);                // will eventually pass a log file pointer into here 
-
-    if (port == 0) {
-      fprintf(stderr, "Failure to initialize message module\n");
-      exit(1);
-    }
+    int port = message_init(stderr);                // will eventually pass a log file pointer into here 
 
     // print the port number on which we wait 
     printf("waiting on port %d for contact....\n", port);
@@ -497,6 +492,17 @@ void sendErrorMessage(const addr_t otherp, char* explanation)
   message_send(otherp, response); 
 }
 
+/*  check parameters, construct the message, log about it, and send the message */
+void sendQuitMessage(const addr_t otherp, char* explanation)
+{
+  char quitMessage[message_MaxBytes];
+
+  sprintf(quitMessage, "QUIT %s", explanation);
+
+  message_send(otherp, quitMessage); 
+
+}
+
 
 void sendDisplayToAll()
 {
@@ -585,6 +591,28 @@ void gameOver()
   and with three columns: player letter, player purse, and player name. 
   The list may be sorted by player letter, or by score, or unsorted.
   */
+  char gameOverMessage[message_MaxBytes];
+  sprintf(gameOverMessage, "GAME OVER:\n");
+
+  for (int i = 0; i < MaxPlayers + 1; i++) {
+    player_t* p = game.players[i];
+    if (player_isTalking(game.players[i])){
+      char* info;
+
+      // set info pointer to each player line, incrementing each time 
+      for (info = gameOverMessage; *info ; info++) {
+        sprintf(*info, "%c\t%3d %s\n", player_getLetter(p), player_getGold(p), player_getName(p));
+      } 
+    }
+  }
+  // broadcast game over message to all players 
+  for (int i = 0; i < MaxPlayers; i++) {
+    player_t* player = game.players[i];
+
+    if (player_isTalking(player)) {
+      sendQuitMessage(player_getAddress(player), gameOverMessage);
+    }
+  }
   // call player_delete on players
   deleteAllPlayers();
 
@@ -604,6 +632,7 @@ void deleteAllPlayers()
     player_delete(game.players[i]);
   }
 }
+
 
 
 
