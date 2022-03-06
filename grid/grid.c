@@ -46,11 +46,11 @@ typedef struct grid {
 
 void gridConvert(char** grid, FILE* fp, int nrows, int ncols);
 void updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter);
-char** gridPrint(grid_t* map, char playerLetter);
+char* gridPrint(grid_t* map, char playerLetter);
 int gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter);
 void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int seed);
 grid_t* gridNewPlayer(grid_t* map);
-grid_t* grid_new(int nrows, int ncols);
+grid_t* grid_new();
 int getNumRows(grid_t* masterGrid);
 int getNumColumns(grid_t* masterGrid);
 char** getGrid2D(grid_t* masterGrid);
@@ -122,8 +122,9 @@ gridConvert(char** grid, FILE* fp, int nrows, int ncols)
     }
     
     strncpy(grid[y], line, len);
-    // printf("%s\n",grid[y]);
-    // printf("Y: %d\n", y);
+    for (int i = 0; i < nrows; i ++){
+      printf("%s\n", grid[i]);
+    }
     y++;
 
   }
@@ -380,7 +381,7 @@ position_t* position_new(int x, int y)
 
 
 /**************** gridPrint ****************/
-char** gridPrint(grid_t* playerGrid, char playerLetter)
+char* gridPrint(grid_t* playerGrid, char playerLetter)
 {
   // printf("%ld\n", sizeof(playerGrid->playerPositions));
   // printf("%ld\n", sizeof(playerGrid->playerPositions[0]));
@@ -440,7 +441,14 @@ char** gridPrint(grid_t* playerGrid, char playerLetter)
     }
   }
 
-  return returnGrid;
+  char returnString[(nrows*ncols) + 1 ] ;
+  for ( int i = 0; i < nrows; i++ ){
+    for ( int x = 0; x < ncols; x++ ) {
+      returnString[((i-1)*nrows) + x] = returnGrid[i][x];
+    }
+  }
+
+  return returnString;
 }
 
 
@@ -475,22 +483,22 @@ gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter)
     // up
     coordinate->y ++;
   }
-  else if (moveLetter = 'y') {
+  else if (moveLetter == 'y') {
     // diagonally up and left
     coordinate->x --;
     coordinate->y ++;
   }
-  else if (moveLetter = 'u') {
+  else if (moveLetter == 'u') {
     // diagonally up and right
     coordinate->x ++;
     coordinate->y ++;
   }
-  else if (moveLetter = 'b') {
+  else if (moveLetter == 'b') {
     // diagonally down and left
     coordinate->x --;
     coordinate->y --;
   }
-  else if (moveLetter = 'n') {
+  else if (moveLetter == 'n') {
     // diagonally down and right
     coordinate->x ++;
     coordinate->y --;
@@ -526,11 +534,10 @@ gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter)
 /**************** grid_new ****************/
 // initializes a new empty grid--mallocs memory
 grid_t* 
-grid_new(int nrows, int ncols)
+grid_new()
 {
-  grid_t* map = mem_malloc(sizeof(grid_t));
-  map->grid2D = newGrid2D(nrows, ncols);
-  return map;
+  grid_t* grid = mem_malloc(sizeof(grid_t));
+  return grid;
 }
 
 /**************** gridMakeMaster ****************/
@@ -554,27 +561,40 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
   char** grid2D;                                              // map of walls, paths, and spaces
   grid2D = newGrid2D(NR, NC);
   gridConvert(grid2D, fp, NR, NC);
+  printf("done converting\n");
   masterGrid->grid2D = grid2D;
-
-  srand(seed);                                                // not sure what this means but seed is an optional parameter for server
+  for (int i = 0; i < NR; i ++){
+    printf("%s\n", grid2D[i]);
+  }
+  // server calls srand(seed) and that is the only time it srand() is called
   // set the number of piles in the map
-  int numPiles = (int)(rand() % (minGoldPiles - maxGoldPiles + 1)) + minGoldPiles; 
+  int numPiles = (int)(rand() % (maxGoldPiles - minGoldPiles +1 )) + minGoldPiles; 
   int currentGoldAmount;
 
+  printf("numpiles: %d\n", numPiles);
   
-  pile_t* goldPiles[numPiles]; // check this syntax
+  pile_t* goldPiles[numPiles]; 
   // create pile structures bt setting random locations and random amounts for gold
   for (int i = 0; i < numPiles; i++) {
+
     position_t* goldPosition= mem_malloc(sizeof(position_t));
     pile_t* goldPile = mem_malloc(sizeof(pile_t));
     goldPosition->x = 0;
     goldPosition->y = 0;
+    char* c = grid2D[0];
+    printf("%s", c);
+    printf("before setting positions\n");
     // find random position that is in an empty room spot
     while (!((grid2D[goldPosition->y][goldPosition->x ] == EMPTY))) {
+      printf("during setting positions\n");
       // set random position for gold
-      goldPosition->x = (rand() % NR) + 1; 
-      goldPosition->y = (rand() % NC) + 1;
+      goldPosition->x = (rand() % NC) + 1; 
+      printf("set x\n");
+      goldPosition->y = (rand() % NR) + 1;
+      printf("set y\n");
+      printf("%c", (grid2D[goldPosition->y][goldPosition->x ]));
     }
+    printf("after setting positions\n");
     goldPile->location = goldPosition;
     goldPile->amount = rand();
     currentGoldAmount += goldPile->amount;
@@ -621,6 +641,7 @@ gridNewPlayer(grid_t* map)
   while( !(map->playerPositions[i] == NULL) ) {
     i++;
   }
+
   map->playerPositions[i]->name = i+'a'; // set char name
   map->playerPositions[i]->playerPosition = playerPosition;
 

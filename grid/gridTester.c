@@ -7,60 +7,48 @@
 #include "file.h"
 #include "mem.h"
 #include <math.h>
-#include "../player/player.h"
 #include "grid.h"
 
-void tester();
-static char** newGrid2D(int nrows, int ncols);
 
 int 
 main(const int argc, char* argv[])
 {
-  tester();
-}
 
-void
-tester()
-{
-  int nrow = 25;
-  int ncol = 100;
-  grid_t* masterGrid = grid_new(nrow, ncol);
-  char** grid2D = newGrid2D(nrow, ncol);
+  printf("line start\n");
 
-  FILE* mapFile = fopen("../maps/challenge.txt", "r");
+  grid_t* masterGrid = grid_new();
+  //printf("made grid\n");
+  char* fileName; 
+  fileName = argv[1];
 
-  printf("nrow is %d, ncol is %d\n", nrow, ncol);
-  gridConvert(grid2D, mapFile, nrow, ncol);
+  printf("line 1\n");
 
-  for (int i = 0; i < nrow; i++) {
-    for (int j = 0; j < ncol; j++) {
-      printf("%c", grid2D[i][j]);
-    }
-    printf("\n");
-  }
-}
+  //FILE* fp = fopen(fileName, "r");
+  //char line[15];
+  //fgets(line, 15, fp);
+  //printf("tester line: %s\n", line);
+  gridMakeMaster(masterGrid, fileName, 10, 1 ,5, 1);
+  printf("made master\n");
 
-static char**
-newGrid2D(int nrows, int ncols)
-{
-  // allocate a 2-dimensional array of nrows x ncols
-  char** grid = calloc(nrows, sizeof(char*));
-  char* contents = calloc(nrows * ncols, sizeof(char));
-  if (grid == NULL || contents == NULL) {
-    fprintf(stderr, "cannot allocate memory for map\r\n");
-    exit(1);
+  printf("line 29\n");
+
+  char** grid2D = getGrid2D(masterGrid);
+  int NR = getNumRows(masterGrid);
+
+  for (int i = 0; i < NR; i++ ) {
+    printf("%d\n", i);
+    printf("%s\n", grid2D[i]);
   }
 
-  // set up the array of pointers, one for each row
-  for (int y = 0; y < nrows; y++) {
-    grid[y] = contents + y * ncols;
-  }
+  printf("line 36\n");
 
-  // fill the board with empty cells
-  for (int y = 0; y < nrows; y++) {
-    for (int x = 0; x < ncols; x++) {
-      grid[y][x] = ' ';
-    }
-  }
-  return grid;
+  // Reads main.txt mao
+  FILE* mapFile = fopen("../maps/main.txt", "r");
+  gridConvert(grid2D, mapFile, getNumRows(masterGrid), getNumColumns(masterGrid));  
+
+  printf("line 42\n");
+
+  gridPrint(masterGrid, 'a');
+
+  
 }

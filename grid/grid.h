@@ -48,7 +48,7 @@ void updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter);
  *   the char** representation of the grid that the player sees,
  *   with the visible players and gold piles.
  */
-char** gridPrint(grid_t* playerGrid, char playerLetter);
+char* gridPrint(grid_t* playerGrid, char playerLetter);
 
 /**************** gridValidMove ****************/ 
 // NEED TO UPDATE!!
@@ -68,7 +68,7 @@ int gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter);
 /**************** gridInit ****************/
 /*
  */
-grid_t* grid_new(int nrows, int ncols);
+grid_t* grid_new();
 
 /**************** gridMakeMaster ****************/
 void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int seed);
