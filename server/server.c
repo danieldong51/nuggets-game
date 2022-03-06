@@ -97,7 +97,6 @@ int main(const int argc, char* argv[])
     // call initialize game 
     initializeGame(mapPathname); 
 
-
     // initialize the message module  
     int port = message_init(stderr);                // will eventually pass a log file pointer into here 
 
@@ -107,12 +106,12 @@ int main(const int argc, char* argv[])
     addr_t other = message_noAddr(); // no correspondent yet 
 
     // call message_loop() until timeout or error 
-    message_loop(&other, timeout, NULL, NULL, handleMessage);
+    //message_loop(&other, timeout, NULL, NULL, handleMessage);
     
-    gameOver();
+    //gameOver();
 
     // shut down message module 
-    message_done(); 
+    //message_done(); 
 
   }
   else {
@@ -166,11 +165,11 @@ static void initializeGame(char* mapPathname)
   game.numPlayers = 0; 
 
   // initialize player list 
-  player_t* playersList[MaxPlayers + 1];
+  player_t* playersList[MaxPlayers];
   game.players = playersList;
 
   // intialize each player struct
-  for (int i = 0; i < MaxPlayers + 1; i++) {
+  for (int i = 0; i < MaxPlayers; i++) {
     player_t* p = player_new();
     game.players[i] = p;
   }
@@ -597,7 +596,7 @@ void gameOver()
   char gameOverMessage[message_MaxBytes];
   sprintf(gameOverMessage, "GAME OVER:\n");
 
-  for (int i = 0; i < MaxPlayers + 1; i++) {
+  for (int i = 0; i < MaxPlayers; i++) {
     player_t* p = game.players[i];
     if (player_isTalking(game.players[i])){
       char* info;
