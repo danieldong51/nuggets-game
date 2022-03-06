@@ -682,11 +682,14 @@ gridNewPlayer(grid_t* masterGrid, char playerLetter)
   masterGrid->playerPositions[i]->playerPosition = playerPosition;
 
   // Initialize new playerGrid
-  grid_t* playerGrid = grid_new(getNumRows(masterGrid), getNumColumns(masterGrid)); 
+  grid_t* playerGrid = grid_new(); 
+
+  // malloc space for grid2D
+  playerGrid->grid2D = newGrid2D(masterGrid->nrows, masterGrid->ncols);
   
-  // malloc space for gold piles and players
-  playerGrid->playerPositions = malloc(MAXPLAYERS * sizeof(playerAndPosition_t*));
-  playerGrid->goldPiles = malloc(MAXGOLD * sizeof(pile_t*));
+  // // malloc space for gold piles and players - DONE IN GRID_NEW()
+  // playerGrid->playerPositions = malloc(MAXPLAYERS * sizeof(playerAndPosition_t*));
+  // playerGrid->goldPiles = malloc(MAXGOLD * sizeof(pile_t*));
 
   return playerGrid;
 }
