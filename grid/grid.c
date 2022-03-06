@@ -441,11 +441,12 @@ char* gridPrint(grid_t* playerGrid, char playerLetter)
     }
   }
 
-  char returnString[(nrows*ncols) + 1 ] ;
+  char returnString[(nrows*(ncols+1)) + 1 ] ;
   for ( int i = 0; i < nrows; i++ ){
     for ( int x = 0; x < ncols; x++ ) {
       returnString[((i-1)*nrows) + x] = returnGrid[i][x];
     }
+    returnString[i*(ncols+1)] = '\n';
   }
 
   return returnString;
