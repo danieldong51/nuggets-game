@@ -257,7 +257,8 @@ void handlePlayMessage(const addr_t from, const char* message)
       return;
     }
     // check to see if we already have this address, or if address is invalid 
-    if (findPlayer(from) != NULL) {
+    player_t* p; 
+    if ( (p = findPlayer(from)) != NULL) {
       printf("Found player trying to play again!\n");
       sendErrorMessage(from, "Sorry - you cannot rejoin the same game.\n");
       return;
@@ -369,6 +370,7 @@ void handleKeyMessage(const addr_t otherp, const char* message)
 
         // change the player's isTalking status to false 
         player_changeStatus(currPlayer, false);
+        grid_deletePlayer(game.masterGrid, player_getLetter(currPlayer));
         break;
 
       case 'h': case 'l': case 'j': case 'k': case 'y': case 'u': case 'b': case 'n':
