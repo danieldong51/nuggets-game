@@ -103,6 +103,7 @@ void setPosition(position_t* position, int x, int y);
 void gridDelete(grid_t* map);
 void goldPilesDelete(pile_t** goldPiles);
 void playerAndPositionDelete(playerAndPosition_t** playerPositions);
+void grid_deletePlayer(grid_t* masterGrid, char playerLetter) ;
 
 position_t* newPosition();
 #endif
