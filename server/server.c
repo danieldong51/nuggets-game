@@ -349,7 +349,6 @@ void handleKeyMessage(const addr_t otherp, const char* message)
 
   // loop through the list of players 
   player_t* currPlayer;
-
   if ((currPlayer = findPlayer(otherp)) != NULL) {
     foundPlayer = true; 
   }
@@ -399,6 +398,7 @@ void handleKeyMessage(const addr_t otherp, const char* message)
       // inform all clients of new gold count by sending a "GOLD" message 
       player_addGold(currPlayer, moveResult);
       game.goldRemaining = game.goldRemaining - moveResult;
+      updateAllGrids(); 
       sendGoldToAll(moveResult, currPlayer);
     }
   }
@@ -414,8 +414,8 @@ void handleKeyMessage(const addr_t otherp, const char* message)
     // switch value of key  - spectator can only send 'Q' keystroke 
     switch(key) {
       case 'Q':
-        // delete spectator  
-        spectator_delete(game.spectator); 
+        // set spectator's address to no address
+        spectator_setAddress(game.spectator, message_noAddr());
         sendQuitMessage(otherp, "Thanks for watching!");
         game.spectator = NULL;
       default: 
