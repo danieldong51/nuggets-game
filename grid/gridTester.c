@@ -68,6 +68,6 @@ tester()
   // gridDelete(playerBGrid);
   // gridDelete(playerCGrid);
   // gridDelete(playerDGrid);
-  gridDelete(masterGrid);
-  gridDelete(playerAGrid);
+  gridDelete(masterGrid, true);
+  gridDelete(playerAGrid, false);
 }
