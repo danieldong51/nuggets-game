@@ -561,7 +561,7 @@ gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter)
   return -1;
 }
 
-
+//tester
 /**************** grid_new ****************/
 // initializes a new empty grid--mallocs memory
 grid_t* 

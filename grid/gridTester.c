@@ -18,7 +18,7 @@ main(const int argc, char* argv[])
 }
 
 void
-tester()
+tester() 
 {
   // initiailizing gridMaster;
   grid_t* masterGrid = grid_new();
@@ -31,5 +31,7 @@ tester()
 
   printf("%s\n", gridPrint(masterGrid, 'a'));
 
+  gridPrint(masterGrid, 'a');
+  printf("%s", gridPrint(masterGrid, 'a'));
   
 }
