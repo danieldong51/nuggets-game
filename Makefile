@@ -10,11 +10,12 @@ L = libcs50
 # otherwise we use the pre-built library provided by instructor.
 all: 
 	(cd $L && if [ -r set.c ]; then make $L.a; else cp $L-given.a $L.a; fi)
-	make -C server
+	make -C support
 	make -C grid
 	make -C player
 	make -C spectator
-	make -C support
+	make -C server
+	
 
 ############### TAGS for emacs users ##########
 TAGS:  Makefile */Makefile */*.c */*.h */*.md */*.sh

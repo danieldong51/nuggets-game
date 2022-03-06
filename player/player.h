@@ -30,7 +30,7 @@ player_t* player_new();
 void player_delete();
 
 // getter functions 
-bool player_isTakling(player_t* player);
+bool player_isTalking(player_t* player);
 int player_getGold(player_t* player);
 grid_t* player_getGrid(player_t* player);
 char* player_getName(player_t* player);
@@ -74,7 +74,7 @@ void player_delete(player_t* player);
 * We return: 
 *   if the player is not null, return whether or not the player is talking to the server 
 */
-bool player_isTakling(player_t* player);
+bool player_isTalking(player_t* player);
 
 /**************** player_getGold() ****************/
 /* A function to return the amount of gold a player has */

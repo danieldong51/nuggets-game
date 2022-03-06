@@ -40,7 +40,7 @@ grid_t* spectator_getGrid(spectator_t* spectator)
   if (spectator != NULL) {
     return spectator->grid;
   }
-
+  return NULL;
 }
 
 /********** spectator_new **************/

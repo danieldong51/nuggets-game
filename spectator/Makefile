@@ -2,7 +2,7 @@
 #
 # Emily Gao
 
-OBJS = spectator.o
+OBJS = spectator.o ../grid/grid.o
 LIBS = ../libcs50/libcs50-given.a 
 
 # uncomment the following to turn on verbose memory logging
@@ -13,10 +13,6 @@ CC = gcc
 MAKE = make
 # for memory-leak tests
 VALGRIND = valgrind --leak-check=full --show-leak-kinds=all
-
-spectator: $(OBJS)
-	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
-
 
 spectator.o: spectator.h ../libcs50/libcs50-given.a ../grid/grid.h ../libcs50/mem.h ../support/message.h
 
