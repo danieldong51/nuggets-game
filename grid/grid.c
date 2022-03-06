@@ -561,16 +561,12 @@ gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter)
   return -1;
 }
 
-
+//tester
 /**************** grid_new ****************/
 // initializes a new empty grid--mallocs memory
 grid_t* 
 grid_new()
 {
-<<<<<<< HEAD
-  grid_t* map = mem_malloc(sizeof(grid_t));
-  return map;
-=======
   grid_t* grid = mem_malloc(sizeof(grid_t));
 
   // initializing player Positions
@@ -586,7 +582,6 @@ grid_new()
   }
 
   return grid;
->>>>>>> origin/dev
 }
 
 /**************** gridMakeMaster ****************/
