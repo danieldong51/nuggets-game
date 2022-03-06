@@ -50,7 +50,7 @@ char* gridPrint(grid_t* map, char playerLetter);
 int gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter);
 void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int seed);
 grid_t* gridNewPlayer(grid_t* map);
-grid_t* grid_new();
+grid_t* grid_new(int nrows, int ncols);
 int getNumRows(grid_t* masterGrid);
 int getNumColumns(grid_t* masterGrid);
 char** getGrid2D(grid_t* masterGrid);
@@ -70,6 +70,7 @@ static void clearPlayerArray(grid_t* grid);
 static void clearPileArray(grid_t* grid);
 static char gridGetChar(char** grid, position_t* position);
 static void gridMark(char** grid, position_t* position, char mark);
+bool checkSpot(grid_t* masterGrid, grid_t* playerGrid, char** visible, position_t* playerPos, position_t* checkPos);
 
 /**************** newGrid2D ****************/
 static char**
@@ -104,7 +105,7 @@ gridConvert(char** grid, FILE* fp, int nrows, int ncols)
   const int size = ncols+2;  // include room for \n\0
   char line[size];           // a line of input
   int y = 0;
-  printf("ROWS: %d\n", nrows);
+  // printf("ROWS: %d\n", nrows);
 
   // read each line and copy it to the board
   while ( fgets(line, size, fp) != NULL && y < nrows) {
@@ -141,72 +142,55 @@ updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter)
 {
   int playerIndex = playerLetter - 'a';
   position_t* playerPos = masterGrid->playerPositions[playerIndex]->playerPosition;
-
-  // initialize toVisit bag and visited grid
-  bag_t* toVisit = bag_new();
-  char** visited = newGrid2D(getNumRows(masterGrid), getNumColumns(masterGrid));
-
-  // initialize visible grid
   char** visible = newGrid2D(getNumRows(masterGrid), getNumColumns(masterGrid));
 
-  // clear players and piles of gold in playerGrid
-  clearPlayerArray(playerGrid);
-  clearPileArray(playerGrid);
+  // while there are visible squares in the loop
+  bool hasSeen = true;
+  int radius = 0;
+  while (hasSeen) {
 
-  // add current squares to toVisit bag and mark as visited 
-  position_t* curPosition = masterGrid->playerPositions[playerIndex]->playerPosition;
-  bag_insert(toVisit, curPosition);
+    // increment radius
+    radius++;
 
-  gridMark(visited, curPosition, '.');
-  
-  // while toVisit is not empty
-  position_t* position;
-  while ((position = bag_extract(toVisit)) != NULL) {
+    // go around perimeter of square of radius x radius and check visible
+    int playerx = playerPos->x;
+    int playery = playerPos->y;
+    for (int i = -radius; i < radius; i++) {
 
-    // if the position is visible
-    if (isVisible(playerPos, position, masterGrid)) {
+      // check top side
+      position_t* checkPos = position_new(playerx + i, playery - radius);
+      if (checkSpot(masterGrid, playerGrid, visible, playerPos, checkPos)) {
+        hasSeen = true;
+      }
 
-      // mark square as visible
-      gridMark(visible, curPosition, '.');
+      // check bottom side
+      checkPos->y = playery + radius;
+      checkPos->x = playerx - i;
+      if (checkSpot(masterGrid, playerGrid, visible, playerPos, checkPos)) {
+        hasSeen = true;
+      }
 
-      // mark player grid
-      gridMark(playerGrid->grid2D, position, gridGetChar(masterGrid->grid2D, position));
+      // check left side
+      checkPos->y = playery - i;
+      checkPos->x = playerx - radius;
+      if (checkSpot(masterGrid, playerGrid, visible, playerPos, checkPos)) {
+        hasSeen = true;
+      }
 
-      // loop over adjacent squares
-      bag_t* adjacentSquares = bag_new();
-
-      int x = position->x;
-      int y = position->y;
-
-      position_t* positionLeft = position_new(x - 1, y);
-      position_t* positionRight = position_new(x + 1, y);
-      position_t* positionUp = position_new(x, y + 1);
-      position_t* positionDown = position_new(x, y - 1);
-
-      bag_insert(adjacentSquares, positionLeft);
-      bag_insert(adjacentSquares, positionRight);
-      bag_insert(adjacentSquares, positionUp);
-      bag_insert(adjacentSquares, positionDown);
-
-      position_t* positionAdjacent;
-
-      while ((positionAdjacent = bag_extract(adjacentSquares)) != NULL) {
-
-        // if square not visited
-        if (gridGetChar(visited, positionAdjacent) != '.') {
-
-          // mark square as visitied
-          gridMark(visited, positionAdjacent, '.');
-
-          // add to toVisit
-          bag_insert(toVisit, positionAdjacent);
-        }
+      // check right side
+      checkPos->x = playerx + radius;
+      checkPos->y = playery + i;
+      if (checkSpot(masterGrid, playerGrid, visible, playerPos, checkPos)) {
+        hasSeen = true;
       }
     }
   }
 
   // loop through player positions and add to player grid if visible
   for (int i = 0; i < MAXPLAYERS; i++) {
+
+    // clear playerPosition entry
+    playerGrid->playerPositions[i] = NULL;
 
     // check if not null
     position_t* otherPlayerPos;
@@ -224,6 +208,9 @@ updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter)
   // loop through gold positions and add to player grid if visible
   for (int i = 0; i < MAXGOLD; i++) {
 
+    // clear pilePosition entry
+    playerGrid->goldPiles[i] = NULL;
+
     // check if not null
     pile_t* goldPile;
     if ((goldPile = masterGrid->goldPiles[i]) != NULL) {
@@ -236,6 +223,23 @@ updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter)
       }
     }
   }
+}
+
+bool
+checkSpot(grid_t* masterGrid, grid_t* playerGrid, char** visible, position_t* playerPos, position_t* checkPos)
+{
+  if (isVisible(playerPos, checkPos, masterGrid)) {
+
+    // mark player grid
+    char gridChar = gridGetChar(masterGrid->grid2D, checkPos);
+    gridMark(playerGrid->grid2D, checkPos, gridChar);
+
+    //mark visible grid
+    gridMark(visible, checkPos, '.');
+
+    return true;
+  }
+  return false;
 }
 
 void 
@@ -269,12 +273,12 @@ gridMark(char** grid, position_t* position, char mark)
 /**************** isVisible ****************/
 /* Helper function for updateGrid */
 bool 
-isVisible(position_t* playerPos, position_t* squarePos, grid_t* masterGrid)
+isVisible(position_t* playerPos, position_t* checkPos, grid_t* masterGrid)
 {
   int pcol = playerPos->x;
-  int col = squarePos->x;
   int prow = playerPos->y;
-  int row = squarePos->y;
+  int col = checkPos->x;
+  int row = checkPos->y;
 
   float slope = (row - prow) / (col - pcol);
   float rowSlope = (col - pcol) / (row - prow);
@@ -530,9 +534,10 @@ gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter)
 /**************** grid_new ****************/
 // initializes a new empty grid--mallocs memory
 grid_t* 
-grid_new()
+grid_new(int nrows, int ncols)
 {
   grid_t* map = mem_malloc(sizeof(grid_t));
+  map->grid2D = newGrid2D(nrows, ncols);
   return map;
 }
 
@@ -642,7 +647,7 @@ gridNewPlayer(grid_t* map)
   map->playerPositions[i]->playerPosition = playerPosition;
 
   // Initialize new playerGrid
-  grid_t* playerGrid = grid_new(); 
+  grid_t* playerGrid = grid_new(getNumRows(map), getNumColumns(map)); 
   
   // malloc space for gold piles and players
   playerGrid->playerPositions = malloc(MAXPLAYERS * sizeof(playerAndPosition_t*));

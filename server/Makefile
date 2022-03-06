@@ -1,18 +1,13 @@
-# Makefile for CS50 'crawler' module 
-#
-# Georgia Mandell 
-# CS50, Winter 2022, Lab 4 
-# TSE Crawler 
+# Makefile for CS50 nuggests
 
 # object files, and the target library
-OBJS = server.o 
-L = ../libcs50
+OBJS = server.o ../support/message.o ../support/log.o ../player/player.o ../grid/grid.o ../spectator/spectator.o
+LIBS = ../libcs50/libcs50-given.a
 
 CC = gcc
 VALGRIND = valgrind --leak-check=full --show-leak-kinds=all
-CFLAGS = -Wall -pedantic -std=c11 -ggdb -I$L
-LIBS = -lm 
-LLIBS = ../libcs50/libcs50.a 
+CFLAGS = -Wall -pedantic -std=c11 -ggdb -I ../libcs50
+
 
 all: server
 
