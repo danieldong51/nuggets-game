@@ -104,6 +104,7 @@ int main(const int argc, char* argv[])
     // print the port number on which we wait 
     printf("waiting on port %d for contact....\n", port);
 
+    printf("getting out of message_loop\n");
     // call message_loop() until error, or game over 
     message_loop(NULL, 0, NULL, NULL, handleMessage);
     
@@ -194,8 +195,9 @@ static void initializeGame(char* mapPathname)
  * Return true if the message loop should exit, otherwise false.
  * e.g., return true if fatal error.
  */
-static bool handleMessage(void* arg, const addr_t from, const char* message)
+bool handleMessage(void* arg, const addr_t from, const char* message)
 {
+  bool noPlayersTalking = true; 
   // check parameters 
   if (message == NULL || !message_isAddr(from)) {
      return false;
@@ -204,23 +206,21 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
   // PLAY
   if (strncmp(message, "PLAY ", strlen("PLAY ")) == 0) {
     handlePlayMessage(from, message);
+    //return false; 
 
-    return false; 
   }
   // SPECTATE 
   else if (strncmp(message, "SPECTATE", strlen("SPECTATE")) == 0) {
     handleSpectateMessage(from, message);
-
-    return false; 
-
+    
+    //return false; 
   }
   // KEY
   else if (strncmp(message, "KEY ", strlen("KEY ")) == 0) {
 
     // call handleKey() function
     handleKeyMessage(from, message);
-
-    return false;
+    //return false; 
   }
   else {
     sendErrorMessage(from, "Unknown command.\n");
@@ -229,6 +229,16 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
   // end the game if no more gold 
   if (game.goldRemaining == 0) {
     return true; 
+  }
+  for (int i = 0; i < MaxPlayers; i++) {
+    if (player_isTalking(game.players[i])) {
+      printf("Player %c still talking...\n", player_getLetter(game.players[i]));
+      noPlayersTalking = false; 
+    }
+  }
+  if (noPlayersTalking){
+    printf("returning true because no players talking...\n");
+    return true;
   }
   
   return false;
@@ -370,7 +380,7 @@ void handleKeyMessage(const addr_t otherp, const char* message)
 
         // change the player's isTalking status to false 
         player_changeStatus(currPlayer, false);
-        grid_deletePlayer(game.masterGrid, player_getLetter(currPlayer));
+        //grid_deletePlayer(game.masterGrid, player_getLetter(currPlayer));
         break;
 
       case 'h': case 'l': case 'j': case 'k': case 'y': case 'u': case 'b': case 'n':
