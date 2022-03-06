@@ -48,7 +48,7 @@ void gridConvert(char** grid, FILE* fp, int nrows, int ncols);
 void updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter);
 char* gridPrint(grid_t* map, char playerLetter);
 int gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter);
-void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int seed);
+void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int randInt);
 grid_t* gridNewPlayer(grid_t* masterGrid);
 grid_t* grid_new();
 int getNumRows(grid_t* masterGrid);
@@ -122,9 +122,6 @@ gridConvert(char** grid, FILE* fp, int nrows, int ncols)
     }
     
     strncpy(grid[y], line, len);
-    for (int i = 0; i < nrows; i ++){
-      printf("%s\n", grid[i]);
-    }
     y++;
 
   }
@@ -543,7 +540,7 @@ grid_new()
 /**************** gridMakeMaster ****************/
 /* fill up char** array and piles_t** array */
 void 
-gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int seed)
+gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int randInt)
 {
   FILE *fp = fopen(fileName, "r");
 
@@ -563,12 +560,9 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
   gridConvert(grid2D, fp, NR, NC);
   printf("done converting\n");
   masterGrid->grid2D = grid2D;
-  for (int i = 0; i < NR; i ++){
-    printf("%s\n", grid2D[i]);
-  }
   // server calls srand(seed) and that is the only time it srand() is called
   // set the number of piles in the map
-  int numPiles = (int)(rand() % (maxGoldPiles - minGoldPiles +1 )) + minGoldPiles; 
+  int numPiles = (int)(randInt % (maxGoldPiles - minGoldPiles + 1)) + minGoldPiles; 
   int currentGoldAmount;
 
   printf("numpiles: %d\n", numPiles);
@@ -582,19 +576,12 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
     goldPosition->x = 0;
     goldPosition->y = 0;
     char* c = grid2D[0];
-    printf("%s", c);
-    printf("before setting positions\n");
     // find random position that is in an empty room spot
     while (!((grid2D[goldPosition->y][goldPosition->x ] == EMPTY))) {
-      printf("during setting positions\n");
       // set random position for gold
       goldPosition->x = (rand() % NC) + 1; 
-      printf("set x\n");
       goldPosition->y = (rand() % NR) + 1;
-      printf("set y\n");
-      printf("%c", (grid2D[goldPosition->y][goldPosition->x ]));
     }
-    printf("after setting positions\n");
     goldPile->location = goldPosition;
     goldPile->amount = rand();
     currentGoldAmount += goldPile->amount;
