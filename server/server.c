@@ -69,7 +69,7 @@ void handleKeyMessage(const addr_t otherp, const char* message);
 
 player_t* findPlayer(const addr_t address);
 void deleteAllPlayers();
-char* getName(char* content);
+char* getName(const char* content);
 
 void updateAllGrids();
 void sendDisplayToAll();
@@ -650,32 +650,26 @@ void deleteAllPlayers()
   }
 }
 
-char* getName(char* content)
+char* getName(const char* content)
 {
   // create a pointer that starts in middle of message
-  char* name = content; 
-  // TODO: this is the same as "content" ^ 
-    
-  // create end pointer and begin it after the space (at first letter of name)
-  char* end = ++name;
+  char* name = mem_malloc_assert(sizeof(char)*(MaxNameLength + 1), "Unable to allocate memory for player name.\n");
 
-  // move pointer along, keep track of name length 
-  int nameLen = 0; 
-  while (*end != '\0' && nameLen < MaxNameLength) {
-    //  replace with an underscore _ any character for which both isgraph() and isblank() are false
-    if (!isgraph(*end) || !(isblank(*end))) {
-      *end = '_';
+  // loop through content to get name 
+  int i; 
+  for (i = 0; i < strlen(content) && i < MaxNameLength; i++){
+    if ( (!isgraph(content[i])) || !(isblank(content[i])) ) {
+      name[i]='_';
     }
-    // slide pointer until it is null or we have reached max name length
-    end++; 
+    else {
+      name[i] = content[i];
+    }
   }
-  // once we reach end of name or max name length, squash with pointer 
-  if (*end != '\0')
-  {
-    *end = '\0';
-  }
+  name[i] = '\0';
 
   return name; 
+  
+
 }
 
 
