@@ -508,74 +508,90 @@ int
 gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter)
 {
   // find the current location of the player
-  int i;
-  position_t* coordinate = position_new(0,0);
-  for (i =0; i<26; i++) {
-    if (masterGrid->playerPositions[i]->name == playerLetter) {
-      coordinate = masterGrid->playerPositions[i]->playerPosition;
-    }
+  int index = playerLetter - 'a';
+  int yCord;
+  int xCord;
+
+  if (masterGrid->playerPositions[index] != NULL) {
+    yCord = masterGrid->playerPositions[index]->playerPosition->y;
+    xCord = masterGrid->playerPositions[index]->playerPosition->x;
   }
-  
+    
   // change to the location based on moveLetter
   if (moveLetter == 'h') {    
     // left
-    coordinate->x --;
+    xCord--;
   }
   else if (moveLetter == 'l') {
     // right
-    coordinate->x ++;
+    xCord++;
   }
   else if (moveLetter == 'j') {
     // down
-    coordinate->y --;
+    yCord++;
   }
   else if (moveLetter == 'k') {
     // up
-    coordinate->y ++;
+    yCord--;
   }
   else if (moveLetter == 'y') {
     // diagonally up and left
-    coordinate->x --;
-    coordinate->y ++;
+    xCord--;
+    yCord--;
   }
   else if (moveLetter == 'u') {
     // diagonally up and right
-    coordinate->x ++;
-    coordinate->y ++;
+    xCord++;
+    yCord--;
   }
   else if (moveLetter == 'b') {
     // diagonally down and left
-    coordinate->x --;
-    coordinate->y --;
+    xCord--;
+    yCord++;
   }
   else if (moveLetter == 'n') {
     // diagonally down and right
-    coordinate->x ++;
-    coordinate->y --;
+    xCord++;
+    yCord++;
   }
 
-
-  int xCord = coordinate->x;
-  int yCord = coordinate->y;
+  char gridSpot = masterGrid->grid2D[yCord][xCord];
+  printf("gridSpot is %c\n", gridSpot);
 
   // if coordinate is an empty room space or passage
-  if ( (masterGrid->grid2D[yCord][xCord] == EMPTY) || ((masterGrid->grid2D[yCord][xCord]) == PASSAGE) ||  ((masterGrid->grid2D[yCord][xCord]) == PASSAGE)) {
-    masterGrid->playerPositions[i]->playerPosition = coordinate;
+  if ( gridSpot == EMPTY || gridSpot == PASSAGE ) {
+    
+    printf("valid move\n");
+
+    // update player location in masterGrid
+    position_t* coordinate = position_new(xCord, yCord);
+    masterGrid->playerPositions[index]->playerPosition = coordinate;
+
+    // check if coordinate is pile of gold
+    int numPiles = sizeof(masterGrid->goldPiles)/sizeof(masterGrid->goldPiles[0]);  
+
+    for (int i = 0; i < MAXGOLD; i++) {
+
+      // if gold pile has same position, return gold amount
+      pile_t* pile;
+      if ((pile = masterGrid->goldPiles[i]) != NULL) {
+
+        int xGold = pile->location->x;
+        int yGold = pile->location->y;
+
+        // gold pile has same position
+        if (xCord == xGold && yCord == yGold) {
+          
+          int amount = pile->amount;
+          pile == NULL;
+          return amount;
+        }
+      }
+    }
+
     return 0;
   }
 
-  // if the coordinate is a pile of gold
-  else if ((masterGrid->grid2D[yCord][xCord] == '*')) {
-    int numPiles = sizeof(masterGrid->goldPiles)/sizeof(masterGrid->goldPiles[0]);  
-    for (int x = 0; x < numPiles; x++) {
-      // loop through and find the pile structure with the same position
-      if (((masterGrid->goldPiles[i]->location->x) == xCord) && ((masterGrid->goldPiles[i]->location->y) == yCord)) {
-        masterGrid->playerPositions[i]->playerPosition = coordinate;
-        int goldAmount = masterGrid->goldPiles[i]->amount;
-        return goldAmount;
-      }
-    }
-  }
   // not a valid space to move into
   return -1;
 }

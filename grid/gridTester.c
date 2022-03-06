@@ -50,6 +50,17 @@ tester()
   updateGrid(playerDGrid, masterGrid, 'd');
   printf("%s\n", gridPrint(playerDGrid, 'd'));
 
+  printf("created players\n");
+
   updateGrid(playerAGrid, masterGrid, 'a');
   printf("%s\n", gridPrint(playerAGrid, 'a'));
+
+  printf("updated playerA\n");
+
+  char c;
+  while (scanf("%c", &c) != NULL) {
+    gridValidMove(masterGrid, 'a', c);
+    updateGrid(playerAGrid, masterGrid, 'a');
+    printf("%s\n", gridPrint(playerAGrid, 'a'));
+  }
 }
