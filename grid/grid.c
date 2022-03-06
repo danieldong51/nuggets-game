@@ -50,7 +50,7 @@ char* gridPrint(grid_t* map, char playerLetter);
 int gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter);
 void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int seed);
 grid_t* gridNewPlayer(grid_t* map);
-grid_t* grid_new(int nrows, int ncols);
+grid_t* grid_new();
 int getNumRows(grid_t* masterGrid);
 int getNumColumns(grid_t* masterGrid);
 char** getGrid2D(grid_t* masterGrid);
@@ -557,6 +557,8 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
   fp = fopen(fileName, "r");
   masterGrid->nrows = NR;
   masterGrid->ncols = NC;
+  printf("rows: %d ", NR);
+  printf("columns: %d ", NC);
 
     // set 2d char map for grid
   char** grid2D;                                              // map of walls, paths, and spaces
@@ -582,18 +584,16 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
     pile_t* goldPile = mem_malloc(sizeof(pile_t));
     goldPosition->x = 0;
     goldPosition->y = 0;
-    char* c = grid2D[0];
-    printf("%s", c);
     printf("before setting positions\n");
     // find random position that is in an empty room spot
     while (!((grid2D[goldPosition->y][goldPosition->x ] == EMPTY))) {
       printf("during setting positions\n");
       // set random position for gold
       goldPosition->x = (rand() % NC) + 1; 
-      printf("set x\n");
+      printf("set x %d\n", goldPosition->x);
       goldPosition->y = (rand() % NR) + 1;
-      printf("set y\n");
-      printf("%c", (grid2D[goldPosition->y][goldPosition->x ]));
+      printf("set y: %d\n", goldPosition->y);
+
     }
     printf("after setting positions\n");
     goldPile->location = goldPosition;
