@@ -71,6 +71,7 @@ static void clearPileArray(grid_t* grid);
 static char gridGetChar(char** grid, position_t* position);
 static void gridMark(char** grid, position_t* position, char mark);
 bool checkSpot(grid_t* masterGrid, grid_t* playerGrid, char** visible, position_t* playerPos, position_t* checkPos);
+void grid_deletePlayer(grid_t* masterGrid, char playerLetter) ;
 
 /**************** newGrid2D ****************/
 static char**
@@ -78,6 +79,7 @@ newGrid2D(int nrows, int ncols)
 {
   // allocate a 2-dimensional array of nrows x ncols
   char** grid = calloc(nrows, sizeof(char*));
+
   char* contents = calloc(nrows * ncols, sizeof(char));
   if (grid == NULL || contents == NULL) {
     fprintf(stderr, "cannot allocate memory for map\r\n");
@@ -88,6 +90,7 @@ newGrid2D(int nrows, int ncols)
   for (int y = 0; y < nrows; y++) {
     grid[y] = contents + y * ncols;
   }
+
 
   // fill the board with empty cells
   for (int y = 0; y < nrows; y++) {
@@ -422,7 +425,8 @@ char* gridPrint(grid_t* playerGrid, char playerLetter)
 
   // fill in returnGrid with walls and spaces
   for (int i = 0; i < nrows; i++) {
-    strcpy(returnGrid[i], playerGrid->grid2D[i]);
+    // returnGrid[i] = playerGrid->grid2D[i];
+    strncpy(returnGrid[i], playerGrid->grid2D[i], ncols-1);
   }
 
   // printing player positions to returnGrid
@@ -496,8 +500,8 @@ char* gridPrint(grid_t* playerGrid, char playerLetter)
     //   returnString[i*(ncols+1)] = '\n';
     // }
   }
-  returnString[(nrows*(ncols+1)) + 1 ] = '\0';
-
+  returnString[(nrows*(ncols+1)) ] = '\0';
+  mem_free(returnGrid);
   return returnString;
 }
 
@@ -613,7 +617,7 @@ grid_new()
   grid->playerPositions = calloc(MAXPLAYERS, sizeof(playerAndPosition_t*));
   for (int i = 0; i < MAXPLAYERS; i++) {
     grid->playerPositions[i] = NULL;
-  }
+  } 
 
   // initializing gold piles
   grid->goldPiles = calloc(MAXGOLD, sizeof(pile_t*));
@@ -635,7 +639,7 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
   int NR = file_numLines(fp);                                 // number of rows in grid 
   char* tempColumn = file_readLine(fp);
   int NC = strlen(tempColumn) + 1;                             // number of columns in grid
-
+  mem_free(tempColumn);
   fclose(fp);
   fp = fopen(fileName, "r");
   masterGrid->nrows = NR;
@@ -656,11 +660,13 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
   
   pile_t** goldPiles = masterGrid->goldPiles; 
 
+
   // create pile structures by setting random locations and random amounts for gold
   for (int i = 0; i < numPiles; i++) {
-
-    position_t* goldPosition= position_new(0, 0);
+    position_t* goldPosition = position_new(0, 0);
     pile_t* goldPile = mem_malloc(sizeof(pile_t));
+
+
 
     // find random position that is in an empty room spot
     while (!((grid2D[goldPosition->y][goldPosition->x] == EMPTY))) {
@@ -680,6 +686,8 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
 
   }
 
+
+
   printf("%d\n", numGold);
   // fraction to scale down gold amount in each pile by
   float goldScale = ((float)numGold/(float)currentGoldAmount);
@@ -691,7 +699,7 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
     goldPiles[i]->amount = floor(oversizedAmount * goldScale);
 
     currentGoldAmount = currentGoldAmount + goldPiles[i]->amount;
-    printf("scaled amount: %d\n",goldPiles[i]->amount);
+
   }
 
   if (currentGoldAmount < numGold){
@@ -701,6 +709,7 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
 
   masterGrid->goldPiles=goldPiles;
   fclose(fp);
+
   // NEED TO THINK ABOUT FREES
 }
 
@@ -794,21 +803,50 @@ position_t* newPosition(){
 void gridDelete(grid_t* map) {
   goldPilesDelete(map->goldPiles); // delete the goldPiles
   playerAndPositionDelete(map->playerPositions);
+  // for (int i = 0; i < map->nrows; i ++){
+  //   mem_free(map->grid2D[i]);
+  // }
+  mem_free(map->grid2D[0]);
+  mem_free(map->grid2D);
   mem_free(map);
+
 }
 
 void goldPilesDelete(pile_t** goldPiles) 
 {
-  int numPiles = sizeof(goldPiles) / sizeof(goldPiles[0]);
-  for (int i = 0; i < numPiles; i++) {
+
+
+  for (int i = 0; i < MAXGOLD; i++) {
+    if (goldPiles[i] != NULL) {
+      mem_free(goldPiles[i]->location);
+    }
     mem_free(goldPiles[i]);
   }
+  mem_free(goldPiles);
 }
 
 void playerAndPositionDelete(playerAndPosition_t** playerPositions)
 {
-  int numPlayers = sizeof(playerPositions) / sizeof(playerPositions[0]);
-  for (int i = 0; i < numPlayers; i++) {
+  
+  for (int i = 0; i < MAXPLAYERS; i++) {
+    if (playerPositions[i] != NULL) {
+      mem_free(playerPositions[i]->playerPosition);
+    }
     mem_free(playerPositions[i]);
+  }
+  mem_free(playerPositions);
+}
+
+void grid_deletePlayer(grid_t* masterGrid, char playerLetter) 
+{
+  playerAndPosition_t** playerPositions = masterGrid->playerPositions;
+  for (int i = 0; i < MAXPLAYERS; i++) {
+    // if player position exists, add to returnGrid
+    if (playerPositions[i] != NULL && playerPositions[i]->playerPosition != NULL) {
+
+      if (i == playerLetter - 'a') {
+        playerPositions[i]->playerPosition = NULL;
+      }
+    }
   }
 }
