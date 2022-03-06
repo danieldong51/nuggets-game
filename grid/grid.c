@@ -55,6 +55,7 @@ int getNumRows(grid_t* masterGrid);
 int getNumColumns(grid_t* masterGrid);
 char** getGrid2D(grid_t* masterGrid);
 void gridDelete(grid_t* map, bool isMaster);
+void grid_deletePlayer(grid_t* masterGrid, char playerLetter);
 
 /**************** local functions ****************/
 /* not visible outside this module */
@@ -850,4 +851,18 @@ playerAndPositionDelete(playerAndPosition_t** playerPositions, bool isMaster)
     }
   }
   mem_free(playerPositions);
+}
+
+void grid_deletePlayer(grid_t* masterGrid, char playerLetter) 
+{
+  playerAndPosition_t** playerPositions = masterGrid->playerPositions;
+  for (int i = 0; i < MAXPLAYERS; i++) {
+    // if player position exists, add to returnGrid
+    if (playerPositions[i] != NULL && playerPositions[i]->playerPosition != NULL) {
+
+      if (i == playerLetter - 'a') {
+        playerPositions[i]->playerPosition = NULL;
+      }
+    }
+  }
 }
