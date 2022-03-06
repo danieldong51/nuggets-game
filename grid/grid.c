@@ -50,7 +50,7 @@ char** gridPrint(grid_t* map, char playerLetter);
 int gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter);
 void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int seed);
 grid_t* gridNewPlayer(grid_t* map);
-grid_t* grid_new(int nrows, int ncols);
+grid_t* grid_new();
 int getNumRows(grid_t* masterGrid);
 int getNumColumns(grid_t* masterGrid);
 char** getGrid2D(grid_t* masterGrid);
@@ -526,11 +526,10 @@ gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter)
 /**************** grid_new ****************/
 // initializes a new empty grid--mallocs memory
 grid_t* 
-grid_new(int nrows, int ncols)
+grid_new()
 {
-  grid_t* map = mem_malloc(sizeof(grid_t));
-  map->grid2D = newGrid2D(nrows, ncols);
-  return map;
+  grid_t* grid = mem_malloc(sizeof(grid_t));
+  return grid;
 }
 
 /**************** gridMakeMaster ****************/
