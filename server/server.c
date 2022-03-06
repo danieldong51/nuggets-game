@@ -612,7 +612,7 @@ void gameOver()
   char gameOverMessage[message_MaxBytes];
   sprintf(gameOverMessage, "GAME OVER:\n");
 
-  for (int i = 0; i < MaxPlayers; i++) {
+  for (int i = 0; i < game.numPlayers + 1; i++) {
     player_t* p = game.players[i];
     char* info;
 
