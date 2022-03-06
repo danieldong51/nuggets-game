@@ -18,7 +18,7 @@ main(const int argc, char* argv[])
 }
 
 void
-tester()
+tester() 
 {
   // initiailizing gridMaster;
   grid_t* masterGrid = grid_new();
@@ -29,5 +29,6 @@ tester()
   printf("rand int is %d\n", randInt);
   gridMakeMaster(masterGrid, "../maps/main.txt", 20, 10, 30, randInt);
 
+  
   
 }
