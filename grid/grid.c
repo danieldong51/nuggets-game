@@ -535,10 +535,9 @@ gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter)
 /**************** grid_new ****************/
 // initializes a new empty grid--mallocs memory
 grid_t* 
-grid_new(int nrows, int ncols)
+grid_new()
 {
   grid_t* map = mem_malloc(sizeof(grid_t));
-  map->grid2D = newGrid2D(nrows, ncols);
   return map;
 }
 
