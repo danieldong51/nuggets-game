@@ -25,23 +25,8 @@ void spectator_delete(spectator_t* spectator);
 addr_t spectator_getAddress(spectator_t* spectator);
 grid_t* spectator_getGrid(spectator_t* spectator);
 
-/******** spectator_getAddress ************/
-addr_t spectator_getAddress(spectator_t* spectator)
-{
-  if(spectator != NULL) {
-    return spectator->address;
-  }
-  return message_noAddr();
-}
-
-/******** spectator_getGrid ************/
-grid_t* spectator_getGrid(spectator_t* spectator) 
-{
-  if (spectator != NULL) {
-    return spectator->grid;
-  }
-  return NULL;
-}
+void spectator_setAddress(spectator_t* spectator, addr_t address);
+void spectator_setGrid(spectator_t* spectator, grid_t* grid);
 
 /********** spectator_new **************/
 spectator_t* spectator_new(grid_t* masterGrid, addr_t address)
@@ -66,6 +51,41 @@ void spectator_delete(spectator_t* spectator)
       mem_free(spectator->grid);
     }
     free(spectator);
+  }
+}
+
+/******** spectator_getAddress ************/
+addr_t spectator_getAddress(spectator_t* spectator)
+{
+  if(spectator != NULL) {
+    return spectator->address;
+  }
+  return message_noAddr();
+}
+
+/******** spectator_getGrid ************/
+grid_t* spectator_getGrid(spectator_t* spectator) 
+{
+  if (spectator != NULL) {
+    return spectator->grid;
+  }
+  return NULL;
+}
+
+
+/******** spectator_setAddress ************/
+void spectator_setAddress(spectator_t* spectator, addr_t address)
+{
+  if(spectator != NULL && message_isAddr(address)) {
+    spectator->address = address;
+  }
+}
+
+/******** spectator_setGrid ************/
+void spectator_setGrid(spectator_t* spectator, grid_t* grid)
+{
+  if(spectator != NULL && grid != NULL) {
+    spectator->grid = grid;
   }
 }
 
