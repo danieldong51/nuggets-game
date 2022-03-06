@@ -48,8 +48,8 @@ void gridConvert(char** grid, FILE* fp, int nrows, int ncols);
 void updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter);
 char* gridPrint(grid_t* map, char playerLetter);
 int gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter);
-void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int seed);
-grid_t* gridNewPlayer(grid_t* map);
+void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int randInt);
+grid_t* gridNewPlayer(grid_t* masterGrid);
 grid_t* grid_new();
 int getNumRows(grid_t* masterGrid);
 int getNumColumns(grid_t* masterGrid);
@@ -122,9 +122,6 @@ gridConvert(char** grid, FILE* fp, int nrows, int ncols)
     }
     
     strncpy(grid[y], line, len);
-    for (int i = 0; i < nrows; i ++){
-      printf("%s\n", grid[i]);
-    }
     y++;
 
   }
@@ -402,13 +399,18 @@ char* gridPrint(grid_t* playerGrid, char playerLetter)
   // printing player positions to returnGrid
   // using the playerPositions list in playerGrid
   playerAndPosition_t** playerPositions = playerGrid->playerPositions;
+
+  printf("filled in returnGrid\n");
+
   if (playerPositions != NULL) {
     
     // loop over players
     for (int i = 0; i < MAXPLAYERS; i++) {
 
       // if player position exists, add to returnGrid
-      if (playerPositions[i]->playerPosition != NULL) {
+      if (playerPositions[i] != NULL && playerPositions[i]->playerPosition != NULL) {
+
+        printf("playerPositions added\n");
 
         position_t* playerPosition = playerPositions[i]->playerPosition;
 
@@ -424,6 +426,8 @@ char* gridPrint(grid_t* playerGrid, char playerLetter)
     }
   }
 
+  printf("made it past players\n");
+
   // printing gold positions to returnGrid
   // using the goldPiles list in playerGrid
   pile_t** goldPiles = playerGrid->goldPiles;
@@ -434,20 +438,46 @@ char* gridPrint(grid_t* playerGrid, char playerLetter)
 
       // if gold pile exists, add to returnGrid
       if (goldPiles[i] != NULL) {
+        
+        printf("inside...\n");
 
         position_t* pilePosition = goldPiles[i]->location;
+
+        if (pilePosition == NULL) {
+          printf("NULLn\n");
+        }
+
+        printf("before here\n");
+
+        printf("x: %d, y: %d\n", pilePosition->x, pilePosition->y);
+
+        printf("here\n");
+
         gridMark(returnGrid, pilePosition, GOLDPILE);
+
+        printf("gridMark...\n");
       }
     }
   }
 
-  char returnString[(nrows*(ncols+1)) + 1 ] ;
+  printf("made it past gold\n");
+
+  char* returnString;
+  returnString = mem_malloc(sizeof(char)* (nrows*(ncols+1)) + 1) ;
   for ( int i = 0; i < nrows; i++ ){
     for ( int x = 0; x < ncols; x++ ) {
-      returnString[((i-1)*nrows) + x] = returnGrid[i][x];
+      returnString[((i)* (ncols + 1)) + x] = returnGrid[i][x];
     }
-    returnString[i*(ncols+1)] = '\n';
+    returnString[(i+1)*(ncols+1) - 1] = '\n';
+    // if (i != 0 ){
+    //       returnString[(i)*(ncols)] = '\n';
+    // }
+    //returnString[(i+1)*(ncols)] = '\n';
+    // if (i != 0) {
+    //   returnString[i*(ncols+1)] = '\n';
+    // }
   }
+  returnString[(nrows*(ncols+1)) + 1 ] = '\0';
 
   return returnString;
 }
@@ -538,13 +568,26 @@ grid_t*
 grid_new()
 {
   grid_t* grid = mem_malloc(sizeof(grid_t));
+
+  // initializing player Positions
+  grid->playerPositions = calloc(MAXPLAYERS, sizeof(playerAndPosition_t*));
+  for (int i = 0; i < MAXPLAYERS; i++) {
+    grid->playerPositions[i] = NULL;
+  }
+
+  // initializing gold piles
+  grid->goldPiles = calloc(MAXGOLD, sizeof(pile_t*));
+  for (int i = 0; i < MAXGOLD; i++) {
+    grid->goldPiles[i] = NULL;
+  }
+
   return grid;
 }
 
 /**************** gridMakeMaster ****************/
 /* fill up char** array and piles_t** array */
 void 
-gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int seed)
+gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int randInt)
 {
   FILE *fp = fopen(fileName, "r");
 
@@ -557,49 +600,40 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
   fp = fopen(fileName, "r");
   masterGrid->nrows = NR;
   masterGrid->ncols = NC;
-  printf("rows: %d ", NR);
-  printf("columns: %d ", NC);
+  
 
     // set 2d char map for grid
   char** grid2D;                                              // map of walls, paths, and spaces
   grid2D = newGrid2D(NR, NC);
   gridConvert(grid2D, fp, NR, NC);
-  printf("done converting\n");
   masterGrid->grid2D = grid2D;
-  for (int i = 0; i < NR; i ++){
-    printf("%s\n", grid2D[i]);
-  }
   // server calls srand(seed) and that is the only time it srand() is called
   // set the number of piles in the map
-  int numPiles = (int)(rand() % (maxGoldPiles - minGoldPiles +1 )) + minGoldPiles; 
+  int numPiles = (int)(randInt % (maxGoldPiles - minGoldPiles + 1)) + minGoldPiles; 
   int currentGoldAmount;
 
   printf("numpiles: %d\n", numPiles);
   
-  pile_t* goldPiles[numPiles]; 
-  // create pile structures bt setting random locations and random amounts for gold
+  pile_t** goldPiles = masterGrid->goldPiles; 
+
+  // create pile structures by setting random locations and random amounts for gold
   for (int i = 0; i < numPiles; i++) {
 
-    position_t* goldPosition= mem_malloc(sizeof(position_t));
+    position_t* goldPosition= position_new(0, 0);
     pile_t* goldPile = mem_malloc(sizeof(pile_t));
-    goldPosition->x = 0;
-    goldPosition->y = 0;
-    printf("before setting positions\n");
-    // find random position that is in an empty room spot
-    while (!((grid2D[goldPosition->y][goldPosition->x ] == EMPTY))) {
-      printf("during setting positions\n");
-      // set random position for gold
-      goldPosition->x = (rand() % NC) + 1; 
-      printf("set x %d\n", goldPosition->x);
-      goldPosition->y = (rand() % NR) + 1;
-      printf("set y: %d\n", goldPosition->y);
 
+    // find random position that is in an empty room spot
+    while (!((grid2D[goldPosition->y][goldPosition->x] == EMPTY))) {
+      // set random position for gold
+      goldPosition->x = (rand() % NC); 
+      goldPosition->y = (rand() % NR);
     }
-    printf("after setting positions\n");
+
     goldPile->location = goldPosition;
     goldPile->amount = rand();
     currentGoldAmount += goldPile->amount;
     goldPiles[i] = goldPile;
+
   }
   
   // fraction to scale down gold amount in each pile by
@@ -621,33 +655,33 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
 // returns the new player grid, which will start off as completely empty
 // creates a new playerAndPosition struct representing new player in the masterGrid (map is the masterGrid)
 grid_t* 
-gridNewPlayer(grid_t* map)
+gridNewPlayer(grid_t* masterGrid)
 {
   position_t* playerPosition= mem_malloc(sizeof(position_t));
 
   playerPosition->x = 0;
   playerPosition->y = 0;
-  while ( !(map->grid2D[playerPosition->y][playerPosition->x] == EMPTY) ){
-    playerPosition->x = (rand() % map-> nrows) + 1; 
-    playerPosition->y = (rand() % map-> ncols) + 1;
+  while ( !(masterGrid->grid2D[playerPosition->y][playerPosition->x] == EMPTY) ){
+    playerPosition->x = (rand() % masterGrid-> nrows) + 1; 
+    playerPosition->y = (rand() % masterGrid-> ncols) + 1;
   }
 
   // if this is the first player being intialized
-  if (map->playerPositions == NULL) {
+  if (masterGrid->playerPositions == NULL) {
     playerAndPosition_t* players[26];
-    map->playerPositions = players;
+    masterGrid->playerPositions = players;
   }
 
   int i = 0;
-  while( !(map->playerPositions[i] == NULL) ) {
+  while( !(masterGrid->playerPositions[i] == NULL) ) {
     i++;
   }
 
-  map->playerPositions[i]->name = i+'a'; // set char name
-  map->playerPositions[i]->playerPosition = playerPosition;
+  masterGrid->playerPositions[i]->name = i+'a'; // set char name
+  masterGrid->playerPositions[i]->playerPosition = playerPosition;
 
   // Initialize new playerGrid
-  grid_t* playerGrid = grid_new(getNumRows(map), getNumColumns(map)); 
+  grid_t* playerGrid = grid_new(getNumRows(masterGrid), getNumColumns(masterGrid)); 
   
   // malloc space for gold piles and players
   playerGrid->playerPositions = malloc(MAXPLAYERS * sizeof(playerAndPosition_t*));

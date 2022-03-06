@@ -11,13 +11,8 @@
 #include <string.h>
 #include <stdbool.h>
 #include <time.h> 
-<<<<<<< HEAD
-#include "libcs50/mem.h"
-#include "grid.h"
-=======
 #include "../libcs50/mem.h"
 #include "../grid/grid.h"
->>>>>>> 1b13dd87950160721b34e0e244062a16cf462fae
 #include "../support/message.h"
 #include "player.h"
 
@@ -66,7 +61,7 @@ void player_setAddress(player_t* player, addr_t address);
 player_t* player_new()
 {
   // malloc memory for new player 
-  player_t* player = mem_malloc_assert(sizeof(player_t*), "Unable to allocate memory for player\n");
+  player_t* player = mem_malloc_assert(sizeof(player_t), "Unable to allocate memory for player\n");
 
   // initialize attributes of player to nothing
   player->name = "";
