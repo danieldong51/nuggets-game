@@ -15,7 +15,7 @@ MAKE = make
 VALGRIND = valgrind --leak-check=full --show-leak-kinds=all
 
 gridTester: $(OBJS)
-	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
+	$(CC) $(CFLAGS) $^ $(LIBS) -lm -o $@
 
 gridTester.o: ../libcs50/libcs50-given.a grid.h
 grid.o: ../libcs50/libcs50-given.a grid.h
