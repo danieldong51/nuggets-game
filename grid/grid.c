@@ -656,10 +656,12 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
   
   pile_t** goldPiles = masterGrid->goldPiles; 
 
+
   // create pile structures by setting random locations and random amounts for gold
   for (int i = 0; i < numPiles; i++) {
     position_t* goldPosition = position_new(0, 0);
-  pile_t* goldPile = mem_malloc(sizeof(pile_t));
+    pile_t* goldPile = mem_malloc(sizeof(pile_t));
+
 
 
     // find random position that is in an empty room spot
@@ -809,7 +811,8 @@ void gridDelete(grid_t* map) {
 void goldPilesDelete(pile_t** goldPiles) 
 {
   int numPiles = sizeof(goldPiles) / sizeof(goldPiles[0]);
-  for (int i = 0; i < numPiles; i++) {
+
+  for (int i = 0; i < MAXGOLD; i++) {
     if (goldPiles[i] != NULL) {
       mem_free(goldPiles[i]->location);
     }
@@ -821,7 +824,7 @@ void goldPilesDelete(pile_t** goldPiles)
 void playerAndPositionDelete(playerAndPosition_t** playerPositions)
 {
   int numPlayers = sizeof(playerPositions) / sizeof(playerPositions[0]);
-  for (int i = 0; i < numPlayers; i++) {
+  for (int i = 0; i < MAXPLAYERS; i++) {
     if (playerPositions[i] != NULL) {
       mem_free(playerPositions[i]->playerPosition);
     }
