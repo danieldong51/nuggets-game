@@ -441,11 +441,12 @@ char* gridPrint(grid_t* playerGrid, char playerLetter)
     }
   }
 
-  char returnString[(nrows*ncols) + 1 ] ;
+  char returnString[(nrows*(ncols+1)) + 1 ] ;
   for ( int i = 0; i < nrows; i++ ){
     for ( int x = 0; x < ncols; x++ ) {
       returnString[((i-1)*nrows) + x] = returnGrid[i][x];
     }
+    returnString[i*(ncols+1)] = '\n';
   }
 
   return returnString;
@@ -562,6 +563,7 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
   char** grid2D;                                              // map of walls, paths, and spaces
   grid2D = newGrid2D(NR, NC);
   gridConvert(grid2D, fp, NR, NC);
+  printf("done converting\n");
   masterGrid->grid2D = grid2D;
   for (int i = 0; i < NR; i ++){
     printf("%s\n", grid2D[i]);
@@ -589,9 +591,9 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
       printf("during setting positions\n");
       // set random position for gold
       goldPosition->x = (rand() % NC) + 1; 
-      printf("set x: %d\n", goldPosition->x);
+      printf("set x\n");
       goldPosition->y = (rand() % NR) + 1;
-      printf("set y: %d\n", goldPosition->y);
+      printf("set y\n");
       printf("%c", (grid2D[goldPosition->y][goldPosition->x ]));
     }
     printf("after setting positions\n");
@@ -603,7 +605,7 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
   
   // fraction to scale down gold amount in each pile by
   int goldScale = numGold/currentGoldAmount;
-  printf("goldScale: %d\n", goldScale);
+
   // loop through again and scale down gold pile amounts
   for (int i = 0; i< numPiles; i++) {
     int oversizedAmount = goldPiles[i]->amount;
@@ -627,8 +629,8 @@ gridNewPlayer(grid_t* map)
   playerPosition->x = 0;
   playerPosition->y = 0;
   while ( !(map->grid2D[playerPosition->y][playerPosition->x] == EMPTY) ){
-    playerPosition->x = (rand() % map-> ncols) + 1; 
-    playerPosition->y = (rand() % map-> nrows) + 1;
+    playerPosition->x = (rand() % map-> nrows) + 1; 
+    playerPosition->y = (rand() % map-> ncols) + 1;
   }
 
   // if this is the first player being intialized
