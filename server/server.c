@@ -106,12 +106,12 @@ int main(const int argc, char* argv[])
     addr_t other = message_noAddr(); // no correspondent yet 
 
     // call message_loop() until timeout or error 
-    //message_loop(&other, timeout, NULL, NULL, handleMessage);
+    message_loop(&other, timeout, NULL, NULL, handleMessage);
     
-    //gameOver();
+    gameOver();
 
     // shut down message module 
-    //message_done(); 
+    message_done(); 
 
   }
   else {
@@ -132,6 +132,7 @@ static bool parseArgs(const int argc, char* argv[])
       fprintf(stderr, "Unable to open map file\n");
       return false; 
     }
+    fclose(mapFile);
 
     if (argc == 3) {
       // if a seed is provided, verify that it is a positive integer, and then set in game struct 
@@ -149,9 +150,7 @@ static bool parseArgs(const int argc, char* argv[])
     else{
       game.seed = (int) getpid();
     }
-
     srand(game.seed);
-  
     return true; 
   }
   return false; 
@@ -169,16 +168,20 @@ static void initializeGame(char* mapPathname)
   game.players = playersList;
 
   // intialize each player struct
+  player_t* p;
   for (int i = 0; i < MaxPlayers; i++) {
-    player_t* p = player_new();
+    p = player_new();
     game.players[i] = p;
   }
 
   // initalize master grid 
   game.masterGrid = grid_new();
 
+  // call rand 
+  int randNum = rand();
+
   // function tto initialize game 
-  gridMakeMaster(game.masterGrid, mapPathname, GoldTotal, GoldMinNumPiles, GoldMaxNumPiles, game.seed);
+  gridMakeMaster(game.masterGrid, mapPathname, GoldTotal, GoldMinNumPiles, GoldMaxNumPiles, randNum);
 
 }
 

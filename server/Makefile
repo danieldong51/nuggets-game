@@ -24,6 +24,9 @@ test:
 
 .PHONY: all clean test 
 
+valgrind: 
+	$(VALGRIND) ./server ../maps/main.txt
+
 # list all the sources and docs in this directory.
 # (this rule is used only by the Professor in preparing the starter kit)
 sourcelist: Makefile *.md *.c *.h
