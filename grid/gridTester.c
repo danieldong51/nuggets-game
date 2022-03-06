@@ -29,6 +29,7 @@ tester()
   printf("rand int is %d\n", randInt);
   gridMakeMaster(masterGrid, "../maps/main.txt", 20, 10, 30, randInt);
 
-  
+  gridPrint(masterGrid, 'a');
+  printf("%s", gridPrint(masterGrid, 'a'));
   
 }
