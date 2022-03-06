@@ -839,13 +839,12 @@ void playerAndPositionDelete(playerAndPosition_t** playerPositions)
 
 void grid_deletePlayer(grid_t* masterGrid, char playerLetter) 
 {
-  playerAndPosition_t** playerPositions = masterGrid->playerPositions;
   for (int i = 0; i < MAXPLAYERS; i++) {
     // if player position exists, add to returnGrid
-    if (playerPositions[i] != NULL && playerPositions[i]->playerPosition != NULL) {
+    if (masterGrid->playerPositions[i] != NULL && masterGrid->playerPositions[i]->playerPosition != NULL) {
 
       if (i == playerLetter - 'a') {
-        playerPositions[i]->playerPosition = NULL;
+        masterGrid->playerPositions[i]->playerPosition = NULL;
       }
     }
   }
