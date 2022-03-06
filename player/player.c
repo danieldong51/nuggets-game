@@ -61,7 +61,7 @@ void player_setAddress(player_t* player, addr_t address);
 player_t* player_new()
 {
   // malloc memory for new player 
-  player_t* player = mem_malloc_assert(sizeof(player_t*), "Unable to allocate memory for player\n");
+  player_t* player = mem_malloc_assert(sizeof(player_t), "Unable to allocate memory for player\n");
 
   // initialize attributes of player to nothing
   player->name = "";
