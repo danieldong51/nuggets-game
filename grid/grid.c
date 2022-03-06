@@ -49,7 +49,7 @@ void updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter);
 char* gridPrint(grid_t* map, char playerLetter);
 int gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter);
 void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int randInt);
-grid_t* gridNewPlayer(grid_t* masterGrid);
+grid_t* gridNewPlayer(grid_t* masterGrid, char playerLetter);
 grid_t* grid_new();
 int getNumRows(grid_t* masterGrid);
 int getNumColumns(grid_t* masterGrid);
@@ -653,9 +653,9 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
 
 /**************** gridNewPlayer ****************/
 // returns the new player grid, which will start off as completely empty
-// creates a new playerAndPosition struct representing new player in the masterGrid (map is the masterGrid)
+// creates a new playerAndPosition struct representing new player in the masterGrid
 grid_t* 
-gridNewPlayer(grid_t* masterGrid)
+gridNewPlayer(grid_t* masterGrid, char playerLetter)
 {
   position_t* playerPosition= mem_malloc(sizeof(position_t));
 
@@ -666,12 +666,13 @@ gridNewPlayer(grid_t* masterGrid)
     playerPosition->y = (rand() % masterGrid-> ncols) + 1;
   }
 
-  // if this is the first player being intialized
-  if (masterGrid->playerPositions == NULL) {
-    playerAndPosition_t* players[26];
-    masterGrid->playerPositions = players;
-  }
+  // // if this is the first player being intialized
+  // if (masterGrid->playerPositions == NULL) {
+  //   playerAndPosition_t* players[26];
+  //   masterGrid->playerPositions = players;
+  // }
 
+  // get the index of the next available spot
   int i = 0;
   while( !(masterGrid->playerPositions[i] == NULL) ) {
     i++;

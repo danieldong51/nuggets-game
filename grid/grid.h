@@ -74,7 +74,16 @@ grid_t* grid_new();
 void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int randInt);
 
 /**************** gridNewPlayer ****************/
-grid_t* gridNewPlayer(grid_t* map);
+/* Returns new playerGrid for player
+ *
+ * Caller provides:
+ *   a valid master map pointer, and a valid char of player letter.
+ * We return:
+ *   NULL if error,
+ *   a valid player map pointer otherwise, with initialized char**
+ *   map.
+ */
+grid_t* gridNewPlayer(grid_t* masterGrid, char playerLetter);
 
 
 /**************** getNumRows ****************/
