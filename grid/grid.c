@@ -584,9 +584,9 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
     while (!((grid2D[goldPosition->y][goldPosition->x ] == EMPTY))) {
       printf("during setting positions\n");
       // set random position for gold
-      goldPosition->x = (rand() % NR) + 1; 
+      goldPosition->x = (rand() % NC) + 1; 
       printf("set x\n");
-      goldPosition->y = (rand() % NC) + 1;
+      goldPosition->y = (rand() % NR) + 1;
       printf("set y\n");
       printf("%c", (grid2D[goldPosition->y][goldPosition->x ]));
     }
