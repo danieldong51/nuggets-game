@@ -71,6 +71,7 @@ static void clearPileArray(grid_t* grid);
 static char gridGetChar(char** grid, position_t* position);
 static void gridMark(char** grid, position_t* position, char mark);
 bool checkSpot(grid_t* masterGrid, grid_t* playerGrid, char** visible, position_t* playerPos, position_t* checkPos);
+void grid_deletePlayer(grid_t* masterGrid, char playerLetter) ;
 
 /**************** newGrid2D ****************/
 static char**
@@ -834,4 +835,18 @@ void playerAndPositionDelete(playerAndPosition_t** playerPositions)
     mem_free(playerPositions[i]);
   }
   mem_free(playerPositions);
+}
+
+void grid_deletePlayer(grid_t* masterGrid, char playerLetter) 
+{
+  playerAndPosition_t** playerPositions = masterGrid->playerPositions;
+  for (int i = 0; i < MAXPLAYERS; i++) {
+    // if player position exists, add to returnGrid
+    if (playerPositions[i] != NULL && playerPositions[i]->playerPosition != NULL) {
+
+      if (i == playerLetter - 'a') {
+        playerPositions[i]->playerPosition = NULL;
+      }
+    }
+  }
 }
