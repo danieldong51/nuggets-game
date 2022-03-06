@@ -31,14 +31,25 @@ tester()
 
   printf("%s\n", gridPrint(masterGrid, 'a'));
 
-  gridPrint(masterGrid, 'a');
-  printf("%s", gridPrint(masterGrid, 'a'));
-
   printf("printed grid\n");
 
+  
   grid_t* playerAGrid = gridNewPlayer(masterGrid, 'a');
+  updateGrid(playerAGrid, masterGrid, 'a');
+  printf("%s\n", gridPrint(playerAGrid, 'a'));
 
-  printf("created playerA grid\n");
+  grid_t* playerBGrid = gridNewPlayer(masterGrid, 'b');
+  updateGrid(playerBGrid, masterGrid, 'b');
+  printf("%s\n", gridPrint(playerBGrid, 'b'));
+
+  grid_t* playerCGrid = gridNewPlayer(masterGrid, 'c');
+  updateGrid(playerCGrid, masterGrid, 'c');
+  printf("%s\n", gridPrint(playerCGrid, 'c'));
+
+  grid_t* playerDGrid = gridNewPlayer(masterGrid, 'd');
+  updateGrid(playerDGrid, masterGrid, 'd');
+  printf("%s\n", gridPrint(playerDGrid, 'd'));
 
   updateGrid(playerAGrid, masterGrid, 'a');
+  printf("%s\n", gridPrint(playerAGrid, 'a'));
 }
