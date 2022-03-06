@@ -400,11 +400,36 @@ char* gridPrint(grid_t* playerGrid, char playerLetter)
     strcpy(returnGrid[i], playerGrid->grid2D[i]);
   }
 
+
+
+
+  // printing gold positions to returnGrid
+  // using the goldPiles list in playerGrid
+  pile_t** goldPiles = playerGrid->goldPiles;
+  if (goldPiles != NULL) {
+    
+    // loop over gold piles
+    for (int i = 0; i < MAXGOLD; i++) {
+
+      // if gold pile exists, add to returnGrid
+      if (goldPiles[i] != NULL) {
+        if (goldPiles[i]->amount != NULL) {
+          position_t* pilePosition = goldPiles[i]->location;
+
+          if (pilePosition == NULL) {
+            printf("NULLn\n");
+          }
+          printf("amount: %d\n",goldPiles[i]->amount);
+          printf("PILE x: %d, y: %d\n", pilePosition->x, pilePosition->y);
+          gridMark(returnGrid, pilePosition, GOLDPILE);
+        }
+      }
+    }
+  }
   // printing player positions to returnGrid
   // using the playerPositions list in playerGrid
   playerAndPosition_t** playerPositions = playerGrid->playerPositions;
 
-  printf("filled in returnGrid\n");
 
   if (playerPositions != NULL) {
     
@@ -414,7 +439,7 @@ char* gridPrint(grid_t* playerGrid, char playerLetter)
       // if player position exists, add to returnGrid
       if (playerPositions[i] != NULL && playerPositions[i]->playerPosition != NULL) {
 
-        printf("playerPositions added\n");
+
 
         position_t* playerPosition = playerPositions[i]->playerPosition;
 
@@ -430,41 +455,6 @@ char* gridPrint(grid_t* playerGrid, char playerLetter)
     }
   }
 
-  printf("made it past players\n");
-
-  // printing gold positions to returnGrid
-  // using the goldPiles list in playerGrid
-  pile_t** goldPiles = playerGrid->goldPiles;
-  if (goldPiles != NULL) {
-    
-    // loop over gold piles
-    for (int i = 0; i < MAXGOLD; i++) {
-
-      // if gold pile exists, add to returnGrid
-      if (goldPiles[i] != NULL) {
-        
-        printf("inside...\n");
-
-        position_t* pilePosition = goldPiles[i]->location;
-
-        if (pilePosition == NULL) {
-          printf("NULLn\n");
-        }
-
-        printf("before here\n");
-
-        printf("x: %d, y: %d\n", pilePosition->x, pilePosition->y);
-
-        printf("here\n");
-
-        gridMark(returnGrid, pilePosition, GOLDPILE);
-
-        printf("gridMark...\n");
-      }
-    }
-  }
-
-  printf("made it past gold\n");
 
   char* returnString;
   returnString = mem_malloc(sizeof(char)* (nrows*(ncols+1)) + 1) ;
@@ -494,69 +484,78 @@ gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter)
 {
   // find the current location of the player
   int i;
+
   position_t* coordinate = position_new(0,0);
+
   for (i =0; i<26; i++) {
-    if (masterGrid->playerPositions[i]->name == playerLetter) {
-      coordinate = masterGrid->playerPositions[i]->playerPosition;
+
+    if (masterGrid->playerPositions[i] != NULL && masterGrid->playerPositions[i]->name != NULL) {
+      if (masterGrid->playerPositions[i]->name == playerLetter) {
+        coordinate = masterGrid->playerPositions[i]->playerPosition;
+        break;
+
+      }
     }
   }
-  
+  int xCord = coordinate->x;
+  int yCord = coordinate->y;
   // change to the location based on moveLetter
   if (moveLetter == 'h') {    
     // left
-    coordinate->x --;
+    xCord --;
   }
   else if (moveLetter == 'l') {
     // right
-    coordinate->x ++;
+    xCord ++;
   }
   else if (moveLetter == 'j') {
     // down
-    coordinate->y --;
+    yCord --;
   }
   else if (moveLetter == 'k') {
     // up
-    coordinate->y ++;
+    yCord ++;
   }
   else if (moveLetter == 'y') {
     // diagonally up and left
-    coordinate->x --;
-    coordinate->y ++;
+    xCord --;
+    yCord ++;
   }
   else if (moveLetter == 'u') {
     // diagonally up and right
-    coordinate->x ++;
-    coordinate->y ++;
+    xCord ++;
+    yCord ++;
   }
   else if (moveLetter == 'b') {
     // diagonally down and left
-    coordinate->x --;
-    coordinate->y --;
+    xCord --;
+    yCord --;
   }
   else if (moveLetter == 'n') {
     // diagonally down and right
-    coordinate->x ++;
-    coordinate->y --;
+    xCord ++;
+    yCord --;
   }
 
 
-  int xCord = coordinate->x;
-  int yCord = coordinate->y;
 
   // if coordinate is an empty room space or passage
-  if ( (masterGrid->grid2D[yCord][xCord] == EMPTY) || ((masterGrid->grid2D[yCord][xCord]) == PASSAGE) ||  ((masterGrid->grid2D[yCord][xCord]) == PASSAGE)) {
-    masterGrid->playerPositions[i]->playerPosition = coordinate;
+  if ( (masterGrid->grid2D[yCord][xCord] == EMPTY) || ((masterGrid->grid2D[yCord][xCord]) == PASSAGE)) {
+    masterGrid->playerPositions[i]->playerPosition->x = coordinate->x;
+    masterGrid->playerPositions[i]->playerPosition->y = coordinate->y;
     return 0;
   }
 
   // if the coordinate is a pile of gold
   else if ((masterGrid->grid2D[yCord][xCord] == '*')) {
-    int numPiles = sizeof(masterGrid->goldPiles)/sizeof(masterGrid->goldPiles[0]);  
+    int numPiles = sizeof(masterGrid->goldPiles)/sizeof(masterGrid->goldPiles[0]); 
+    printf("numpiles: %d/n") ;
     for (int x = 0; x < numPiles; x++) {
       // loop through and find the pile structure with the same position
       if (((masterGrid->goldPiles[i]->location->x) == xCord) && ((masterGrid->goldPiles[i]->location->y) == yCord)) {
         masterGrid->playerPositions[i]->playerPosition = coordinate;
         int goldAmount = masterGrid->goldPiles[i]->amount;
+        masterGrid->goldPiles[i]->amount = NULL;
         return goldAmount;
       }
     }
@@ -614,7 +613,7 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
   // server calls srand(seed) and that is the only time it srand() is called
   // set the number of piles in the map
   int numPiles = (int)(randInt % (maxGoldPiles - minGoldPiles + 1)) + minGoldPiles; 
-  int currentGoldAmount;
+  double currentGoldAmount = 0;
 
   printf("numpiles: %d\n", numPiles);
   
@@ -635,19 +634,33 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
 
     goldPile->location = goldPosition;
     goldPile->amount = rand();
-    currentGoldAmount += goldPile->amount;
+
+
+    currentGoldAmount = currentGoldAmount + goldPile->amount;  
+
     goldPiles[i] = goldPile;
 
-  }
-  
-  // fraction to scale down gold amount in each pile by
-  int goldScale = numGold/currentGoldAmount;
 
+  }
+
+  printf("%d\n", numGold);
+  // fraction to scale down gold amount in each pile by
+  float goldScale = ((float)numGold/(float)currentGoldAmount);
+  currentGoldAmount = 0;
   // loop through again and scale down gold pile amounts
   for (int i = 0; i< numPiles; i++) {
     int oversizedAmount = goldPiles[i]->amount;
-    goldPiles[i]->amount = round(oversizedAmount * goldScale);
+
+    goldPiles[i]->amount = floor(oversizedAmount * goldScale);
+
+    currentGoldAmount = currentGoldAmount + goldPiles[i]->amount;
+    printf("scaled amount: %d\n",goldPiles[i]->amount);
   }
+
+  if (currentGoldAmount < numGold){
+    goldPiles[numPiles-1]->amount += (numGold-currentGoldAmount);
+  }
+
 
   masterGrid->goldPiles=goldPiles;
   fclose(fp);

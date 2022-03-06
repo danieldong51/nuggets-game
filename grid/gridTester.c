@@ -39,6 +39,12 @@ tester()
   grid_t* playerAGrid = gridNewPlayer(masterGrid, 'a');
 
   printf("created playerA grid\n");
-
-  updateGrid(playerAGrid, masterGrid, 'a');
+  printf("%s", gridPrint(masterGrid, 'a'));
+  printf("\n\n now gridValidMove\n\n");
+  char c;
+  while (( c = getchar()) != 'q'){
+      printf("%d\n", gridValidMove(masterGrid, 'a', c));
+      printf("%s", gridPrint(masterGrid, 'a'));
+  }
+  
 }
