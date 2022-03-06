@@ -28,14 +28,15 @@ tester()
   int randInt = rand();
   gridMakeMaster(masterGrid, "../maps/main.txt", 20, 10, 30, 1);
   printf("made master grid\n");
-
-  // printf("%s\n", gridPrint(masterGrid, 'a'));
-
+  //char* result = gridPrint(masterGrid, 'a');
+  //printf("%s\n", result);
+  //mem_free(result);
+  
   // printf("printed grid\n");
 
   
-  // grid_t* playerAGrid = gridNewPlayer(masterGrid, 'a');
-  // updateGrid(playerAGrid, masterGrid, 'a');
+  grid_t* playerAGrid = gridNewPlayer(masterGrid, 'a');
+  updateGrid(playerAGrid, masterGrid, 'a');
   // printf("%s\n", gridPrint(playerAGrid, 'a'));
 
   // grid_t* playerBGrid = gridNewPlayer(masterGrid, 'b');
