@@ -465,10 +465,10 @@ void sendGoldMessage(int n, int r, int p, const addr_t otherp)
 /*  check parameters, construct the message, log about it, and send the message */
 void sendDisplayMessage(player_t* player, const addr_t otherp) 
 { 
-  char** grid2D = gridPrint(player_getGrid(player), player_getLetter(player));
+  char* grid1D = gridPrint(player_getGrid(player), player_getLetter(player));
 
   char response[message_MaxBytes];
-  sprintf(response, "DISPLAY\n%s", grid2D);
+  sprintf(response, "DISPLAY\n%s", grid1D);
 
   message_send(otherp, response);
 }
@@ -476,10 +476,10 @@ void sendDisplayMessage(player_t* player, const addr_t otherp)
 /* check parameters, construct message, and send message */
 void sendSpecDisplayMessage(const addr_t otherp)
 {
-  char** grid2D = gridPrint(game.masterGrid, '.');
+  char* grid1D = gridPrint(game.masterGrid, '.');
 
   char response[message_MaxBytes];
-  sprintf(response, "DISPLAY\n%s", grid2D);
+  sprintf(response, "DISPLAY\n%s", grid1D);
 
   message_send(otherp, response);
 
