@@ -141,7 +141,17 @@ static bool parseArgs(const int argc, char* argv[])
       if (seed >= 0) {
         game.seed = seed; 
       }
-     }
+      else {
+        fprintf(stderr, "Failed to initialize seed");
+        return false; 
+      }
+    }
+
+    else{
+      game.seed = (int) getpid();
+    }
+
+    srand(game.seed);
   
     return true; 
   }
@@ -252,13 +262,13 @@ void handlePlayMessage(const addr_t from, const char* message)
 
 
     if (sizeof(name) == 0) {
-      message_send(from, "QUIT Sorry - you must provide player's name.");
+      sendQuitMessage(from, "Sorry - you must provide player's name");
       return;
     }
 
     // check to see if we already have this player 
     if (findPlayer(from) != NULL) {
-      message_send(from, "ERROR Sorry - you cannot rejoin the same game.");
+      sendErrorMessage(from, "Sorry - you cannot rejoin the same game.");
       return;
     }
 
@@ -292,7 +302,7 @@ void handlePlayMessage(const addr_t from, const char* message)
   else 
   {
     // too many players, respond to client with "NO"
-    message_send(from, "QUIT Game is full: no more players can join.");
+    sendQuitMessage(from, "Game is full: no more players can join.");
   }
 }
 
@@ -305,7 +315,7 @@ void handleSpectateMessage(const addr_t from, const char* message)
 
     if (message_eqAddr(specAddress, from) == false) {
       // if it is not the same address, create a new spectator, replace our spectator, send message to old spectator
-      message_send(specAddress, "QUIT You have been replaced by a new spectator.");
+      sendQuitMessage(specAddress, "You have been replaced by a new spectator");
       
       // delete old spectator
       spectator_delete(game.spectator); 
@@ -360,7 +370,7 @@ void handleKeyMessage(const addr_t otherp, const char* message)
     // switch value of key 
     switch(key) {
       case 'Q':
-        message_send(otherp, "QUIT Thanks for playing!");
+        sendQuitMessage(otherp, "Thanks for playing!");
 
         // change the player's isTalking status to false 
         player_changeStatus(currPlayer, false);
@@ -407,8 +417,7 @@ void handleKeyMessage(const addr_t otherp, const char* message)
       case 'Q':
         // delete spectator  
         spectator_delete(game.spectator); 
-
-        message_send(otherp, "QUIT Thanks for watching!");
+        sendQuitMessage(otherp, "Thanks for watching!");
         game.spectator = NULL;
       default: 
         //  the server shall ignore that keystroke and may send back an ERROR message as described below
@@ -585,12 +594,6 @@ player_t* findPlayer(const addr_t address)
 void gameOver()
 {
   // construct and broadcast game over message
-  /*
-  The game-over summary shall be the phrase "GAME OVER:" 
-  followed by a simple textual table with one row for every player (including any who quit early) 
-  and with three columns: player letter, player purse, and player name. 
-  The list may be sorted by player letter, or by score, or unsorted.
-  */
   char gameOverMessage[message_MaxBytes];
   sprintf(gameOverMessage, "GAME OVER:\n");
 
@@ -601,7 +604,7 @@ void gameOver()
 
       // set info pointer to each player line, incrementing each time 
       for (info = gameOverMessage; *info ; info++) {
-        sprintf(*info, "%c\t%3d %s\n", player_getLetter(p), player_getGold(p), player_getName(p));
+        sprintf(info, "%c\t%3d %s\n", player_getLetter(p), player_getGold(p), player_getName(p));
       } 
     }
   }
