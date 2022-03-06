@@ -33,5 +33,12 @@ tester()
 
   gridPrint(masterGrid, 'a');
   printf("%s", gridPrint(masterGrid, 'a'));
-  
+
+  printf("printed grid\n");
+
+  grid_t* playerAGrid = gridNewPlayer(masterGrid, 'a');
+
+  printf("created playerA grid\n");
+
+  updateGrid(playerAGrid, masterGrid, 'a');
 }
