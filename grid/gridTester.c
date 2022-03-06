@@ -64,12 +64,10 @@ tester()
   //   updateGrid(playerAGrid, masterGrid, 'a');
   //   printf("%s\n", gridPrint(playerAGrid, 'a'));
   // }
-<<<<<<< HEAD
   // gridDelete(playerAGrid);
   // gridDelete(playerBGrid);
   // gridDelete(playerCGrid);
   // gridDelete(playerDGrid);
   gridDelete(masterGrid);
-=======
->>>>>>> 1feedecc35a70a1ab9ecb9140f1e4f11f5ad2886
+  gridDelete(playerAGrid);
 }
