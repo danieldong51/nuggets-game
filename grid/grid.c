@@ -154,11 +154,15 @@ updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter)
     int playery = playerPos->y;
     for (int i = -radius; i < radius; i++) {
 
+      printf("in the for loop, with i as %d\n", i);
+
       // check top side
       position_t* checkPos = position_new(playerx + i, playery - radius);
       if (checkSpot(masterGrid, playerGrid, visible, playerPos, checkPos)) {
         hasSeen = true;
       }
+
+      printf("checked top\n");
 
       // check bottom side
       checkPos->y = playery + radius;
@@ -657,14 +661,16 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
 grid_t* 
 gridNewPlayer(grid_t* masterGrid, char playerLetter)
 {
-  position_t* playerPosition= mem_malloc(sizeof(position_t));
+  int y = 0;
+  int x = 0;
 
-  playerPosition->x = 0;
-  playerPosition->y = 0;
-  while ( !(masterGrid->grid2D[playerPosition->y][playerPosition->x] == EMPTY) ){
-    playerPosition->x = (rand() % masterGrid-> nrows) + 1; 
-    playerPosition->y = (rand() % masterGrid-> ncols) + 1;
+  while ( (masterGrid->grid2D[y][x] != EMPTY) ) {
+
+    y = (rand() % masterGrid-> nrows); 
+    x = (rand() % masterGrid-> ncols);
   }
+
+  position_t* playerPosition = position_new(x, y);
 
   // // if this is the first player being intialized
   // if (masterGrid->playerPositions == NULL) {
@@ -673,13 +679,19 @@ gridNewPlayer(grid_t* masterGrid, char playerLetter)
   // }
 
   // get the index of the next available spot
-  int i = 0;
-  while( !(masterGrid->playerPositions[i] == NULL) ) {
-    i++;
-  }
+  // int i = 0;
+  // while( !(masterGrid->playerPositions[i] == NULL) ) {
+  //   i++;
+  // }
 
-  masterGrid->playerPositions[i]->name = i+'a'; // set char name
-  masterGrid->playerPositions[i]->playerPosition = playerPosition;
+  int index = playerLetter - 'a';
+
+  // initialize the playerPositions at index
+  playerAndPosition_t* playerAndPosition = malloc(sizeof(playerAndPosition_t));
+  playerAndPosition->name = playerLetter;
+  playerAndPosition->playerPosition = playerPosition;
+
+  masterGrid->playerPositions[index] = playerAndPosition;
 
   // Initialize new playerGrid
   grid_t* playerGrid = grid_new(); 
