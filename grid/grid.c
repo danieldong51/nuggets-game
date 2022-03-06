@@ -555,6 +555,11 @@ gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter)
     yCord++;
   }
 
+  // checking if out of bounds
+  if (xCord < 0 || yCord < 0 || xCord >= masterGrid->ncols || yCord >= masterGrid->nrows) {
+    return -1;
+  }
+
   char gridSpot = masterGrid->grid2D[yCord][xCord];
   printf("gridSpot is %c\n", gridSpot);
 
