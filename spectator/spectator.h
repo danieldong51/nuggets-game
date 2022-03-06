@@ -22,7 +22,8 @@ spectator_t* spectator_new(grid_t* masterGrid, addr_t address);
 void spectator_delete(spectator_t* spectator);
 grid_t* spectator_getGrid(spectator_t* spectator);
 addr_t spectator_getAddress(spectator_t* spectator);
-
+void spectator_setGrid(spectator_t* spectator, grid_t* grid);
+void spectator_setAddress(spectator_t* spectator, addr_t address);
 
 /************ spectator_new ***********/
 spectator_t* spectator_new(grid_t* masterGrid, addr_t address);
@@ -38,7 +39,9 @@ addr_t spectator_getAddress(spectator_t* spectator);
 /******** spectator_getGrid ************/
 grid_t* spectator_getGrid(spectator_t* spectator);
 
+/******** spectator_setAddress ************/
+void spectator_setAddress(spectator_t* spectator, addr_t address);
 
-
- 
+ /******** spectator_setGrid ************/
+void spectator_setGrid(spectator_t* spectator, grid_t* grid);
 
