@@ -49,7 +49,7 @@ void updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter);
 char* gridPrint(grid_t* map, char playerLetter);
 int gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter);
 void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int seed);
-grid_t* gridNewPlayer(grid_t* map);
+grid_t* gridNewPlayer(grid_t* masterGrid);
 grid_t* grid_new();
 int getNumRows(grid_t* masterGrid);
 int getNumColumns(grid_t* masterGrid);
@@ -620,33 +620,33 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
 // returns the new player grid, which will start off as completely empty
 // creates a new playerAndPosition struct representing new player in the masterGrid (map is the masterGrid)
 grid_t* 
-gridNewPlayer(grid_t* map)
+gridNewPlayer(grid_t* masterGrid)
 {
   position_t* playerPosition= mem_malloc(sizeof(position_t));
 
   playerPosition->x = 0;
   playerPosition->y = 0;
-  while ( !(map->grid2D[playerPosition->y][playerPosition->x] == EMPTY) ){
-    playerPosition->x = (rand() % map-> nrows) + 1; 
-    playerPosition->y = (rand() % map-> ncols) + 1;
+  while ( !(masterGrid->grid2D[playerPosition->y][playerPosition->x] == EMPTY) ){
+    playerPosition->x = (rand() % masterGrid-> nrows) + 1; 
+    playerPosition->y = (rand() % masterGrid-> ncols) + 1;
   }
 
   // if this is the first player being intialized
-  if (map->playerPositions == NULL) {
+  if (masterGrid->playerPositions == NULL) {
     playerAndPosition_t* players[26];
-    map->playerPositions = players;
+    masterGrid->playerPositions = players;
   }
 
   int i = 0;
-  while( !(map->playerPositions[i] == NULL) ) {
+  while( !(masterGrid->playerPositions[i] == NULL) ) {
     i++;
   }
 
-  map->playerPositions[i]->name = i+'a'; // set char name
-  map->playerPositions[i]->playerPosition = playerPosition;
+  masterGrid->playerPositions[i]->name = i+'a'; // set char name
+  masterGrid->playerPositions[i]->playerPosition = playerPosition;
 
   // Initialize new playerGrid
-  grid_t* playerGrid = grid_new(getNumRows(map), getNumColumns(map)); 
+  grid_t* playerGrid = grid_new(getNumRows(masterGrid), getNumColumns(masterGrid)); 
   
   // malloc space for gold piles and players
   playerGrid->playerPositions = malloc(MAXPLAYERS * sizeof(playerAndPosition_t*));
