@@ -42,7 +42,7 @@ main(const int argc, char* argv[])
 
   printf("line 36\n");
 
-  // Reads main.txt mao
+  // Reads main.txt map
   FILE* mapFile = fopen("../maps/main.txt", "r");
   gridConvert(grid2D, mapFile, getNumRows(masterGrid), getNumColumns(masterGrid));  
 
