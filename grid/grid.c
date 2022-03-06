@@ -422,7 +422,7 @@ char* gridPrint(grid_t* playerGrid, char playerLetter)
 
   // fill in returnGrid with walls and spaces
   for (int i = 0; i < nrows; i++) {
-    strcpy(returnGrid[i], playerGrid->grid2D[i]);
+    strncpy(returnGrid[i], playerGrid->grid2D[i], ncols-1);
   }
 
   // printing player positions to returnGrid
@@ -496,7 +496,7 @@ char* gridPrint(grid_t* playerGrid, char playerLetter)
     //   returnString[i*(ncols+1)] = '\n';
     // }
   }
-  returnString[(nrows*(ncols+1)) + 1 ] = '\0';
+  returnString[(nrows*(ncols+1))] = '\0';
 
   return returnString;
 }
@@ -613,7 +613,7 @@ grid_new()
   grid->playerPositions = calloc(MAXPLAYERS, sizeof(playerAndPosition_t*));
   for (int i = 0; i < MAXPLAYERS; i++) {
     grid->playerPositions[i] = NULL;
-  }
+  } 
 
   // initializing gold piles
   grid->goldPiles = calloc(MAXGOLD, sizeof(pile_t*));
