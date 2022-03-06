@@ -7,17 +7,12 @@
 #include "file.h"
 #include "mem.h"
 #include <math.h>
-#include "../player/player.h"
 #include "grid.h"
 
-void tester();
-static char** newGrid2D(int nrows, int ncols);
 
 int 
 main(const int argc, char* argv[])
 {
-  tester();
-}
 
   printf("line start\n");
 
@@ -35,40 +30,25 @@ main(const int argc, char* argv[])
   gridMakeMaster(masterGrid, fileName, 10, 1 ,5, 1);
   printf("made master\n");
 
-  FILE* mapFile = fopen("../maps/challenge.txt", "r");
+  printf("line 29\n");
 
-  printf("nrow is %d, ncol is %d\n", nrow, ncol);
-  gridConvert(grid2D, mapFile, nrow, ncol);
+  char** grid2D = getGrid2D(masterGrid);
+  int NR = getNumRows(masterGrid);
 
-  for (int i = 0; i < nrow; i++) {
-    for (int j = 0; j < ncol; j++) {
-      printf("%c", grid2D[i][j]);
-    }
-    printf("\n");
-  }
-}
-
-static char**
-newGrid2D(int nrows, int ncols)
-{
-  // allocate a 2-dimensional array of nrows x ncols
-  char** grid = calloc(nrows, sizeof(char*));
-  char* contents = calloc(nrows * ncols, sizeof(char));
-  if (grid == NULL || contents == NULL) {
-    fprintf(stderr, "cannot allocate memory for map\r\n");
-    exit(1);
+  for (int i = 0; i < NR; i++ ) {
+    printf("%d\n", i);
+    printf("%s\n", grid2D[i]);
   }
 
-  // set up the array of pointers, one for each row
-  for (int y = 0; y < nrows; y++) {
-    grid[y] = contents + y * ncols;
-  }
+  printf("line 36\n");
 
-  // fill the board with empty cells
-  for (int y = 0; y < nrows; y++) {
-    for (int x = 0; x < ncols; x++) {
-      grid[y][x] = ' ';
-    }
-  }
-  return grid;
+  // Reads main.txt mao
+  FILE* mapFile = fopen("../maps/main.txt", "r");
+  gridConvert(grid2D, mapFile, getNumRows(masterGrid), getNumColumns(masterGrid));  
+
+  printf("line 42\n");
+
+  gridPrint(masterGrid, 'a');
+
+  
 }
