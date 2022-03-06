@@ -583,7 +583,7 @@ gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter)
         if (xCord == xGold && yCord == yGold) {
           
           int amount = pile->amount;
-          pile == NULL;
+          masterGrid->goldPiles[i] = NULL;
           return amount;
         }
       }
@@ -645,7 +645,7 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
   // server calls srand(seed) and that is the only time it srand() is called
   // set the number of piles in the map
   int numPiles = (int)(randInt % (maxGoldPiles - minGoldPiles + 1)) + minGoldPiles; 
-  int currentGoldAmount;
+  double currentGoldAmount = 0;
 
   printf("numpiles: %d\n", numPiles);
   
@@ -666,19 +666,33 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
 
     goldPile->location = goldPosition;
     goldPile->amount = rand();
-    currentGoldAmount += goldPile->amount;
+
+
+    currentGoldAmount = currentGoldAmount + goldPile->amount;  
+
     goldPiles[i] = goldPile;
 
-  }
-  
-  // fraction to scale down gold amount in each pile by
-  int goldScale = numGold/currentGoldAmount;
 
+  }
+
+  printf("%d\n", numGold);
+  // fraction to scale down gold amount in each pile by
+  float goldScale = ((float)numGold/(float)currentGoldAmount);
+  currentGoldAmount = 0;
   // loop through again and scale down gold pile amounts
   for (int i = 0; i< numPiles; i++) {
     int oversizedAmount = goldPiles[i]->amount;
-    goldPiles[i]->amount = round(oversizedAmount * goldScale);
+
+    goldPiles[i]->amount = floor(oversizedAmount * goldScale);
+
+    currentGoldAmount = currentGoldAmount + goldPiles[i]->amount;
+    printf("scaled amount: %d\n",goldPiles[i]->amount);
   }
+
+  if (currentGoldAmount < numGold){
+    goldPiles[numPiles-1]->amount += (numGold-currentGoldAmount);
+  }
+
 
   masterGrid->goldPiles=goldPiles;
   fclose(fp);

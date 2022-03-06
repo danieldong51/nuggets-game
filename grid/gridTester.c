@@ -59,7 +59,7 @@ tester()
 
   char c;
   while (scanf("%c", &c) != NULL) {
-    gridValidMove(masterGrid, 'a', c);
+    printf("return: %d\n", gridValidMove(masterGrid, 'a', c));
     updateGrid(playerAGrid, masterGrid, 'a');
     printf("%s\n", gridPrint(playerAGrid, 'a'));
   }
