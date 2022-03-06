@@ -399,13 +399,18 @@ char* gridPrint(grid_t* playerGrid, char playerLetter)
   // printing player positions to returnGrid
   // using the playerPositions list in playerGrid
   playerAndPosition_t** playerPositions = playerGrid->playerPositions;
+
+  printf("filled in returnGrid\n");
+
   if (playerPositions != NULL) {
     
     // loop over players
     for (int i = 0; i < MAXPLAYERS; i++) {
 
       // if player position exists, add to returnGrid
-      if (playerPositions[i]->playerPosition != NULL) {
+      if (playerPositions[i] != NULL && playerPositions[i]->playerPosition != NULL) {
+
+        printf("playerPositions added\n");
 
         position_t* playerPosition = playerPositions[i]->playerPosition;
 
@@ -421,6 +426,8 @@ char* gridPrint(grid_t* playerGrid, char playerLetter)
     }
   }
 
+  printf("made it past players\n");
+
   // printing gold positions to returnGrid
   // using the goldPiles list in playerGrid
   pile_t** goldPiles = playerGrid->goldPiles;
@@ -431,19 +438,46 @@ char* gridPrint(grid_t* playerGrid, char playerLetter)
 
       // if gold pile exists, add to returnGrid
       if (goldPiles[i] != NULL) {
+        
+        printf("inside...\n");
 
         position_t* pilePosition = goldPiles[i]->location;
+
+        if (pilePosition == NULL) {
+          printf("NULLn\n");
+        }
+
+        printf("before here\n");
+
+        printf("x: %d, y: %d\n", pilePosition->x, pilePosition->y);
+
+        printf("here\n");
+
         gridMark(returnGrid, pilePosition, GOLDPILE);
+
+        printf("gridMark...\n");
       }
     }
   }
 
-  char returnString[(nrows*ncols) + 1 ] ;
+  printf("made it past gold\n");
+
+  char* returnString;
+  returnString = mem_malloc(sizeof(char)* (nrows*(ncols+1)) + 1) ;
   for ( int i = 0; i < nrows; i++ ){
     for ( int x = 0; x < ncols; x++ ) {
-      returnString[((i-1)*nrows) + x] = returnGrid[i][x];
+      returnString[((i)* (ncols + 1)) + x] = returnGrid[i][x];
     }
+    returnString[(i+1)*(ncols+1) - 1] = '\n';
+    // if (i != 0 ){
+    //       returnString[(i)*(ncols)] = '\n';
+    // }
+    //returnString[(i+1)*(ncols)] = '\n';
+    // if (i != 0) {
+    //   returnString[i*(ncols+1)] = '\n';
+    // }
   }
+  returnString[(nrows*(ncols+1)) + 1 ] = '\0';
 
   return returnString;
 }
@@ -534,6 +568,19 @@ grid_t*
 grid_new()
 {
   grid_t* grid = mem_malloc(sizeof(grid_t));
+
+  // initializing player Positions
+  grid->playerPositions = calloc(MAXPLAYERS, sizeof(playerAndPosition_t*));
+  for (int i = 0; i < MAXPLAYERS; i++) {
+    grid->playerPositions[i] = NULL;
+  }
+
+  // initializing gold piles
+  grid->goldPiles = calloc(MAXGOLD, sizeof(pile_t*));
+  for (int i = 0; i < MAXGOLD; i++) {
+    grid->goldPiles[i] = NULL;
+  }
+
   return grid;
 }
 
@@ -554,13 +601,11 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
   masterGrid->nrows = NR;
   masterGrid->ncols = NC;
   
-  printf("nrows: %d, ncols: %d\n", NR, NC);
 
     // set 2d char map for grid
   char** grid2D;                                              // map of walls, paths, and spaces
   grid2D = newGrid2D(NR, NC);
   gridConvert(grid2D, fp, NR, NC);
-  printf("done converting\n");
   masterGrid->grid2D = grid2D;
   // server calls srand(seed) and that is the only time it srand() is called
   // set the number of piles in the map
@@ -569,35 +614,27 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
 
   printf("numpiles: %d\n", numPiles);
   
-  pile_t* goldPiles[MAXGOLD]; 
+  pile_t** goldPiles = masterGrid->goldPiles; 
 
   // create pile structures by setting random locations and random amounts for gold
   for (int i = 0; i < numPiles; i++) {
 
     position_t* goldPosition= position_new(0, 0);
     pile_t* goldPile = mem_malloc(sizeof(pile_t));
-    printf("beginning\n");
 
     // find random position that is in an empty room spot
     while (!((grid2D[goldPosition->y][goldPosition->x] == EMPTY))) {
-      printf("y: %d, x: %d\n", goldPosition->y, goldPosition->x);
       // set random position for gold
       goldPosition->x = (rand() % NC); 
       goldPosition->y = (rand() % NR);
-      printf("end while\n");
     }
-
-    printf("done\n");
 
     goldPile->location = goldPosition;
     goldPile->amount = rand();
     currentGoldAmount += goldPile->amount;
     goldPiles[i] = goldPile;
 
-    printf("done done\n");
   }
-
-  printf("set random locations and amounts for gold\n");
   
   // fraction to scale down gold amount in each pile by
   int goldScale = numGold/currentGoldAmount;

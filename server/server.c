@@ -97,7 +97,6 @@ int main(const int argc, char* argv[])
     // call initialize game 
     initializeGame(mapPathname); 
 
-
     // initialize the message module  
     int port = message_init(stderr);                // will eventually pass a log file pointer into here 
 
@@ -133,6 +132,7 @@ static bool parseArgs(const int argc, char* argv[])
       fprintf(stderr, "Unable to open map file\n");
       return false; 
     }
+    fclose(mapFile);
 
     if (argc == 3) {
       // if a seed is provided, verify that it is a positive integer, and then set in game struct 
@@ -150,9 +150,7 @@ static bool parseArgs(const int argc, char* argv[])
     else{
       game.seed = (int) getpid();
     }
-
     srand(game.seed);
-  
     return true; 
   }
   return false; 
@@ -166,20 +164,24 @@ static void initializeGame(char* mapPathname)
   game.numPlayers = 0; 
 
   // initialize player list 
-  player_t* playersList[MaxPlayers + 1];
+  player_t* playersList[MaxPlayers];
   game.players = playersList;
 
   // intialize each player struct
-  for (int i = 0; i < MaxPlayers + 1; i++) {
-    player_t* p = player_new();
+  player_t* p;
+  for (int i = 0; i < MaxPlayers; i++) {
+    p = player_new();
     game.players[i] = p;
   }
 
   // initalize master grid 
   game.masterGrid = grid_new();
 
+  // call rand 
+  int randNum = rand();
+
   // function tto initialize game 
-  gridMakeMaster(game.masterGrid, mapPathname, GoldTotal, GoldMinNumPiles, GoldMaxNumPiles, game.seed);
+  gridMakeMaster(game.masterGrid, mapPathname, GoldTotal, GoldMinNumPiles, GoldMaxNumPiles, randNum);
 
 }
 
@@ -597,7 +599,7 @@ void gameOver()
   char gameOverMessage[message_MaxBytes];
   sprintf(gameOverMessage, "GAME OVER:\n");
 
-  for (int i = 0; i < MaxPlayers + 1; i++) {
+  for (int i = 0; i < MaxPlayers; i++) {
     player_t* p = game.players[i];
     if (player_isTalking(game.players[i])){
       char* info;

@@ -11,13 +11,8 @@
 #include <string.h>
 #include <stdbool.h>
 #include <time.h> 
-<<<<<<< HEAD
-#include "libcs50/mem.h"
-#include "grid.h"
-=======
 #include "../libcs50/mem.h"
 #include "../grid/grid.h"
->>>>>>> 1b13dd87950160721b34e0e244062a16cf462fae
 #include "../support/message.h"
 #include "player.h"
 
