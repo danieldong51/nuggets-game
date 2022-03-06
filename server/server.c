@@ -284,7 +284,7 @@ void handlePlayMessage(const addr_t from, const char* message)
     player_setAddress(player, from);
     
     /// set random position for player and add it to list of positions, also create empty grid for player with grid_new()
-    player_setGrid(player, gridNewPlayer(game.masterGrid));
+    player_setGrid(player, gridNewPlayer(game.masterGrid, player_getLetter(player)));
 
     // send ok message 
     sendOkMessage(from, letter);
@@ -533,9 +533,13 @@ void sendDisplayToAll()
     }
   }
   // send to spectator
+  
   addr_t specAddress = spectator_getAddress(game.spectator);
   
-  sendSpecDisplayMessage(specAddress);
+  if (message_isAddr(specAddress)){
+    sendSpecDisplayMessage(specAddress);
+  }
+  
 
 }
 void sendGoldToAll(int moveResult, player_t* currPlayer) 
@@ -560,8 +564,9 @@ void sendGoldToAll(int moveResult, player_t* currPlayer)
 
   addr_t specAddress = spectator_getAddress(game.spectator);
   // send to spectator 
-  sendGoldMessage(0, 0, game.goldRemaining, specAddress);
-
+  if (message_isAddr(specAddress)){
+    sendGoldMessage(0, 0, game.goldRemaining, specAddress);
+  }
 }
 
 void updateAllGrids()
@@ -574,6 +579,7 @@ void updateAllGrids()
       updateGrid(player_getGrid(player), game.masterGrid, player_getLetter(player));
     }
   }
+  // don't need to update grid for spectator
 }
 
 player_t* findPlayer(const addr_t address) 
