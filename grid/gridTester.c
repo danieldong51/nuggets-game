@@ -28,15 +28,16 @@ tester()
   int randInt = rand();
   gridMakeMaster(masterGrid, "../maps/main.txt", 20, 10, 30, 1);
   printf("made master grid\n");
-
-  printf("%s\n", gridPrint(masterGrid, 'a'));
-
-  printf("printed grid\n");
+  //char* result = gridPrint(masterGrid, 'a');
+  //printf("%s\n", result);
+  //mem_free(result);
+  
+  // printf("printed grid\n");
 
   
   grid_t* playerAGrid = gridNewPlayer(masterGrid, 'a');
   updateGrid(playerAGrid, masterGrid, 'a');
-  printf("%s\n", gridPrint(playerAGrid, 'a'));
+  // printf("%s\n", gridPrint(playerAGrid, 'a'));
 
   // grid_t* playerBGrid = gridNewPlayer(masterGrid, 'b');
   // updateGrid(playerBGrid, masterGrid, 'b');
@@ -50,12 +51,12 @@ tester()
   // updateGrid(playerDGrid, masterGrid, 'd');
   // printf("%s\n", gridPrint(playerDGrid, 'd'));
 
-  printf("created players\n");
+  // printf("created players\n");
 
-  updateGrid(playerAGrid, masterGrid, 'a');
-  printf("%s\n", gridPrint(playerAGrid, 'a'));
+  // updateGrid(playerAGrid, masterGrid, 'a');
+  // printf("%s\n", gridPrint(playerAGrid, 'a'));
 
-  printf("updated playerA\n");
+  // printf("updated playerA\n");
 
   // char c;
   // while (scanf("%c", &c) != NULL) {
@@ -63,4 +64,10 @@ tester()
   //   updateGrid(playerAGrid, masterGrid, 'a');
   //   printf("%s\n", gridPrint(playerAGrid, 'a'));
   // }
+  // gridDelete(playerAGrid);
+  // gridDelete(playerBGrid);
+  // gridDelete(playerCGrid);
+  // gridDelete(playerDGrid);
+  gridDelete(masterGrid);
+  gridDelete(playerAGrid);
 }

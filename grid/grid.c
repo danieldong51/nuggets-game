@@ -800,7 +800,8 @@ void gridDelete(grid_t* map) {
 void goldPilesDelete(pile_t** goldPiles) 
 {
   int numPiles = sizeof(goldPiles) / sizeof(goldPiles[0]);
-  for (int i = 0; i < numPiles; i++) {
+  printf("num Piles is %d\n", numPiles);
+  for (int i = 0; i < MAXGOLD; i++) {
     mem_free(goldPiles[i]);
   }
 }
@@ -808,7 +809,7 @@ void goldPilesDelete(pile_t** goldPiles)
 void playerAndPositionDelete(playerAndPosition_t** playerPositions)
 {
   int numPlayers = sizeof(playerPositions) / sizeof(playerPositions[0]);
-  for (int i = 0; i < numPlayers; i++) {
+  for (int i = 0; i < MAXPLAYERS; i++) {
     mem_free(playerPositions[i]);
   }
 }
