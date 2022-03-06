@@ -31,20 +31,36 @@ tester()
 
   printf("%s\n", gridPrint(masterGrid, 'a'));
 
-  gridPrint(masterGrid, 'a');
-  printf("%s", gridPrint(masterGrid, 'a'));
-
   printf("printed grid\n");
 
-  grid_t* playerAGrid = gridNewPlayer(masterGrid, 'a');
-
-  printf("created playerA grid\n");
-  printf("%s", gridPrint(masterGrid, 'a'));
-  printf("\n\n now gridValidMove\n\n");
-  char c;
-  while (( c = getchar()) != 'q'){
-      printf("%d\n", gridValidMove(masterGrid, 'a', c));
-      printf("%s", gridPrint(masterGrid, 'a'));
-  }
   
+  grid_t* playerAGrid = gridNewPlayer(masterGrid, 'a');
+  updateGrid(playerAGrid, masterGrid, 'a');
+  printf("%s\n", gridPrint(playerAGrid, 'a'));
+
+  grid_t* playerBGrid = gridNewPlayer(masterGrid, 'b');
+  updateGrid(playerBGrid, masterGrid, 'b');
+  printf("%s\n", gridPrint(playerBGrid, 'b'));
+
+  grid_t* playerCGrid = gridNewPlayer(masterGrid, 'c');
+  updateGrid(playerCGrid, masterGrid, 'c');
+  printf("%s\n", gridPrint(playerCGrid, 'c'));
+
+  grid_t* playerDGrid = gridNewPlayer(masterGrid, 'd');
+  updateGrid(playerDGrid, masterGrid, 'd');
+  printf("%s\n", gridPrint(playerDGrid, 'd'));
+
+  printf("created players\n");
+
+  updateGrid(playerAGrid, masterGrid, 'a');
+  printf("%s\n", gridPrint(playerAGrid, 'a'));
+
+  printf("updated playerA\n");
+
+  char c;
+  while (scanf("%c", &c) != NULL) {
+    printf("return: %d\n", gridValidMove(masterGrid, 'a', c));
+    updateGrid(playerAGrid, masterGrid, 'a');
+    printf("%s\n", gridPrint(playerAGrid, 'a'));
+  }
 }
