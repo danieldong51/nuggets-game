@@ -553,6 +553,8 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
   fp = fopen(fileName, "r");
   masterGrid->nrows = NR;
   masterGrid->ncols = NC;
+  
+  printf("nrows: %d, ncols: %d\n", NR, NC);
 
     // set 2d char map for grid
   char** grid2D;                                              // map of walls, paths, and spaces
@@ -567,26 +569,35 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
 
   printf("numpiles: %d\n", numPiles);
   
-  pile_t* goldPiles[numPiles]; 
-  // create pile structures bt setting random locations and random amounts for gold
+  pile_t* goldPiles[MAXGOLD]; 
+
+  // create pile structures by setting random locations and random amounts for gold
   for (int i = 0; i < numPiles; i++) {
 
-    position_t* goldPosition= mem_malloc(sizeof(position_t));
+    position_t* goldPosition= position_new(0, 0);
     pile_t* goldPile = mem_malloc(sizeof(pile_t));
-    goldPosition->x = 0;
-    goldPosition->y = 0;
-    char* c = grid2D[0];
+    printf("beginning\n");
+
     // find random position that is in an empty room spot
-    while (!((grid2D[goldPosition->y][goldPosition->x ] == EMPTY))) {
+    while (!((grid2D[goldPosition->y][goldPosition->x] == EMPTY))) {
+      printf("y: %d, x: %d\n", goldPosition->y, goldPosition->x);
       // set random position for gold
-      goldPosition->x = (rand() % NC) + 1; 
-      goldPosition->y = (rand() % NR) + 1;
+      goldPosition->x = (rand() % NC); 
+      goldPosition->y = (rand() % NR);
+      printf("end while\n");
     }
+
+    printf("done\n");
+
     goldPile->location = goldPosition;
     goldPile->amount = rand();
     currentGoldAmount += goldPile->amount;
     goldPiles[i] = goldPile;
+
+    printf("done done\n");
   }
+
+  printf("set random locations and amounts for gold\n");
   
   // fraction to scale down gold amount in each pile by
   int goldScale = numGold/currentGoldAmount;
