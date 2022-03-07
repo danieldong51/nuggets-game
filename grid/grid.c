@@ -58,12 +58,12 @@ grid_t* grid_new();                                                             
 int getNumRows(grid_t* masterGrid);                                                     // get number rows in the map
 int getNumColumns(grid_t* masterGrid);                                                  // get number columns in the map
 char** getGrid2D(grid_t* masterGrid);                                                   // get the char** component of a grid structure
-void gridDelete(grid_t* map, bool isMaster);
-void grid_deletePlayer(grid_t* masterGrid, char playerLetter);
+void gridDelete(grid_t* map, bool isMaster);                                            // delete grid and free its memory
+void grid_deletePlayer(grid_t* masterGrid, char playerLetter);                          // delete a player from the master grid so that it is no longer printed in the map
 
 /**************** local functions ****************/
 /* not visible outside this module */
-static char** newGrid2D(int nrows, int ncols);
+static char** newGrid2D(int nrows, int ncols);                                            // create a new char** grid given rows and columns, set as empty
 static bool isVisible(position_t* playerPos, position_t* squarePos, grid_t* masterGrid);
 static bool isEmpty(grid_t* masterGrid, int col, int row);
 static int increment(int cur, int goal);
