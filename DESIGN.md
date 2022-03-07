@@ -79,16 +79,24 @@ HandleMessage will follow the REQUIREMENTS.spec in responding to messages from t
 ### Major data structures
 
 
-The only data structure for the client is the game struct, which is a single global variable accessible to both the client and server. 
+The data structures for the client is the game struct and the score struct.
 
 The game struct has the following parameters: 
-  * MaxNameLength = 50;   // max number of chars in playerName
-  * MaxPlayers = 26;      // maximum number of players
-  * GoldTotal = 250;      // amount of gold in the game
-  * GoldMinNumPiles = 10; // minimum number of gold piles
-  * GoldMaxNumPiles = 30; // maximum number of gold piles
+  * char hostname[messageMaxLength];   // the hostname
+  * char port[maxPortLength];      // the port
+  * addr_t serverAddress;      // the server's address
+  * char playerName[messageMaxLength]; // the player's name
+  * int cX;    //the x cordinate of the cursor
+  * int cY;    //the y cordinate of the cursor
 
----
+
+The score struct has the following parameters:
+  * char letter;   //players letter
+  * int collected; //nuggets collected 
+  * int nuggetsLeft; //nuggets left to be collected
+  * int purse;   //player's gold purse
+
+----
 
 ## Server
 ### User interface
