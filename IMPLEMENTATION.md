@@ -301,7 +301,7 @@ Take in file
 Obtain # of rows in file
 Create array of strings with (# of row) slots
 For number of rows in file
-	Add contents of row x into slot x of a the array of strings
+	Add contents of row x into slot x of the array of strings
 ```
 
 #### `updateGrid`
