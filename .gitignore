@@ -41,3 +41,5 @@ player/player
 spectator/spectator
 grid/grid
 grid/gridTester
+player.log
+grid/gridTester.c
