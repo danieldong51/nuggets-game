@@ -718,7 +718,6 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles
   masterGrid->goldPiles=goldPiles;
   fclose(fp);
 
-  // NEED TO THINK ABOUT FREES
 }
 
 
