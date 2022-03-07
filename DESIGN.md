@@ -2,7 +2,7 @@
 ## Design Spec
 ### Team Tux, Winter 2022
 
-According to the [Requirements Spec] (REQUIREMENTS.md), the Nuggets game requires two standalone programs: a client and a server.
+According to the [Requirements Spec](REQUIREMENTS.md), the Nuggets game requires two standalone programs: a client and a server.
 Our design also includes the player, spectator and grid modules. 
 We describe each program and module separately.
 We do not describe the `support` library nor the modules that enable features that go beyond the spec.
@@ -162,18 +162,18 @@ The server has one major data structures: the _game_ struct, which is a single g
 
 ### Unit Tests
 
-  1. Test the client, making sure it can connect to a server and handle both sending and receiving messages
-  2. Test state module to make sure it can store player positions and gold positions
-  3. Test player module to make sure it can handle player positions
-  4. Test spectator module
-  5. Test visibility to make sure it correctly handles items within visibility when given different player locations and grid layouts
+  1. Test visibility function to make sure it accurately calculates which spots the player can see
+  2. Test gridMake functions for master and player grids
+  3. Test gridPrint function to make sure it accurately reflects the player's grid
+  4. Test server sendMessage to make sure it can send messages to miniclient
+  5. Test server receiveMessage to make sure it can receive and parse messages from miniclient
+  6. Test player module to make sure it accurately handles gold counts
 
 ### Integration Tests
 
-  1. Test server
-  2. Test game
-  3. Test clients
-  4. Test spectator
+We will test every module extensively, including
+  1. Testing grid module to make sure the game is playable and players can move and see accurately
+  2. Testing server module to make sure the server is runnable and can receive clients
 
 ### System Tests
 
