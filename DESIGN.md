@@ -1,18 +1,14 @@
 # CS50 Nuggets
 ## Design Spec
-### Team name, term, year
-
-> This **template** includes some gray text meant to explain how to use the template; delete all of them in your document!
+### Team Tux, Winter 2022
 
 According to the [Requirements Spec](REQUIREMENTS.md), the Nuggets game requires two standalone programs: a client and a server.
-Our design also includes x, y, z modules.
+Our design also includes the player, spectator and grid modules. 
 We describe each program and module separately.
 We do not describe the `support` library nor the modules that enable features that go beyond the spec.
 We avoid repeating information that is provided in the requirements spec.
 
-## Player
-
-> Teams of 3 students should delete this section.
+## Client
 
 The *client* acts in one of two modes:
 
@@ -22,33 +18,85 @@ The *client* acts in one of two modes:
 ### User interface
 
 See the requirements spec for both the command-line and interactive UI.
+The client’s only interface with the user is going to be on the command-line. It has two arguments:
 
-> You may not need much more.
-
+```
+./client hostname port [playername]
+```
+	
 ### Inputs and outputs
 
-> Briefly describe the inputs (keystrokes) and outputs (display).
-> If you write to log files, or log to stderr, describe that here.
-> Command-line arguments are not 'input'.
+The Client will specify whether they are a spectator or a player by sending a message to the server through stdin:
+  - PLAY real name if client wants to be a player in the game
+  - SPECTATE if client wants to be a spectator in the game
+
+Inputs (keystrokes) - see requirements.md spec for keystrokes
+
+Outputs (display)
+
+The output to the client is a display of _NR+1_ rows and _NC_ columns. The top line shall provide game status, which is different for a player and a spectator. Refer to Requirements.md for details on the game status. 
+The remaining _NR_ lines present the grid to the client, which represents the _map_. Details on a valid _map_ are in the Requirements Spec. 
+If the client is a spectator, the output is the full map: all gridpoints and occupants. 
+If the client is a player at a gridpoint (_pr_, _pc_), that player can see the occupants of only those spots that are visible from its current location, and can see the spots and boundaries of all rooms and passages it has seen since the player began playing, but not their occupants. See more on visibility in the Requirements Spec. 
+
+The client also logs important information into a logfile, including: 
+  * Hostname port
+  * Playername
+  * Each time player picks gold, and how much gold, and total accumulated gold
+  * Remaining gold
+
 
 ### Functional decomposition into modules
 
-> List and briefly describe any modules that comprise your client, other than the main module.
+We anticipate the following modules or functions: 
+  1. _handleInput_ - sends messages from client to server
+  2. _handleMessage_ - receives messages from server, updates client interface
+
+We make use of the following helper modules: 
+  1. _log_, a module that provides a way to log important messages into a file.  
+  2. _message_, a module that represents messages sent between the server and the client 
+
  
 ### Pseudo code for logic/algorithmic flow
 
-> For each function write pseudocode indented by a tab, which in Markdown will cause it to be rendered in literal form (like a code block).
-> Much easier than writing as a bulleted list!
-> See the Server section for an example.
+The client will run as follows:
 
-> Then briefly describe each of the major functions, perhaps with level-4 #### headers.
+	Initialize the message module (without logging)
+	Check arguments
+	Command line provides address for server
+	If player:
+		Send PLAY message to server with player’s real name
+	Else:
+		Send SPECTATE message to server
+	Loop, waiting for input or messages; provide callback functions
+	Shut down the message module when down
+
+HandleInput will follow the REQUIREMENTS.spec in sending messages to the server.
+
+HandleMessage will follow the REQUIREMENTS.spec in responding to messages from the server.
+
 
 ### Major data structures
 
-> A language-independent description of the major data structure(s) in this program.
-> Mention, but do not describe, any libcs50 data structures you plan to use.
 
----
+The data structures for the client is the game struct and the score struct.
+
+The game struct has the following parameters: 
+  * char hostname[messageMaxLength];   // the hostname
+  * char port[maxPortLength];      // the port
+  * addr_t serverAddress;      // the server's address
+  * char playerName[messageMaxLength]; // the player's name
+  * int cX;    //the x cordinate of the cursor
+  * int cY;    //the y cordinate of the cursor
+
+
+The score struct has the following parameters:
+  * char letter;   //players letter
+  * int collected; //nuggets collected 
+  * int nuggetsLeft; //nuggets left to be collected
+  * int purse;   //player's gold purse
+
+----
 
 ## Server
 ### User interface
@@ -56,23 +104,42 @@ See the requirements spec for both the command-line and interactive UI.
 See the requirements spec for the command-line interface.
 There is no interaction with the user.
 
-> You may not need much more.
-
 ### Inputs and outputs
 
-> Briefly describe the inputs (map file) and outputs (to terminal).
-> If you write to log files, or log to stderr, describe that here.
-> Command-line arguments are not 'input'.
+Input (map file): The server receives a pathname for a map file from the command-line. The server may assume that the map file is valid; it just needs to verify that the file can be opened for reading. 
+
+Output (terminal): The server only prints the “game-over summary” when the number of nuggets reaches 0. See more on the content of the game-over summary in the Requirements Spec. 
+
+The message module used in the server also logs useful information and messages into a log file, including: 
+  - Hostname port
+  - All players name
+  - Each time player picks up gold, and how much
+  - Remaining gold
+  - After quit, all players gold amount
+  - Any connection errors 
 
 ### Functional decomposition into modules
 
-> List and briefly describe any modules that comprise your server, other than the main module.
+We anticipate the following functions and modules: 
+  1. _main_
+  2. _parseArgs_, parse command-line arguments and initialize seed 
+  3. _initializeGame_, initialize game struct
+  4. _handleMessages_, handler function for _message_loop_
+  5. _handlePlayMessage_, message handler for `PLAY` messages which calls grid and sender functions
+  6. _handleSpectateMessage_, message handler for `SPECTATE` message which calls grid and sender functions
+  7. _handleKeyMessage_, message handler for `KEY` message which calls grid and sender functions
+  8. _updateAllGrids_, update every players grid 
+  9. _sendDisplayToAll_, which sends `DISPLAY` messages to all clients
+  10. _sendGoldToAll_, sends `GOLD` messages to all clients
+  11. _sendQuitMessage_, _sendOkMessage_, _sendGridMessage_, _sendGoldMessage_, _sendErrorMessage_, _sendDisplayMessage_, _sendSpecDisplayMessage_ are sender functions that construct messages and call _message_send_ 
+
+We also define helper modules that provide data structures: 
+  1. _player_, a module providing a data structure to represent a player in the game
+  2. _spectator_, a module providing a data structure to represent a spectator in the game, which contains information of all player’s names, and locations
+  3. _grid_, a module that is used by both the client and server that is used to update the user interface for all clients each time a client sends a message.
+  4. _message_, a module that represents messages sent between the server and the client 
 
 ### Pseudo code for logic/algorithmic flow
-
-> For each function write pseudocode indented by a tab, which in Markdown will cause it to be rendered in literal form (like a code block).
-> Much easier than writing as a bulleted list!
-> For example:
 
 The server will run as follows:
 
@@ -86,30 +153,32 @@ The server will run as follows:
 	clean up
 
 
-> Then briefly describe each of the major functions, perhaps with level-4 #### headers.
-
 ### Major data structures
 
-> Describe each major data structure in this program: what information does it represent, how does it represent the data, and what are its members.
-> This description should be independent of the programming language.
-> Mention, but do not describe, data structures implemented by other modules (such as the new modules you detail below, or any libcs50 data structures you plan to use).
+The server has one major data structures: the _game_ struct, which is a single global variable accessible to both the client and server. The _game_ struct keeps track of a list of player struct in _game.players_, the master grid struct in _game.masterGrid_, and the spectator struct with _game.spectator_.
 
----
 
-## XYZ module
+## Testing Plan
 
-> Repeat this section for each module that is included in either the client or server.
+### Unit Tests
 
-### Functional decomposition
+  1. Test visibility function to make sure it accurately calculates which spots the player can see
+  2. Test gridMake functions for master and player grids
+  3. Test gridPrint function to make sure it accurately reflects the player's grid
+  4. Test server sendMessage to make sure it can send messages to miniclient
+  5. Test server receiveMessage to make sure it can receive and parse messages from miniclient
+  6. Test player module to make sure it accurately handles gold counts
 
-> List each of the main functions implemented by this module, with a phrase or sentence description of each.
+### Integration Tests
 
-### Pseudo code for logic/algorithmic flow
+We will test every module extensively, including
+  1. Testing grid module to make sure the game is playable and players can move and see accurately
+  2. Testing server module to make sure the server is runnable and can receive clients
 
-> For any non-trivial function, add a level-4 #### header and provide tab-indented pseudocode.
-> This pseudocode should be independent of the programming language.
+### System Tests
 
-### Major data structures
+Use ~/cs50-dev/shared/nuggets/ to test
 
-> Describe each major data structure in this module: what information does it represent, how does it represent the data, and what are its members.
-> This description should be independent of the programming language.
+### Usability testing
+
+  1. Test with users (group members)
