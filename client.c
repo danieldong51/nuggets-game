@@ -247,4 +247,60 @@ handleError(const char* message){
 
 
 
+void mapDisplay(char* map) {
 
+  int X = 0;
+  int Y = 2;
+
+  //for each character in map
+  for (int i=0; i < strlen(map); i ++) {
+
+    //Use switch statements for the following map characters
+    switch(map[i]){
+
+      //solid rock - interstitial space outside rooms
+      case ' ' :
+
+      //- a horizontal boundary
+      case '-' :
+
+      //| a vertical boundary
+      case '|' :
+
+      //+ a corner boundary
+      case '+':
+
+      //. an empty room spot
+      case '.':
+
+      //# an empty passage spot
+      case '#':
+
+      //the player
+      case '@':
+
+      //a pile of gold
+      case '*':
+
+      //for everything else
+      default :
+        if (isalpha(map[i]) != 0) {
+          attron(COLOR_PAIR(1));
+          mvprintw(Y, X, "%c", map[i]);
+          nextPosition(&Y, &X);
+
+          attroff(COLOR_PAIR(1));
+
+        }
+
+        else{
+
+        }
+
+        break;
+
+
+    }
+  }
+
+}
