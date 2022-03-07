@@ -673,7 +673,7 @@ static void gameOver()
   deleteAllPlayers();
 
   // delete master grid
-  gridDelete(game.masterGrid);
+  gridDelete(game.masterGrid, true);
 
   // delete spectator object
   if (game.spectator != NULL) {
