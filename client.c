@@ -47,8 +47,15 @@ static const int MaxNameLength = 50; //max characters in playerName
 static int ncols, nrows; //number of columns and rows of the map
 
 /**************** file-local functions ****************/
-static bool handleInput  (void* arg);
+void initNcurses();
+bool handleInput(void* arg);
 static bool handleMessage(void* arg, const addr_t from, const char* message);
+void handleQuit(const char* message);
+void handleGrid(const char* message);
+void handleGold(const char* message);
+void handleDisplay(const char* message);
+void handleError(const char* message);
+void mapDisplay(char* map);
 
 
 
@@ -246,7 +253,7 @@ handleError(const char* message){
 
 
 
-
+/********* mapDisplay **********/
 void mapDisplay(char* map) {
 
   int X = 0;
@@ -287,7 +294,7 @@ void mapDisplay(char* map) {
         if (isalpha(map[i]) != 0) {
           attron(COLOR_PAIR(1));
           mvprintw(Y, X, "%c", map[i]);
-          nextPosition(&Y, &X);
+          positionNext(&Y, &X);
 
           attroff(COLOR_PAIR(1));
 
@@ -302,5 +309,12 @@ void mapDisplay(char* map) {
 
     }
   }
+
+}
+
+
+/***********positionNext*********/
+void positionNext(int* Y, int* X) {
+
 
 }
