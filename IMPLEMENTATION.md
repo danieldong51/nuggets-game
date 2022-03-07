@@ -207,15 +207,10 @@ Functions to construct and send `QUIT`, `OK`, `GRID`, `ERROR`, `GOLD`, and `DISP
 
 ```c
 static void sendOkMessage(const addr_t otherp, char letter);
-```c
 static void sendGridMessage(const addr_t otherp);
-```c
 static void sendErrorMessage(const addr_t otherp, char* explanation);
-```c
 static void sendGoldMessage(int n, int r, int p, const addr_t otherp);
-```c
 static void sendDisplayMessage(player_t* player, const addr_t otherp);
-```c
 static void sendSpecDisplayMessage(const addr_t otherp);
 ```
 
