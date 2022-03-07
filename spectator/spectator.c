@@ -47,9 +47,6 @@ spectator_t* spectator_new(grid_t* masterGrid, addr_t address)
 void spectator_delete(spectator_t* spectator)
 {
   if (spectator != NULL) {
-    if (spectator->grid != NULL) {
-      mem_free(spectator->grid);
-    }
     free(spectator);
   }
 }

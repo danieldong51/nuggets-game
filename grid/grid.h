@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include "../libcs50/bag.h"
 #include "../libcs50/file.h"
@@ -112,9 +113,7 @@ char** getGrid2D(grid_t* masterGrid);
 void setPosition(position_t* position, int x, int y);
 
 
-void gridDelete(grid_t* map);
-void goldPilesDelete(pile_t** goldPiles);
-void playerAndPositionDelete(playerAndPosition_t** playerPositions);
+void gridDelete(grid_t* map, bool isMaster);
 void grid_deletePlayer(grid_t* masterGrid, char playerLetter) ;
 
 position_t* newPosition();
