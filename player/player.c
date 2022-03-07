@@ -188,7 +188,7 @@ void player_setGrid(player_t* player, grid_t* grid)
 /* see player.h for description */
 void player_setAddress(player_t* player, const addr_t address)
 {
-  if (player != NULL && message_isAddr(address) == false) {
+  if (player != NULL && message_isAddr(address)) {
     player->address = address; 
   }
 }
@@ -198,10 +198,10 @@ void player_delete(player_t* player)
   if (player != NULL) {
     // check if the grid object is NULL, free if not 
     if (player->grid != NULL) {
-      gridDelete(player->grid);
+      gridDelete(player->grid, false);
     }
-    if (player->name != NULL) {
-      mem_free(player->name);
+    if (player->name != "") {
+      free(player->name);
     }
     
     mem_free(player);
