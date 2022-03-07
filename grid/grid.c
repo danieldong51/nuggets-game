@@ -506,6 +506,7 @@ char* gridPrint(grid_t* playerGrid, char playerLetter)
     // }
   }
   returnString[(nrows*(ncols+1)) ] = '\0';
+  mem_free(returnGrid[0]);
   mem_free(returnGrid);
   return returnString;
 }
@@ -577,9 +578,13 @@ gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter)
     
     printf("valid move\n");
 
+    // free existing position
+    // mem_free(masterGrid->playerPositions[index]->playerPosition);
+
     // update player location in masterGrid
-    position_t* coordinate = position_new(xCord, yCord);
-    masterGrid->playerPositions[index]->playerPosition = coordinate;
+    // position_t* coordinate = position_new(xCord, yCord);
+    masterGrid->playerPositions[index]->playerPosition->x = xCord;
+    masterGrid->playerPositions[index]->playerPosition->y = yCord;
 
     // check if coordinate is pile of gold
     int numPiles = sizeof(masterGrid->goldPiles)/sizeof(masterGrid->goldPiles[0]);  

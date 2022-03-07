@@ -57,13 +57,16 @@ tester()
   // printf("%s\n", gridPrint(playerAGrid, 'a'));
 
   // printf("updated playerA\n");
+  printf("%s\n", gridPrint(playerAGrid, 'a'));
 
-  // char c;
-  // while (scanf("%c", &c) != NULL) {
-  //   printf("return: %d\n", gridValidMove(masterGrid, 'a', c));
-  //   updateGrid(playerAGrid, masterGrid, 'a');
-  //   printf("%s\n", gridPrint(playerAGrid, 'a'));
-  // }
+  char c;
+  while (scanf("%c", &c) != NULL) {
+    printf("return: %d\n", gridValidMove(masterGrid, 'a', c));
+    updateGrid(playerAGrid, masterGrid, 'a');
+    char* temp = gridPrint(playerAGrid, 'a');
+    printf("%s\n", temp);
+    free(temp);
+  }
   // gridDelete(playerAGrid);
   // gridDelete(playerBGrid);
   // gridDelete(playerCGrid);
