@@ -37,11 +37,11 @@ typedef struct pile {
 
 /**************** global types ****************/
 typedef struct grid {
-  char** grid2D;                    // 2d string array, each slot represents one row
-  pile_t** goldPiles; 
-  playerAndPosition_t** playerPositions;
-  int nrows;
-  int ncols; 
+  char** grid2D;                            // 2d string array, each slot represents one row
+  pile_t** goldPiles;                       // list of gold piles
+  playerAndPosition_t** playerPositions;    // list of players and their positions
+  int nrows;                                // nrows in the map
+  int ncols;                                // ncols in the map
 } grid_t;
 
 void gridConvert(char** grid, FILE* fp, int nrows, int ncols);
@@ -796,16 +796,6 @@ getGrid2D(grid_t* masterGrid)
   return masterGrid->grid2D;
 }
 
-void setPosition(position_t* position, int x, int y)
-{
-  position->x = x;
-  position->y = y;
-}
-
-position_t* newPosition(){
-  position_t* position = mem_malloc(sizeof(position_t));
-  return position;
-}
 
 void 
 gridDelete(grid_t* map, bool isMaster) 
