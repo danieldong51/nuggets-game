@@ -79,6 +79,6 @@ tester()
   //   scanf("%c", &c);
   // }
 
-  gridDelete(masterGrid, true);
   gridDelete(playerAGrid, false);
+  gridDelete(masterGrid, true);
 }
