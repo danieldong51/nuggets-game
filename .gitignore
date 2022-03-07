@@ -36,3 +36,8 @@ Icon?
 
 ###########################################################################
 # custom additions below here; see also .gitignore files in subdirectories.
+server/server
+player/player
+spectator/spectator
+grid/grid
+grid/gridTester

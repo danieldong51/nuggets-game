@@ -8,6 +8,26 @@ Each player is randomly dropped into a room when joining the game.
 Players move about, collecting nuggets when they move onto a pile.
 When all gold nuggets are collected, the game ends and a summary is printed.
 
+## Server
+
+The server directory contains server.c, the program that implements all of the game logic.
+
+## Player 
+
+The player directory contains player.c and player.h, which implements the `player` module used in the server. 
+
+## Spectator 
+
+The spectator directory contains spectator.c and spectator.h, which implements the `spectator` module user in the server.
+
+## Client 
+The client directory contains client.c, the program that connexts to the server and allows a human to join the game as either player or spectator. Our client functionality is not fully developed. 
+
+## Division of Labor 
+- Emily and Dan: grid 
+- Georgia: server, player  
+- Jeff: spectator, client 
+
 ## Materials provided
 
 See the [support library](support/README.md) for some useful modules.
