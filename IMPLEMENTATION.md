@@ -197,16 +197,11 @@ A function to call `sendGoldMessage` to all players in _game.players_ given the 
 static void sendGoldToAll(int moveResult, player_t* currPlayer);
 ```
 
-A function to construct and send a `QUIT` message to given address. 
-
-```c
-static void sendQuitMessage(const addr_t otherp, char* explanation);
-```
-
 Functions to construct and send `QUIT`, `OK`, `GRID`, `ERROR`, `GOLD`, and `DISPLAY` messages to given sender. 
 
 ```c
 static void sendOkMessage(const addr_t otherp, char letter);
+static void sendQuitMessage(const addr_t otherp, char* explanation);
 static void sendGridMessage(const addr_t otherp);
 static void sendErrorMessage(const addr_t otherp, char* explanation);
 static void sendGoldMessage(int n, int r, int p, const addr_t otherp);
