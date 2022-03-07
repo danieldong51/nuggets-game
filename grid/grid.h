@@ -1,3 +1,11 @@
+/* 
+ * grid.h - a program responsible funnctionality for nuggets game play
+ * 
+ * Nuggets
+ * CS50, Winter 2022
+ * Team Tux
+ */
+
 #ifndef _GRID_H_
 #define _GRID_H_
 
