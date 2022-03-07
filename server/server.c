@@ -134,7 +134,7 @@ static bool parseArgs(const int argc, char* argv[])
   fclose(mapFile);
 
   if (argc == 3) {
-    
+
     // if a seed is provided, see if possible to scan into integer
     if (sscanf(argv[2], "%d", &game.seed) != 1) {
       // if scan unsuccessful, print error 
@@ -378,6 +378,7 @@ static void handleSpectateMessage(const addr_t from, const char* message)
   addr_t gameSpecAdd = spectator_getAddress(game.spectator);
 
   if (message_isAddr(gameSpecAdd)) {
+
     // if we do, compare the address to this new address 
     if (message_isAddr(from) == true && message_eqAddr(gameSpecAdd, from) == false) {
 
@@ -389,11 +390,9 @@ static void handleSpectateMessage(const addr_t from, const char* message)
   // either way, check if this address is valid and set it as spectator's address 
   if (message_isAddr(from)){
 
-    // set address of spectator to this new spectator 
     spectator_t* newSpectator = game.spectator;
     spectator_setAddress(newSpectator, from);
 
-    // server shall then immediately send GRID, GOLD, and DISPLAY messages as described below.
     sendGridMessage(from);
 
     sendGoldMessage(0, 0, game.goldRemaining, from);
@@ -453,106 +452,132 @@ static void handleKeyMessage(const addr_t otherp, const char* message)
     foundPlayer = true; 
   }
 
+  const char* content = message + strlen("KEY ");        // pointer to message, starting after "KEY "
+  char key; 
+  sscanf(content, " %c", &key);                         // parse content for keystroke using sscanf 
+
   if (foundPlayer) {
 
-    // get the letter of this player 
     char letter = player_getLetter(currPlayer);
-
-    const char* content = message + strlen("KEY "); // pointer to message, starting after "KEY "
-
-    char key; 
-
-    // parse content for keystroke using sscanf 
-    sscanf(content, " %c", &key);
     int moveResult; 
 
     // switch value of key 
     switch(key) {
       case 'Q' : case 'q':
+
         sendQuitMessage(otherp, "Thanks for playing!\n");
 
-        // change the player's isTalking status to false 
         player_changeStatus(currPlayer, false);
-        grid_deletePlayer(game.masterGrid, player_getLetter(currPlayer));
+        grid_deletePlayer(game.masterGrid, player_getLetter(currPlayer));     // delete player from master grid 
+
         updateAllGrids();
+
         sendDisplayToAll();
+
         break;
 
       case 'h': case 'l': case 'j': case 'k': case 'y': case 'u': case 'b': case 'n':
+
         moveResult = gridValidMove(game.masterGrid, letter, key);
         handleMoveResult(moveResult, currPlayer, otherp);
+
         break;
 
       case 'H': case 'L': case 'J': case 'K': case 'Y': case 'U': case 'B': case 'N':
+
         key = tolower(key);
-        moveResult = gridValidMove(game.masterGrid, letter, key);
+
+        moveResult = gridValidMove(game.masterGrid, letter, key); 
         handleMoveResult(moveResult, currPlayer, otherp);
+
         break;
 
       default: 
-        //  the server shall ignore that keystroke and may send back an ERROR message as described below
-        sendErrorMessage(otherp, "Invalid keystroke\n");
+        sendErrorMessage(otherp, "Invalid keystroke\n");            // ignore invalid keystrokes and send ERROR message
     }
   }
 
   else if (foundSpectator) {
-    const char* content = message + strlen("KEY "); // pointer to message, starting after "KEY "
-
-    char key; 
-
-    // parse using sscanf 
-    sscanf(content, " %c", &key);
 
     // switch value of key  - spectator can only send 'Q' keystroke 
     switch(key) {
       case 'Q': case 'q':
-        // set spectator's address to no address
-        spectator_setAddress(game.spectator, message_noAddr());
+        spectator_setAddress(game.spectator, message_noAddr());     // set spectator's address to no address
         game.hasSpectator = false; 
-        sendQuitMessage(otherp, "Thanks for watching!\n");
+
+        sendQuitMessage(otherp, "Thanks for watching!\n");          // send QUIT message to spectator
         break;
+    
       default: 
-        //  the server shall ignore that keystroke and may send back an ERROR message as described below
-        sendErrorMessage(otherp, "Invalid keystroke\n");
+        sendErrorMessage(otherp, "Invalid keystroke\n");            // ignore invalid keystrokes and send ERROR message
     }
   }
 }
 
+/* ******************** handleMoveResult() ************************** */
+/* Message-specific handler function for handleMessage(), used for adding a new spectator */
+/*
+* Caller provides: 
+*   int moveResult, the result of gridValidMove 
+*   currPlayer, the player struct for sender
+*   addr_t otherp, the address of sender 
+* We do:  
+*   if the player successfully moved, update all grids and send DISPLAY messages to all clients
+*   if the player's move was invalid, send ERROR message 
+*   if the player stepped on gold:
+*     add nuggets to players gold count
+*     decrement from goldRemaining
+*     update all grids and send DISPLAY messages to all clients
+* We return: 
+*   nothing 
+*/ 
 static void handleMoveResult(int moveResult, player_t* currPlayer, addr_t otherp) 
 {
-  if (moveResult == 0) {
+  
+  if (moveResult == 0) {          // user successfully moved 
+
     updateAllGrids();
+
     sendDisplayToAll();
+
   }
   else if (moveResult == -1) {
     sendErrorMessage(otherp, "Player cannot make this move");
   }
-  else {
-    // moveResult = amount of gold this player has just picked up 
-    // inform all clients of new gold count by sending a "GOLD" message 
+  else {                          // if moveResult is nonzero, it represents # nuggets picked up
     player_addGold(currPlayer, moveResult);
     game.goldRemaining = game.goldRemaining - moveResult;
+
     updateAllGrids(); 
+
     sendGoldToAll(moveResult, currPlayer);
+
     sendDisplayToAll();
   }
 }
-/*  check parameters, construct the message, log about it, and send the message */
+
+
+/* ******************** sendOkMessage() ************************** */
+/* Check parameters, construct and send OK message to given address */
 static void sendOkMessage(const addr_t otherp, char letter)
 {
   if (message_isAddr(otherp) && letter != ' ') {
-    // send "ok" message
+
     char okMessage[message_MaxBytes];
     sprintf(okMessage, "OK %c", letter);
+
     message_send(otherp, okMessage);
+
   }
 }
 
-/*  check parameters, construct the message, log about it, and send the message */
+/* ******************** sendGridMessage() ************************** */
+/* Check parameters, construct and send GRID message to given address */
 static void sendGridMessage(const addr_t otherp)
 {
   if (message_isAddr(otherp)) {
-    // GRID nrows ncols
+
+    // get number of rows and columns from masterGrid
     int numRows = getNumRows(game.masterGrid); 
     int numCols = getNumColumns(game.masterGrid);
 
@@ -566,12 +591,13 @@ static void sendGridMessage(const addr_t otherp)
 
 }
 
-/*  check parameters, construct the message, log about it, and send the message */
+/* ******************** sendGoldMessage() ************************** */
+/* Check parameters, construct and send GOLD message to given address */
 static void sendGoldMessage(int n, int r, int p, const addr_t otherp)
 {
   if (message_isAddr(otherp) && n >= 0 && p >= 0 && r >= 0) {
-    char response[message_MaxBytes];
 
+    char response[message_MaxBytes];
     sprintf(response, "GOLD %d %d %d", n, r, p);
 
     message_send(otherp, response); 
@@ -579,11 +605,13 @@ static void sendGoldMessage(int n, int r, int p, const addr_t otherp)
 
 }
 
-/*  check parameters, construct the message, log about it, and send the message */
+/* ******************** sendDisplayMessage() ************************** */
+/* Check parameters, construct and send DISPLAY message to given address */
 static void sendDisplayMessage(player_t* player, const addr_t otherp) 
 { 
-  if (player != NULL && message_isAddr(otherp)){
-    char* grid1D = gridPrint(player_getGrid(player), player_getLetter(player));
+  if (player != NULL && message_isAddr(otherp)) {
+
+    char* grid1D = gridPrint(player_getGrid(player), player_getLetter(player));     // construct 1D grid with gridPrint
 
     char response[message_MaxBytes];
     sprintf(response, "DISPLAY\n%s", grid1D);
@@ -597,26 +625,31 @@ static void sendDisplayMessage(player_t* player, const addr_t otherp)
   
 }
 
-/* check parameters, construct message, and send message */
+
+/* ******************** sendSpecDisplayMessage() ************************** */
+/* Check parameters, construct and send DISPLAY message with masterGrid to spectator address */
 static void sendSpecDisplayMessage(const addr_t otherp)
 {
   if (message_isAddr(otherp)){
-    char* grid1D = gridPrint(game.masterGrid, '.');
+
+    char* grid1D = gridPrint(game.masterGrid, '.');          // // construct 1D grid of masterGrid with gridPrint
 
     char response[message_MaxBytes];
     sprintf(response, "DISPLAY\n%s", grid1D);
 
     message_send(otherp, response);
     mem_free(grid1D);
-
   }
 
 }
 
-/*  check parameters, construct the message, log about it, and send the message */
+
+/* ******************** sendErrorMessage() ************************** */
+/* Check parameters, construct and send ERROR message to given address */
 static void sendErrorMessage(const addr_t otherp, char* explanation)
 {
-  if (message_isAddr(otherp) && explanation != NULL){
+  if (message_isAddr(otherp) && explanation != NULL) {
+
     char response[message_MaxBytes];
     sprintf(response, "ERROR %s", explanation); 
 
@@ -625,12 +658,13 @@ static void sendErrorMessage(const addr_t otherp, char* explanation)
   
 }
 
-/*  check parameters, construct the message, log about it, and send the message */
+/* ******************** sendQuitMessage() ************************** */
+/* Check parameters, construct and send QUIT message to given address */
 static void sendQuitMessage(const addr_t otherp, char* explanation)
 {
   if (message_isAddr(otherp) && explanation != NULL) {
-    char quitMessage[message_MaxBytes];
 
+    char quitMessage[message_MaxBytes];
     sprintf(quitMessage, "QUIT %s", explanation);
 
     message_send(otherp, quitMessage); 
@@ -638,41 +672,40 @@ static void sendQuitMessage(const addr_t otherp, char* explanation)
   
 }
 
-
+/* ******************** sendQuitMessage() ************************** */
+/* Check parameters, construct and send QUIT message to given address */
 static void sendDisplayToAll()
 {
   // loop through players, send DISPLAY message to each one 
   for (int i = 0; i < MaxPlayers; i++) {
+
     player_t* thisPlayer = game.players[i];
+
     if (player_isTalking(thisPlayer) && message_isAddr(player_getAddress(thisPlayer))) {
 
-      // update grid for this player 
       updateGrid(player_getGrid(thisPlayer), game.masterGrid, player_getLetter(thisPlayer));
       
-      // get address of this player 
       addr_t address = player_getAddress(thisPlayer);
     
-      // send display message to player 
       sendDisplayMessage(thisPlayer, address); 
     }
   }
-  // send to spectator
-  
+
+  // send to spectator   
   addr_t specAddress = spectator_getAddress(game.spectator);
   
   if (message_isAddr(specAddress)){
     sendSpecDisplayMessage(specAddress);
   }
-  
-
 }
+
+/* ******************** sendGoldToAll() ************************** */
+/* Check parameters, construct and send GOLD message to all talking clients */
 static void sendGoldToAll(int moveResult, player_t* currPlayer) 
 {
   for (int i = 0; i< MaxPlayers; i++){
-    // check if player is currently talking to server 
-    player_t* player = game.players[i];
 
-    // get address of player 
+    player_t* player = game.players[i];
     addr_t address = player_getAddress(player);
 
     if (player_isTalking(player) && message_isAddr(player_getAddress(player))) {
@@ -685,27 +718,29 @@ static void sendGoldToAll(int moveResult, player_t* currPlayer)
       }
     }
   }
-
-  addr_t specAddress = spectator_getAddress(game.spectator);
   // send to spectator 
+  addr_t specAddress = spectator_getAddress(game.spectator);
   if (message_isAddr(specAddress)){
     sendGoldMessage(0, 0, game.goldRemaining, specAddress);
   }
 }
 
+/* ******************** updateAllGrids() ************************** */
+/* Call updateGrid on every talking player with masterGrid */
 static void updateAllGrids()
 {
-  // call updateGrid on EVERY player  
   for (int i = 0; i < MaxPlayers; i++) {
+
     player_t* player = game.players[i];
 
     if (player_isTalking(player)) {
       updateGrid(player_getGrid(player), game.masterGrid, player_getLetter(player));
     }
   }
-  // don't need to update grid for spectator
 }
 
+/* ******************** findPlayer() ************************** */
+/* Given an address, return the player in the list of players with that address, NULL otherwise */
 player_t* findPlayer(const addr_t address) 
 {
   if (message_isAddr(address)) {
@@ -719,42 +754,95 @@ player_t* findPlayer(const addr_t address)
   return NULL;
 }
 
+/* ******************** deleteAllPlayers() ************************** */
+/* Loop through player list and call player_delete on each player */
+static void deleteAllPlayers()
+{
+  for (int i = 0; i < MaxPlayers; i++) {
+    player_delete(game.players[i]);
+  }
+}
+
+/* ******************** getName() ************************** */
+/* Given a name, parse, truncate, and return */
+/*
+* We do: 
+*   loop through content pointer
+*   truncate an over-length real name to MaxNameLength characters
+*   replacing with an underscore _ any character for which both isgraph() and isblank() are false
+*/
+static char* getName(const char* content)
+{
+  char* name = mem_malloc_assert(sizeof(char)*(MaxNameLength + 1), "Unable to allocate memory for player name.\n");
+
+  // loop through content pointer 
+  int i; 
+  for (i = 0; i < strlen(content) && i < MaxNameLength; i++){
+
+    if ( (!isgraph(content[i])) && !(isblank(content[i])) ) {
+      name[i]='_';
+    }
+
+    else {
+      name[i] = content[i];
+    }
+
+  }
+  name[i] = '\0';             // truncate at MaxNameLength
+
+  return name; 
+}
+
+/* ******************** gameOver() ************************** */
+/* Delete game struct, construct GAME OVER message, send to all talking clients */
+/*
+* We do: 
+*   construct a GAME OVER message with a tabular summary of all past players' names, scores, and letters 
+*   broadcast GAME OVER message to all talking clients 
+*   delete all player structs by calling player_delete, which calls gridDelete on each players grid 
+*   free player list 
+*   delete masterGrid by calling gridDelete, which frees all grid memory 
+*   delete spectator if it exists 
+*/
 static void gameOver()
 {
   // construct and broadcast game over message
   char gameOverMessage[message_MaxBytes];
-  printf("gameOver called..\n");
   sprintf(gameOverMessage, "GAME OVER:\n");
 
   for (int i = 0; i < MaxPlayers; i++) {
+
     player_t* p = game.players[i];
-    printf("first loop\n");
+
     if (strcmp(player_getName(p),"")!=0){
-      printf("print player info for %s\n", player_getName(p));
-      // set info pointer to each player line, incrementing each time 
+
+      // get summary for each player and print to gameOverMessage
       char* info;
       for (info = gameOverMessage ; *info ; info++);
+
       char letter = toupper(player_getLetter(p));
       sprintf(info, "%c\t%3d %s\n", letter, player_getGold(p), player_getName(p));
       } 
   }
   
-
   // broadcast game over message to all players who are still talking to server 
   for (int i = 0; i < MaxPlayers; i++) {
+
     player_t* player = game.players[i];
-    printf("second loop\n");
+
     if (player_isTalking(player) && message_isAddr(player_getAddress(player))) {
       sendQuitMessage(player_getAddress(player), gameOverMessage);
     }
   }
+
   // send spectator game over message 
   addr_t specAddress = spectator_getAddress(game.spectator);
-  // send to spectator 
+
   if (message_isAddr(specAddress)){
     printf("send to spectator\n");
     sendQuitMessage(specAddress, gameOverMessage);
   }
+  
   // call player_delete on players
   deleteAllPlayers();
   free(game.players);
@@ -769,33 +857,6 @@ static void gameOver()
   
 }
 
-static void deleteAllPlayers()
-{
-  for (int i = 0; i < MaxPlayers; i++) {
-    player_delete(game.players[i]);
-  }
-}
-
-static char* getName(const char* content)
-{
-  // create a pointer that starts in middle of message
-  char* name = mem_malloc_assert(sizeof(char)*(MaxNameLength + 1), "Unable to allocate memory for player name.\n");
-
-  // loop through content to get name 
-  int i; 
-  for (i = 0; i < strlen(content) && i < MaxNameLength; i++){
-    if ( (!isgraph(content[i])) && !(isblank(content[i])) ) {
-      name[i]='_';
-    }
-    else {
-      name[i] = content[i];
-    }
-  }
-  name[i] = '\0';
-
-  return name; 
-  
-}
 
 
 
