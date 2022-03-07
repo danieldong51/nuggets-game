@@ -12,4 +12,4 @@ The server shall be prepared to receive these message types: PLAY, SPECTATE, and
 
 The server can only accept up to 26 players, and one spectator. If a new player wants to join when we already have maximum number of players, they will receive a QUIT message.
 
-The server terminates when all the gold is collected or all the joined players have quit. 
+The server terminates when all the gold is collected or all the 26 players have joined and quit. 

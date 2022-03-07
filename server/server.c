@@ -240,8 +240,8 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
     }
   }
 
-  // if all players have quit, quit 
-  if (game.numPlayers > 0 && noPlayersTalking) {
+  // if all possible players have quit, quit 
+  if (game.numPlayers == MaxPlayers && noPlayersTalking) {
     return true;
   }
 

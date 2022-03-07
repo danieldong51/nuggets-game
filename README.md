@@ -8,7 +8,7 @@ The gold nuggets are randomly distributed in *piles* within the rooms.
 Up to 26 players, and one spectator, may play a given game.
 Each player is randomly dropped into a room when joining the game.
 Players move about, collecting nuggets when they move onto a pile.
-When all gold nuggets are collected or all joined players have quit, the game ends and a summary is printed.
+When all gold nuggets are collected or all 26 players have joined and quit, the game ends and a summary is printed.
 
 Deconstruction of game: 
 * server: a program that handles receiving and messages from client
