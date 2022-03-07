@@ -257,13 +257,12 @@ int gridValidMove(position_t* coordinate)
 ### Detailed pseudocode
 
 #### `gridConvert`
-```
-Take in file
-Obtain # of rows in file
-Create array of strings with (# of row) slots
-For number of rows in file
-	Add contents of row x into slot x of a the array of strings
-```
+
+	Take in file
+	Obtain # of rows in file
+	Create array of strings with (# of row) slots
+	For number of rows in file
+		Add contents of row x into slot x of a the array of strings
 
 #### `updateGrid`
 ```
@@ -514,7 +513,7 @@ Testing invalid server address on the client side
 
 Finally, we will run `client` and `server` on a Thayer Linux server by giving the server's hostname on the client's command line. We’ll run a server on `babylon5` and a client on `plank`. 
 
-We will test both ‘client’ and ‘server’ using the four programs in the shared directory `~/cs50-dev/shared/nuggets/’. We will also use the `padmap` program, a tool to pad all lines of a mapfile so they have the same length, and the `checkmap` program, which validates a map.
+We will test both ‘client’ and ‘server’ using the four programs in the shared directory `~/cs50-dev/shared/nuggets/’.` We will also use the `padmap` program, a tool to pad all lines of a mapfile so they have the same length, and the `checkmap` program, which validates a map.
 
 ### system testing
 

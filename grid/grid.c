@@ -430,7 +430,7 @@ char* gridPrint(grid_t* playerGrid, char playerLetter)
         if (i == playerLetter - 'a') {
           gridMark(returnGrid, playerPosition, '@');
         } else {
-          char playerLetter = i + 'a';
+          char playerLetter = i + 'A';
           // set char of player to its player letter
           gridMark(returnGrid, playerPosition, playerLetter);
         }
