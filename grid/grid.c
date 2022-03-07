@@ -599,6 +599,8 @@ gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter)
         if (xCord == xGold && yCord == yGold) {
           
           int amount = pile->amount;
+          mem_free(masterGrid->goldPiles[i]->location);
+          mem_free(masterGrid->goldPiles[i]);
           masterGrid->goldPiles[i] = NULL;
           return amount;
         }
