@@ -209,18 +209,15 @@ updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter)
 
     // check if not null
     playerAndPosition_t* otherPlayer;
-    if (masterGrid->playerPositions[i] != NULL) {
+    if ((otherPlayer = masterGrid->playerPositions[i]) != NULL) {
 
-      if ((otherPlayer = masterGrid->playerPositions[i]) != NULL) {
+      // printf("otherPlayerPos y: %d, x: %d\n", otherPlayerPos->y, otherPlayerPos->x);
+      // check if player position is visible
+      if (gridGetChar(visible, otherPlayer->playerPosition) == '.') {
 
-        // printf("otherPlayerPos y: %d, x: %d\n", otherPlayerPos->y, otherPlayerPos->x);
-        // check if player position is visible
-        if (gridGetChar(visible, otherPlayer->playerPosition) == '.') {
-
-          // add player to playerGrid's player list
-          // playerGrid->playerPositions[i] = malloc(sizeof(playerAndPosition_t));
-          playerGrid->playerPositions[i] = otherPlayer;
-        }
+        // add player to playerGrid's player list
+        // playerGrid->playerPositions[i] = malloc(sizeof(playerAndPosition_t));
+        playerGrid->playerPositions[i] = otherPlayer;
       }
     }
   }
@@ -861,13 +858,10 @@ playerAndPositionDelete(playerAndPosition_t** playerPositions, bool isMaster)
 void grid_deletePlayer(grid_t* masterGrid, char playerLetter) 
 {
   playerAndPosition_t** playerPositions = masterGrid->playerPositions;
-  for (int i = 0; i < MAXPLAYERS; i++) {
-    // if player position exists, add to returnGrid
-    if (playerPositions[i] != NULL && playerPositions[i]->playerPosition != NULL) {
+  int index = playerLetter - 'a';
 
-      if (i == playerLetter - 'a') {
-        playerPositions[i]->playerPosition = NULL;
-      }
-    }
+  if (playerPositions[index] != NULL) {
+    // playerPositions[index]->playerPosition = NULL;
+    playerPositions[index] = NULL;
   }
 }
