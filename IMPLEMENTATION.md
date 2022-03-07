@@ -925,13 +925,13 @@ else
 
 ## Testing plan
 
-### unit testing
+### Unit testing
 
 We will conduct unit tests according to detailing in the Design Spec, [DESIGN.md](https://github.com/cs50winter2022/nuggets-team-tux/blob/submit-implementation/DESIGN.md). We will individually test each module as we code to ensure each individual unit of the program runs smoothly. 
 
-### integration testing
+### Integration testing
 
-We will test the server and the client programs extensively, including: 
+We will test the server program extensively, including: 
 - End game behavior 
 - More than MaxPlayers players trying to connect
 - More than one spectator trying to connect
@@ -939,17 +939,7 @@ We will test the server and the client programs extensively, including:
 - Players all quitting
 - All gold collected
 
-Finally, we will run `client` and `server` on a Thayer Linux server by giving the server's hostname on the client's command line. We’ll run a server on `babylon5` and a client on `plank`. 
-
-We will test both ‘client’ and ‘server’ using the four programs in the shared directory `~/cs50-dev/shared/nuggets/`. 
-
-### system testing
-
-We will test the client and server together, looking to check:
-The server can take connections
-The client can connect to the server
-The server can hold up to 26 clients and 1 spectator
-The server remembers which player a client was, and fills them in as needed
+We will test the `server` using the `client` in the shared directory `~/cs50-dev/shared/nuggets/`. 
 
 ---
 

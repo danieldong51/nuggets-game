@@ -12,7 +12,7 @@ The server code was tested with the client in the shared folder. We started the 
 
 We also tested multiple players joining, and then quitting. We tested players quitting from the game in a few different cases. We tested a player quitting with no players remaining in the game but less than 26 players have joined, in which case the game does not quit and waits for more players. We tested a player quitting with players and/or spectators still remaining, confirming that the quitted player was removed from remaining players' / spectator's display. We tested adding 26 players and then quitting all 26 players, in which case the game will end, since no more players can join. 
 
-We also tested if a spectator joins and then players join and quit, in which case the game ends and the spectator sees the game over summary. If a specator joins and then quits without any players joining, we tested that the game still allows more players. If the spectator joins and all 26 players join and then quit, send game over message to spectator.
+We also tested if a spectator joins and then players join and quit, in which case the game ends and the spectator sees the game over summary. If a specator joins and then quits without any players joining, we tested that the game still allows more players. If the spectator joins and all 26 players join and then quit, send game over message to spectator. If a new spectator is added when we already have a spectator, we tested that the old spectator is replaced and sent a QUIT message.
 
 We tested that the server would accept up to 26 players, and deny a player joining if there are already 26 players. 
 
