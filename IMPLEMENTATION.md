@@ -203,39 +203,19 @@ A function to construct and send a `QUIT` message to given address.
 static void sendQuitMessage(const addr_t otherp, char* explanation);
 ```
 
-A function to construct and send a `OK` message to given address. 
+Functions to construct and send `QUIT`, `OK`, `GRID`, `ERROR`, `GOLD`, and `DISPLAY` messages to given sender. 
 
 ```c
 static void sendOkMessage(const addr_t otherp, char letter);
-```
-
-A function to construct and send a `GRID` message to given address. 
-
 ```c
 static void sendGridMessage(const addr_t otherp);
-```
-
-A function to construct and send an `ERROR` message to given address. 
-
 ```c
 static void sendErrorMessage(const addr_t otherp, char* explanation);
-```
-
-A function to construct and send a `GOLD` message to given address. 
-
 ```c
 static void sendGoldMessage(int n, int r, int p, const addr_t otherp);
-```
-
-A function to construct and send a player `DISPLAY` message to given address. 
-
 ```c
 static void sendDisplayMessage(player_t* player, const addr_t otherp);
-```
-
-A function to construct and send a spectator `DISPLAY` message using master grid to given address. 
-
-```c 
+```c
 static void sendSpecDisplayMessage(const addr_t otherp);
 ```
 
