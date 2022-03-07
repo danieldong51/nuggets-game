@@ -214,34 +214,34 @@ static void sendSpecDisplayMessage(const addr_t otherp);
 ### Detailed pseudo code
 
 #### `main`:
-```c
-validate command line arguments using parseArgs()
-call initializeGame() with map.txt 
-initialize ‘message module’ 
-print the port number on which we wait 
-call message_loop()
-call gameOver() to inform all clients the game has ended
-clean up
-```
+
+  validate command line arguments using parseArgs()
+  call initializeGame() with map.txt 
+  initialize ‘message module’ 
+  print the port number on which we wait 
+  call message_loop()
+  call gameOver() to inform all clients the game has ended
+  clean up
+
 
 #### `parseArgs`:
-```c
-validate number of arguments 
-verify map file can be opened for reading
-if seed provided
-  verify it is a valid seed number
-  seed the random-number generator with that seed
-else
-  seed the random-number generator with getpid()
-```
+
+  validate number of arguments 
+  verify map file can be opened for reading
+  if seed provided
+    verify it is a valid seed number
+    seed the random-number generator with that seed
+  else
+    seed the random-number generator with getpid()
+
 
 #### `initializeGame`:
-```c
-initialize information about the game
-initialize list of players by calling player_new() for each player
-call gridMakeMaster() with mapPathname and game.masterGrid to initialize and drop gold on game grid 
-initialize spectator
-```
+
+  initialize information about the game
+  initialize list of players by calling player_new() for each player
+  call gridMakeMaster() with mapPathname and game.masterGrid to initialize and drop gold on game grid 
+  initialize spectator
+
 
 
 #### `handleMessage`:
