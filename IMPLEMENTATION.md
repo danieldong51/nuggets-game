@@ -31,14 +31,11 @@ int maxPlayers = 26;      		// maximum number of players
 int goldTotal = 250;     			// amount of gold in the game
 int goldMinNumPiles = 10; 		// minimum number of gold piles
 int goldMaxNumPiles = 30; 		// maximum number of gold piles
-<<<<<<< HEAD
-=======
 
 int goldRemaining;              // amount of gold left in game 
 player_t* players[26];          // list of players 
 grid_t* masterGrid;             // master grid object that contains master char 2D array + other info 
 
->>>>>>> 51589fe3d1e563a96371acf9ad459a4f3fdfce76
 } game_t; 
 ```
 
@@ -95,18 +92,12 @@ if the message from the server is:
   “ERROR”: 
     Print explanation that should be to the right of the error message.
 ```
-    	
----
 
 ## Server
 
 ### Data structures
 
 The _game_ struct, which is a single global variable accessible to both client and server. The struct is provided in the client section of the Implementation Spec. 
-<<<<<<< HEAD
-
-=======
->>>>>>> 51589fe3d1e563a96371acf9ad459a4f3fdfce76
 
 ### Definition of function prototypes
 
@@ -121,15 +112,9 @@ A function to set up the data structures for the game, including loading the map
 ```c
 static void initializeGame(char* mapPathname);
 ```
-<<<<<<< HEAD
 
 A function that calls message_loop to accept messages from the client and take the appropriate action. 
 
-=======
-
-A function that calls message_loop to accept messages from the client and take the appropriate action. 
-
->>>>>>> 51589fe3d1e563a96371acf9ad459a4f3fdfce76
 ```c
 static void acceptMessages(int port);
 ```
@@ -346,144 +331,6 @@ bool isTalking;
 
 A function to create a new player struct. It initializes the players location to a random room spot and sets the player's grid to be the empty grid. The server will then call updateGrid on the player's grid and master grid. 
 
-<<<<<<< HEAD
-```c
-player_t* player_new(char* name, char* letter, position_t* pos); 
-```
-
-A function to update the players `position` struct to register a player’s move. This function need not update their grid, for this is handled by the server. This function need not check that the position coordinates are valid since this is also handled by the server. 
-
-```c
-void player_move(player_t* player, position_t* newPosition); 
-```
-
-A function to delete a player and free all of its memory. 
-
-```c
-void player_delete(player_t* player); 
-``` 
-
-A function to get the `position` of a player, i.e. its (x, y) coordinates. 
-
-```c
-position_t* player_getPosition(player_t* player); 
-``` 
-
-A function to increment the number of gold a player has by _numGold_ amount. This function is called by the server when a player steps on a gold pile. 
-
-```c
-void player_addGold(player_t* player, int numGold);
-```
-
-A function that returns whether or not a player is currently talking to the server. 
-
-```c
-bool player_isTalking(player_t* player); 
-```
-
-A function to return the grid object of a player.
-
-```c 
-grid_t* player_getGrid(player_t* player); 
-```
-
-A function to change whether or not the player is talking to the server. 
-
-```c 
-void player_changeStatus(player_t* player); 
-```
- 
-### Detailed pseudo code
-
-#### `player_new`
-
-```
-if given name, letter, and grid is valid
-  generate a random room spot on the grid 
-  allocate memory for a new player
-  if memory for player can be created: 
-    set this spot as the players position
-    set the grid for the player to the empty grid 
-    initialize other player information
-	  return the new player object
-if any errors
-	return null 
-```
-
-#### `player_move` 
-
-```
-replace the position of this player with the given position
-```
-
-#### `player_delete` 
-
-``` 
-if the given player struct is not null
-	free the memory for the position and grid of this player
-	free the memory for the player object
-```
-
-#### `player_getPosition`
-
-```
-if player is not null 
-	return the position of this player 
-else
-	return null
-```
-
-#### `player_addGold` 
-
-```
-if player is not null 
-	add the given amount to this player’s numGold count
-```
-
-#### `player_isTalking`
-```
-if player is not null 
-	return this player’s bool struct isTalking
-else 
-	return false 
-```
-
-#### `player_getGrid`
-
-```
-if player is not null 
-	return this player’s grid struct 
-else 
-	return null
-```
-
-#### `player_changeStatus`
-
-```
-if player is not null 
-  if isTakling is false, make it true 
-  if isTalking is true, make it false 
-else 
-  do nothing
-```
-
----
-
-## Spectator
-
-### Data structures
-
-The data structure for the spectator is the rooms it has seen before, which is represented by the _grid_ struct.
-
-```c
-grid_t* grid;
-```
-
-### Definition of function prototypes
-
-A function to create a new player struct. 
-=======
->>>>>>> 51589fe3d1e563a96371acf9ad459a4f3fdfce76
 ```c
 player_t* player_new(char* name, char* letter, position_t* pos); 
 ```
@@ -656,11 +503,6 @@ if the given spectator struct is not null:
 ### unit testing
 
 We will conduct unit tests according to detailing in the Design Spec, [DESIGN.md](https://github.com/cs50winter2022/nuggets-team-tux/blob/submit-implementation/DESIGN.md). We will individually test each module as we code to ensure each individual unit of the program runs smoothly. 
-<<<<<<< HEAD
-
-We will conduct unit tests according to detailing in the DESIGN spec. We will individually test each module as we code to ensure each individual unit of the program runs smoothly. 
-=======
->>>>>>> 51589fe3d1e563a96371acf9ad459a4f3fdfce76
 
 ### integration testing
 
@@ -676,15 +518,6 @@ We will test both ‘client’ and ‘server’ using the four programs in the s
 
 ### system testing
 
-<<<<<<< HEAD
-
-We will test the client and server together, looking to check:
-The server can take connections
-The client can connect to the server
-The server can hold up to 26 clients and 1 spectator
-The server remembers which player a client was, and fills them in as needed
-=======
->>>>>>> 51589fe3d1e563a96371acf9ad459a4f3fdfce76
 
 We will test the client and server together, looking to check:
 The server can take connections
