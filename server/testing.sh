@@ -6,10 +6,25 @@
 #
 # Server testing script 
 
-./server ../maps/main.txt
+./server ../maps/edges.txt
 
-# test with their miniclient
-#../prof/client 10.132.13.241. portNum
+# nonexistent map file 
+# ./server ../maps/error.txt
+
+# # invalid # arguments: no arguments
+# ./server 
+
+# # invalid seed : string 
+# ./server ../maps/main.txt ../maps/error.txt
+
+# # invalid seed : non integer 
+# ./server ../maps/main.txt -1
+
+# # invalid # arguments: 3 arguments 
+# ./server ../maps/main.txt ../maps/error.txt d
+
+
+
 
 
 
