@@ -647,7 +647,6 @@ static void gameOver()
       printf("print player info for %s\n", player_getName(p));
       // set info pointer to each player line, incrementing each time 
       char* info;
-      printf("%s",info);
       for (info = gameOverMessage ; *info ; info++);
       sprintf(info, "%c\t%3d %s\n", player_getLetter(p), player_getGold(p), player_getName(p));
       } 
@@ -671,6 +670,7 @@ static void gameOver()
   }
   // call player_delete on players
   deleteAllPlayers();
+  free(game.players);
 
   // delete master grid
   gridDelete(game.masterGrid, true);

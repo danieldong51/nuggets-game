@@ -200,8 +200,8 @@ void player_delete(player_t* player)
     if (player->grid != NULL) {
       gridDelete(player->grid, false);
     }
-    if (player->name != NULL) {
-      mem_free(player->name);
+    if (player->name != "") {
+      free(player->name);
     }
     
     mem_free(player);
