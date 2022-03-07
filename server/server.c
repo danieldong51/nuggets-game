@@ -29,6 +29,7 @@ static const int GoldTotal = 250;      // amount of gold in the game
 static const int GoldMinNumPiles = 10; // minimum number of gold piles
 static const int GoldMaxNumPiles = 30; // maximum number of gold piles 
 static const char SPACE = ' ';
+static const char PERIOD = '.'; 
 
 /* ***************************************** */
 /* Global variables */
@@ -38,8 +39,6 @@ struct game {
   player_t** players;             // list of player structs 
   grid_t* masterGrid;             // master grid struct
   spectator_t* spectator;         // spectator struct
-  bool playersJoined;             // whether or not any players have joined 
-  bool hasSpectator;              // whether or not a spectator is talking to the server
   int seed;                       // seed for rand()
 } game; 
 
@@ -174,10 +173,6 @@ static void initializeGame(char* mapPathname)
     game.players[i] = player_new();
   }
 
-  // initialize booleans 
-  game.playersJoined = false;
-  game.hasSpectator = false; 
-
   // call rand 
   int randNum = rand();
 
@@ -229,11 +224,11 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
     handleKeyMessage(from, message);
   }
   else {
-    sendErrorMessage(from, "Unknown command.\n");             // malformatted message; ignore 
+    sendErrorMessage(from, "Unknown command.\n");     // malformatted message; ignore 
   }
 
   // end the game if no more gold 
-  if (game.goldRemaining == 0) {
+  if (game.goldRemaining == 0) {                      
     return true; 
   }
 
@@ -267,11 +262,7 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
 *     send "OK" message to player to confirm they joined game
 *     add a player struct to game's player list and store information for this player 
 *     call gridNewPlayer to generate a random position and a grid object for the player
-*     update all players grids
-*     send GRID message to sender
-*     send GOLD message to sender
-*     send DISPLAY message to all clients
-*     increment the number of players that have joined so far 
+*     update all players grids, send GRID and GOLD message to sender, send DISPLAY to all 
 * if there are already MaxPlayers: 
 *     send QUIT message to current sender
 * We return: 
@@ -279,11 +270,10 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
 */ 
 static void handlePlayMessage(const addr_t from, const char* message)
 {
-  const char* content = message + strlen("PLAY ");                // pointer to the middle of the message
+  const char* content = message + strlen("PLAY ");    // pointer to the middle of the message
   
   if (game.numPlayers < MaxPlayers)
   {
-    // get name from rest of message 
     char* name = getName(content); 
 
     // get the letter of this player from numPlayers
@@ -314,30 +304,22 @@ static void handlePlayMessage(const addr_t from, const char* message)
     player_changeStatus(game.players[game.numPlayers], true);
     player_setAddress(game.players[game.numPlayers], from);
 
-    game.playersJoined = true; 
-
-    /// set random position and create empty for player 
+    /// set random position and create empty grid for player 
     player_setGrid(game.players[game.numPlayers], gridNewPlayer(game.masterGrid, player_getLetter(game.players[game.numPlayers])));
 
-    // call updateGrid to recalculate visibility for all players
-    updateAllGrids();
+    updateAllGrids();                                 // call updateGrid to recalculate visibility for all players
 
-    // immediately send GRID and GOLD messages to new clients
-    sendGridMessage(from); 
-
+    sendGridMessage(from);                            // immediately send GRID and GOLD messages to new clients
     sendGoldMessage(0, 0, game.goldRemaining, from);
+ 
+    sendDisplayToAll();                               // send DISPLAY message to all clients
 
-    // send display message to all clients 
-    sendDisplayToAll();
-
-    // incremement the number of players 
-    game.numPlayers++;
+    game.numPlayers++;                                // incremement the number of players that have joined so far 
 
   }
   else 
   {
-    // too many players, respond to client with "NO"
-    sendQuitMessage(from, "Game is full: no more players can join.\n");
+    sendQuitMessage(from, "Game is full: no more players can join.\n"); // too many players
   }
 }
 
@@ -352,9 +334,7 @@ static void handlePlayMessage(const addr_t from, const char* message)
 *     compare address of sender to our spectator, replace and send QUIT message to old spectator if they are different 
 *   verify the address is valid
 *   set the spectators address to from
-*   send GRID message to new spectator
-*   send GOLD message to new spectator
-*   send DISPLAY message to new spectator
+*   send GRID, GOLD, DISPLAY messages to new spectator
 * We return: 
 *   nothing 
 */ 
@@ -384,10 +364,7 @@ static void handleSpectateMessage(const addr_t from, const char* message)
     sendGoldMessage(0, 0, game.goldRemaining, from);
 
     sendSpecDisplayMessage(from);
-  }
-
-  game.hasSpectator = true; 
-  
+  }  
 
 }
 
@@ -401,25 +378,14 @@ static void handleSpectateMessage(const addr_t from, const char* message)
 *   check if we are dealing with a spectator or a player
 *   if it is a player: 
 *     get the letter of the player from its address
-*     if key is: 
-*     'q' or 'Q': 
-*       send quit message to player 
-*       change players status to not talking
-*       delete player from master grid
-*       update all grids
-*       send DISPLAY message to all clients 
-*     one of the moving keys: 
-*       call gridValidMove on key to get moveResult
-*       call handleMoveResult to send messages to clients based on outcome of attempted move 
-*      send ERROR message if invalid keystroke
+*     if key is 'q' or 'Q', quit player, update all grids, send DISPLAY message to all clients  
+*     if key is one of the moving keys: call gridValidMove and handleMoveResult 
+*     send ERROR message if invalid keystroke
 *   if it is a spectator: 
-*       if key is: 
-*       'q' or 'Q':
-*         set spectators address to no address 
-*         send QUIT message to spectator
-*      send ERROR message if invalid keystroke 
+*       if key is 'q' or 'Q', set spectators address to no address and send QUIT message to spectator
+*       send ERROR message if invalid keystroke 
 * We return: 
-*   nothing 
+*   nothing
 */ 
 static void handleKeyMessage(const addr_t otherp, const char* message)
 {
@@ -465,7 +431,7 @@ static void handleKeyMessage(const addr_t otherp, const char* message)
 
       case 'h': case 'l': case 'j': case 'k': case 'y': case 'u': case 'b': case 'n':
 
-        moveResult = gridValidMove(game.masterGrid, letter, key);
+        moveResult = gridValidMove(game.masterGrid, letter, key);             // get result of attempted move 
         handleMoveResult(moveResult, currPlayer, otherp);
 
         break;
@@ -474,7 +440,7 @@ static void handleKeyMessage(const addr_t otherp, const char* message)
 
         key = tolower(key);
 
-        moveResult = gridValidMove(game.masterGrid, letter, key); 
+        moveResult = gridValidMove(game.masterGrid, letter, key);            // get result of attempted move 
         handleMoveResult(moveResult, currPlayer, otherp);
 
         break;
@@ -490,9 +456,8 @@ static void handleKeyMessage(const addr_t otherp, const char* message)
     switch(key) {
       case 'Q': case 'q':
         spectator_setAddress(game.spectator, message_noAddr());     // set spectator's address to no address
-        game.hasSpectator = false; 
-
         sendQuitMessage(otherp, "Thanks for watching!\n");          // send QUIT message to spectator
+
         break;
     
       default: 
@@ -548,7 +513,7 @@ static void handleMoveResult(int moveResult, player_t* currPlayer, addr_t otherp
 /* Check parameters, construct and send OK message to given address */
 static void sendOkMessage(const addr_t otherp, char letter)
 {
-  if (message_isAddr(otherp) && letter != ' ') {
+  if (message_isAddr(otherp) && letter != SPACE) {
 
     char okMessage[message_MaxBytes];
     sprintf(okMessage, "OK %c", letter);
@@ -569,8 +534,6 @@ static void sendGridMessage(const addr_t otherp)
     int numCols = getNumColumns(game.masterGrid);
 
     char response[message_MaxBytes];
-      
-    // construct content of message 
     sprintf(response, "%s %d %d", "GRID ", numRows, numCols);
 
     message_send(otherp, response);
@@ -619,7 +582,7 @@ static void sendSpecDisplayMessage(const addr_t otherp)
 {
   if (message_isAddr(otherp)){
 
-    char* grid1D = gridPrint(game.masterGrid, '.');          // // construct 1D grid of masterGrid with gridPrint
+    char* grid1D = gridPrint(game.masterGrid, PERIOD);      // construct 1D grid of masterGrid with gridPrint
 
     char response[message_MaxBytes];
     sprintf(response, "DISPLAY\n%s", grid1D);
