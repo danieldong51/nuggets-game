@@ -1,3 +1,11 @@
+/* 
+ * grid.h - a program responsible funnctionality for nuggets game play
+ * 
+ * Nuggets
+ * CS50, Winter 2022
+ * Team Tux
+ */
+
 #ifndef _GRID_H_
 #define _GRID_H_
 
@@ -10,10 +18,21 @@
 #include "../libcs50/mem.h"
 #include <math.h>
 
+/**************** local types ****************/
+// structure to contain x, y coordinates
 typedef struct position position_t;
+
+// structure to contain letter of player and its location
 typedef struct playerAndPosition playerAndPosition_t;
+
+// structure to contain location of pile and the amount of gold in the pile
 typedef struct pile pile_t;
+
+
+/**************** global types ****************/
+// structure responsible for majority of grid gameplay
 typedef struct grid grid_t;
+
 
 
 /**************** gridConvert ****************/

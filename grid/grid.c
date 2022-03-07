@@ -1,3 +1,11 @@
+/* 
+ * grid.c - a program responsible funnctionality for nuggets game play
+ * 
+ * Nuggets
+ * CS50, Winter 2022
+ * Team Tux
+ */
+ 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -22,40 +30,40 @@ typedef struct position {
 } position_t;
 
 typedef struct playerAndPosition {
-  char name;
-  position_t* playerPosition;
+  char name;                      // player's letter
+  position_t* playerPosition;     // location of player
 } playerAndPosition_t;
 
 typedef struct pile {
-  position_t* location;
-  int amount;
+  position_t* location;           // location of gold Pile
+  int amount;                     // amount of gold at the pile
 } pile_t;
 
 /**************** global types ****************/
 typedef struct grid {
-  char** grid2D;                    // 2d string array, each slot represents one row
-  pile_t** goldPiles; 
-  playerAndPosition_t** playerPositions;
-  int nrows;
-  int ncols; 
+  char** grid2D;                            // 2d string array, each slot represents one row
+  pile_t** goldPiles;                       // list of gold piles
+  playerAndPosition_t** playerPositions;    // list of players and their positions
+  int nrows;                                // nrows in the map
+  int ncols;                                // ncols in the map
 } grid_t;
 
-void gridConvert(char** grid, FILE* fp, int nrows, int ncols);
-void updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter);
-char* gridPrint(grid_t* map, char playerLetter);
-int gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter);
-void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int randInt);
-grid_t* gridNewPlayer(grid_t* masterGrid, char playerLetter);
-grid_t* grid_new();
-int getNumRows(grid_t* masterGrid);
-int getNumColumns(grid_t* masterGrid);
-char** getGrid2D(grid_t* masterGrid);
-void gridDelete(grid_t* map, bool isMaster);
-void grid_deletePlayer(grid_t* masterGrid, char playerLetter);
+void gridConvert(char** grid, FILE* fp, int nrows, int ncols);                          // convert map file to char** object
+void updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter);             // update visibility display within a grid's char**
+char* gridPrint(grid_t* map, char playerLetter);                                        // print out a grid's char** map with the gold piles and other players
+int gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter);              // check if a move is a valid move for a player, and make the move if it is valid
+void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int randInt);  // make the mastergrid for the spectator and server
+grid_t* gridNewPlayer(grid_t* masterGrid, char playerLetter);                           // make a new player, update the masterGrid
+grid_t* grid_new();                                                                     // allocate memory for a new player
+int getNumRows(grid_t* masterGrid);                                                     // get number rows in the map
+int getNumColumns(grid_t* masterGrid);                                                  // get number columns in the map
+char** getGrid2D(grid_t* masterGrid);                                                   // get the char** component of a grid structure
+void gridDelete(grid_t* map, bool isMaster);                                            // delete grid and free its memory
+void grid_deletePlayer(grid_t* masterGrid, char playerLetter);                          // delete a player from the master grid so that it is no longer printed in the map
 
 /**************** local functions ****************/
 /* not visible outside this module */
-static char** newGrid2D(int nrows, int ncols);
+static char** newGrid2D(int nrows, int ncols);                                            // create a new char** grid given rows and columns, set as empty
 static bool isVisible(position_t* playerPos, position_t* squarePos, grid_t* masterGrid);
 static bool isEmpty(grid_t* masterGrid, int col, int row);
 static int increment(int cur, int goal);
