@@ -2,6 +2,8 @@
 ## Team Tux 
 ## Georgia Mandell, Daniel Dong, Emily Gao, Jefferson Adjetey
 
+#### Note to grader: Our client functionality is the not complete. Please test our game on the professor's client. We have spoken to the professor about this, and he said it was okay. 
+
 integration testing = client alone or server alone), system testing = client + server together.
 
 ### Integration Testing
@@ -17,6 +19,25 @@ We tested that the server would accept up to 26 players, and deny a player joini
 We also tested collecting all of the gold, and confirming that when all of the gold is collected, game ends and every client receieves game over summary.
 
 We tested erroneous cases, such as an invalid pathname to a map file, a non-integer seed, and a negative seed. We also tested incorrect input from the client (invalid keystrokes).
+
+
+#### Grid
+
+We tested the functions of grid on gridTester.c before having the server call any of the grid functionalities.
+
+We created new grid's given various maps and various inputs, to see whether or not grid would be able to handle them.
+
+Running every function of grid to ensure that each operated properly on its own.
+* creating a new grid
+* creating a masterGrid
+* creating a grid for a new player
+* updating the player's visbility
+* printing the user's visibility
+* moving the player on the map
+* deleting the grid
+* We ran ALL functions with valgrind to ensure no memory leaks
+
+After these tests, we integrated grid into server to complete integration testing.
 
 
 ### System Testing
