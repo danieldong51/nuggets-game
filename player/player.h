@@ -16,20 +16,16 @@
 #include "../grid/grid.h"
 #include "../support/message.h"
 
-
-
 /**************** global types ****************/
 typedef struct player player_t; 
 
 /**************** global functions ****************/
 /* that is, visible outside this file */
 
-/**************** local functions ****************/
-/* not visible outside this file */
 player_t* player_new();
 void player_delete();
 
-// getter functions 
+/* Getter functions */ 
 bool player_isTalking(player_t* player);
 int player_getGold(player_t* player);
 grid_t* player_getGrid(player_t* player);
@@ -37,7 +33,7 @@ char* player_getName(player_t* player);
 char player_getLetter(player_t* player);
 addr_t player_getAddress(player_t* player);
 
-// setter functions 
+/* Setter functions */ 
 void player_addGold(player_t* player, int numGold);
 void player_changeStatus(player_t* player, bool status);
 void player_setLetter(player_t* player, char letter);
@@ -63,6 +59,15 @@ player_t* player_new();
 
 /**************** player_delete() ****************/
 /* A function to delete a player struct and free all of its memory */
+/*
+* We do: 
+*   if the player is not null:
+*     call gridDelete on player grid 
+*     free player name 
+*     free player 
+* We return: 
+*   nothing
+*/
 void player_delete(player_t* player);
 
 

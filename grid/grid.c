@@ -48,35 +48,37 @@ typedef struct grid {
   int ncols;                                // ncols in the map
 } grid_t;
 
-void gridConvert(char** grid, FILE* fp, int nrows, int ncols);                          // convert map file to char** object
-void updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter);             // update visibility display within a grid's char**
-char* gridPrint(grid_t* map, char playerLetter);                                        // print out a grid's char** map with the gold piles and other players
-int gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter);              // check if a move is a valid move for a player, and make the move if it is valid
+/**************** global functions ****************/
+void gridConvert(char** grid, FILE* fp, int nrows, int ncols);                            // convert map file to char** object
+void updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter);               // update visibility display within a grid's char**
+char* gridPrint(grid_t* map, char playerLetter);                                          // print out a grid's char** map with the gold piles and other players
+int gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter);                // check if a move is a valid move for a player, and make the move if it is valid
 void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int randInt);  // make the mastergrid for the spectator and server
-grid_t* gridNewPlayer(grid_t* masterGrid, char playerLetter);                           // make a new player, update the masterGrid
-grid_t* grid_new();                                                                     // allocate memory for a new player
-int getNumRows(grid_t* masterGrid);                                                     // get number rows in the map
-int getNumColumns(grid_t* masterGrid);                                                  // get number columns in the map
-char** getGrid2D(grid_t* masterGrid);                                                   // get the char** component of a grid structure
-void gridDelete(grid_t* map, bool isMaster);                                            // delete grid and free its memory
-void grid_deletePlayer(grid_t* masterGrid, char playerLetter);                          // delete a player from the master grid so that it is no longer printed in the map
+grid_t* gridNewPlayer(grid_t* masterGrid, char playerLetter);                             // make a new player, update the masterGrid
+grid_t* grid_new();                                                                       // allocate memory for a new player
+int getNumRows(grid_t* masterGrid);                                                       // get number rows in the map
+int getNumColumns(grid_t* masterGrid);                                                    // get number columns in the map
+char** getGrid2D(grid_t* masterGrid);                                                     // get the char** component of a grid structure
+void gridDelete(grid_t* map, bool isMaster);                                              // delete grid and free its memory
+void grid_deletePlayer(grid_t* masterGrid, char playerLetter);                            // delete a player from the master grid so that it is no longer printed in the map
 
 /**************** local functions ****************/
 /* not visible outside this module */
 static char** newGrid2D(int nrows, int ncols);                                            // create a new char** grid given rows and columns, set as empty
-static bool isVisible(position_t* playerPos, position_t* squarePos, grid_t* masterGrid);
-static bool isEmpty(grid_t* masterGrid, int col, int row);
-static int increment(int cur, int goal);
-static bool isInteger(float num);
-static position_t* position_new(int x, int y);
-static char gridGetChar(char** grid, position_t* position);
-static void gridMark(char** grid, position_t* position, char mark);
-static bool checkSpot(grid_t* masterGrid, grid_t* playerGrid, char** visible, position_t* playerPos, position_t* checkPos);
-static void goldPilesDelete(pile_t** goldPiles, bool isMaster);
-static void playerAndPositionDelete(playerAndPosition_t** playerPositions, bool isMaster);
+static bool isVisible(position_t* playerPos, position_t* squarePos, grid_t* masterGrid);  // Checks if checkPos is visible from playerPos
+static bool isEmpty(grid_t* masterGrid, int col, int row);                                // Checks if spot on grid is an empty space
+static int increment(int cur, int goal);                                                  // Helper function for updateGrid, increments or decrements cur, depending on if goal is larger or smaller
+static bool isInteger(float num);                                                         // Checks if float num is an intege
+static position_t* position_new(int x, int y);                                            // Returns new position_t struct with x and y
+static char gridGetChar(char** grid, position_t* position);                               // Returns char from grid at position
+static void gridMark(char** grid, position_t* position, char mark);                       // Marks the grid at a given positon given a character
+static bool checkSpot(grid_t* masterGrid, grid_t* playerGrid, char** visible, position_t* playerPos, position_t* checkPos); // Checks if given spot is visible
+static void goldPilesDelete(pile_t** goldPiles, bool isMaster);                           // deletes and frees a list of goldPile structures
+static void playerAndPositionDelete(playerAndPosition_t** playerPositions, bool isMaster);// deletes and frees a list of playerAndPosition structures
 
 
 /**************** newGrid2D ****************/
+/* creates and allocates space for an array of strings given number of rows and number of columns */
 static char**
 newGrid2D(int nrows, int ncols)
 {
@@ -104,7 +106,8 @@ newGrid2D(int nrows, int ncols)
   return grid;
 }
 
-
+/**************** gridConvert ****************/
+/* See grid.h for details */ 
 void
 gridConvert(char** grid, FILE* fp, int nrows, int ncols)
 {
@@ -597,7 +600,7 @@ grid_new()
 }
 
 /**************** gridMakeMaster ****************/
-/* fill up char** array and piles_t** array */
+/* fill up char** array given a map file and piles_t** array give information about gold. Amount of gold in each pile is randomized.  */
 void 
 gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, 
                int minGoldPiles, int maxGoldPiles, int randInt)
@@ -605,24 +608,25 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold,
   FILE *fp = fopen(fileName, "r");
 
   // set goldPiles for grid
-  int NR = file_numLines(fp);                              // number of rows in grid 
+  int NR = file_numLines(fp);                               // number of rows in grid 
   char* tempColumn = file_readLine(fp);
-  int NC = strlen(tempColumn) + 1;                         // number of columns in grid
+  int NC = strlen(tempColumn) + 1;                          // number of columns in grid
   mem_free(tempColumn);
   fclose(fp);
+
   fp = fopen(fileName, "r");
-  masterGrid->nrows = NR;
-  masterGrid->ncols = NC;
+  masterGrid->nrows = NR;                                   // set rows of grid
+  masterGrid->ncols = NC;                                   // set columns of grid
   
 
   // set 2d char map for grid
-  char** grid2D;                                           // map of walls, paths, and spaces
-  grid2D = newGrid2D(NR, NC);
-  gridConvert(grid2D, fp, NR, NC);
-  masterGrid->grid2D = grid2D;
+  char** grid2D;                                            // map of walls, paths, and spaces
+  grid2D = newGrid2D(NR, NC);         
+  gridConvert(grid2D, fp, NR, NC);                          // fill up the char** array given the map file
+  masterGrid->grid2D = grid2D;                              // set the char** grid2D of grid
 
   // server calls srand(seed) and that is the only time it srand() is called
-  // set the number of piles in the map
+  // randomize the number of piles in the map
   int numPiles = (int)(randInt % (maxGoldPiles - minGoldPiles + 1)) + minGoldPiles; 
   double currentGoldAmount = 0;
   
@@ -634,7 +638,6 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold,
     position_t* goldPosition = position_new(0, 0);
     pile_t* goldPile = mem_malloc(sizeof(pile_t));
 
-
     // find random position that is in an empty room spot
     while (!((grid2D[goldPosition->y][goldPosition->x] == EMPTY))) {
       // set random position for gold
@@ -643,9 +646,11 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold,
     }
 
     goldPile->location = goldPosition;
+
+    // initially set amount of gold in the pile to be large random value
     goldPile->amount = rand();
 
-
+    // increment variable that keepps track of total gold amounr
     currentGoldAmount = currentGoldAmount + goldPile->amount;  
 
     goldPiles[i] = goldPile;
@@ -653,25 +658,25 @@ gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold,
 
   // fraction to scale down gold amount in each pile by
   float goldScale = ((float)numGold/(float)currentGoldAmount);
+
+  // reset tracker variable
   currentGoldAmount = 0;
+
   // loop through again and scale down gold pile amounts
   for (int i = 0; i< numPiles; i++) {
     int oversizedAmount = goldPiles[i]->amount;
-
-    goldPiles[i]->amount = floor(oversizedAmount * goldScale);
-
+    goldPiles[i]->amount = floor(oversizedAmount * goldScale);      // always floor
     currentGoldAmount = currentGoldAmount + goldPiles[i]->amount;
-
   }
 
+  // because we floor the amount of gold whem rounding, the current gold may be less than the amount of gold supposed to be in the amp
   if (currentGoldAmount < numGold){
+    // scale up the last pile
     goldPiles[numPiles-1]->amount += (numGold-currentGoldAmount);
   }
 
-
   masterGrid->goldPiles=goldPiles;
   fclose(fp);
-
 }
 
 
