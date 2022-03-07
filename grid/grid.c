@@ -623,13 +623,13 @@ grid_new()
   grid_t* grid = mem_malloc(sizeof(grid_t));
 
   // initializing player Positions
-  grid->playerPositions = calloc(MAXPLAYERS, sizeof(playerAndPosition_t));
+  grid->playerPositions = calloc(MAXPLAYERS, sizeof(playerAndPosition_t*));
   for (int i = 0; i < MAXPLAYERS; i++) {
     grid->playerPositions[i] = NULL;
   } 
 
   // initializing gold piles
-  grid->goldPiles = calloc(MAXGOLD, sizeof(pile_t));
+  grid->goldPiles = calloc(MAXGOLD, sizeof(pile_t*));
   for (int i = 0; i < MAXGOLD; i++) {
     grid->goldPiles[i] = NULL;
   }
@@ -756,10 +756,18 @@ gridNewPlayer(grid_t* masterGrid, char playerLetter)
 
   // initialize the playerPositions at index
   playerAndPosition_t* playerAndPosition = malloc(sizeof(playerAndPosition_t));
+
+  // playerAndPosition_t* playerAndPosition = masterGrid->playerPositions[index];
+
   playerAndPosition->name = playerLetter;
   playerAndPosition->playerPosition = playerPosition;
 
   masterGrid->playerPositions[index] = playerAndPosition;
+
+  // TEST
+  if (masterGrid->playerPositions[index] == NULL) {
+    printf("THIS IS NULL\n");
+  }
 
   // Initialize new playerGrid
   grid_t* playerGrid = grid_new(); 
@@ -800,6 +808,10 @@ getGrid2D(grid_t* masterGrid)
 void 
 gridDelete(grid_t* map, bool isMaster) 
 {
+  if (map->playerPositions[0] == NULL && isMaster) {
+    printf("THIS IS NULL, isMaster is\n");
+  }
+
   goldPilesDelete(map->goldPiles, isMaster); // delete the goldPiles
   playerAndPositionDelete(map->playerPositions, isMaster);
   // for (int i = 0; i < map->nrows; i ++){
@@ -855,6 +867,8 @@ void grid_deletePlayer(grid_t* masterGrid, char playerLetter)
 
   if (playerPositions[index] != NULL) {
     // playerPositions[index]->playerPosition = NULL;
+    free(playerPositions[index]->playerPosition);
+    free(playerPositions[index]);
     playerPositions[index] = NULL;
   }
 }
