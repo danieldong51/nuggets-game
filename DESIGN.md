@@ -8,7 +8,7 @@ We describe each program and module separately.
 We do not describe the `support` library nor the modules that enable features that go beyond the spec.
 We avoid repeating information that is provided in the requirements spec.
 
-## Player
+## Client
 
 The *client* acts in one of two modes:
 
@@ -24,7 +24,6 @@ The client’s only interface with the user is going to be on the command-line. 
 ./client hostname port [playername]
 ```
 	
-
 ### Inputs and outputs
 
 The Client will specify whether they are a spectator or a player by sending a message to the server through stdin:
@@ -103,7 +102,7 @@ Input (map file): The server receives a pathname for a map file from the command
 
 Output (terminal): The server only prints the “game-over summary” when the number of nuggets reaches 0. See more on the content of the game-over summary in the Requirements Spec. 
 
-The server also logs useful information and messages into a log file, including: 
+The message module used in the server also logs useful information and messages into a log file, including: 
   - Hostname port
   - All players name
   - Each time player picks up gold, and how much
@@ -114,8 +113,17 @@ The server also logs useful information and messages into a log file, including:
 ### Functional decomposition into modules
 
 We anticipate the following functions and modules: 
-  1. handleMessages = receive message from client, update client interface to be sent back
-  2. messageSend = sends message to one specific client
+  1. _main_
+  2. _parseArgs_, parse command-line arguments and initialize seed 
+  3. _initializeGame_, initialize game struct
+  4. _handleMessages_, handler function for _message_loop_
+  5. _handlePlayMessage_, message handler for `PLAY` messages which calls grid and sender functions
+  6. _handleSpectateMessage_, message handler for `SPECTATE` message which calls grid and sender functions
+  7. _handleKeyMessage_, message handler for `KEY` message which calls grid and sender functions
+  8. _updateAllGrids_, update every players grid 
+  9. _sendDisplayToAll_, which sends `DISPLAY` messages to all clients
+  10. _sendGoldToAll_, sends `GOLD` messages to all clients
+  11. _sendQuitMessage_, _sendOkMessage_, _sendGridMessage_, _sendGoldMessage_, _sendErrorMessage_, _sendDisplayMessage_, _sendSpecDisplayMessage_ are sender functions that construct messages and call _message_send_ 
 
 We also define helper modules that provide data structures: 
   1. _player_, a module providing a data structure to represent a player in the game
@@ -137,58 +145,9 @@ The server will run as follows:
 	clean up
 
 
-#### main
-
-	Validate command line arguments using parseArgs
-	Call initializeGame() with map.txt 
-	Initialize ‘message module’ 
-	Call acceptMessages()
-	
-
-#### parseArgs 
-
-	verify that the given pathname is for a file that can be read 
-	call checkMap and padMap on map
-	return true if able to open file; false on error
-
-#### acceptMessages
-
-	Print the port number
-	message_loop()
-	Call visibility
-
-#### Visibility 
-
-	Each time a player presses a valid move keystroke
-		For each player:
-			Calculate if player sees any new part of grid, update player module
-			Calculate which players, gold piles are in the player's visibility
-			messageSend to client updated playerGrid, visible players, and visible gold piles
-		For spectator:
-			messageSend to client grid, with list of players
-
-#### initializeGame 
-
-	populate the global variable “game” with the given map.txt file
-	while we have not yet dropped GoldMaxNumPiles piles: 
-		if we have dropped at least GoldMinNumPiles piles: 
-			break 
-		generate a random number, x
-		move through the char* grid pointer x times or until you reach a valid room spot
-		generate a random number, y, to determine the size of the pile 
-		drop a pile of size y on this room spot 
-
-
-#### gameOver
-
-	If state->remainingGold = 0, end the program
-	
-
 ### Major data structures
 
-The server has three major data structures. The first is the _game_ struct, which is a single global variable accessible to both the client and server. It also has a _grid_ data structure, which is implemented in the grid module. A grid has the char* _grid_ which is the string display of the map, and a list of _pile_ structures, which contain the location of each pile and the amount of gold in the pile.
-
-Finally, the server keeps track of a list of _player_ objects, which contains information about that player’s name, location, the amount of gold the player has, the rooms it has seen before, and whether the player is currently talking to the server. 
+The server has one major data structures: the _game_ struct, which is a single global variable accessible to both the client and server. The _game_ struct keeps track of a list of _players_ struct in _game.players_, the master _grid_ struct in _game.masterGrid_, and the /_spectator_ struct with _game.spectator_.
 
 
 ## Testing Plan
