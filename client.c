@@ -13,9 +13,13 @@
 #include <stdbool.h>
 #include <strings.h>
 #include "message.h"
+#include <ncurses.h>
 
 #define messageMaxLength 65507
 #define maxPortLength 6
+
+//constants
+const int maxStatusLength = 48;
 
 /*
  *
@@ -31,11 +35,16 @@ static struct {
 
 typedef struct score {
   char letter;
-  int goldRemaining;
+  int collected;
+  int nuggetsLeft;
+  int purse;
+
 } score_t;
 
 
-static const int MaxNameLength = 50;
+static const int MaxNameLength = 50; //max characters in playerName
+//bool screenSizeOK = false; //whetehr screen is big enough
+static int ncols, nrows; //number of columns and rows of the map
 
 /**************** file-local functions ****************/
 static bool handleInput  (void* arg);
@@ -93,7 +102,21 @@ main(const int argc, char* argv[]){
   }
 }
 
+/****************** initCurses ***********
+ *
+ */
+void initNcurses() {
+  
+  initscr();
 
+  cbreak();
+  noecho();
+
+  //change the color of the screen
+  start_color();
+  init_pair(1, COLOR_GREEN, COLOR_BLACK);
+  attron(COLOR_PAIR(1));
+}
 
 /**************** handleInput ****************/
 /* stdin has input ready; read a line and send it to the client. 
@@ -121,33 +144,92 @@ handleInput(void* arg){
 static bool
 handleMessage(void* arg, const addr_t from, const char* message)
 {
-   if (strncmp(message, "OK ", strlen("OK ")) == 0);
+   if (strncmp(message, "OK ", strlen("OK ")) == 0){
+    sscanf(message, "OK %c", &game.score->letter); 
+   }
 
-   else if (strncmp(message, "GRID ", strlen("GRID ")) == 0);
+   else if (strncmp(message, "GRID ", strlen("GRID ")) == 0){
+     handleGrid(message);
+   }
 
-   else if (strncmp(message, "GOLD ", strlen("GOLD ")) == 0);
+   else if (strncmp(message, "GOLD ", strlen("GOLD ")) == 0){
+     handleGold(message);
+   }
 
-    else if (strncmp(message, "DISPLAY", strlen("DISPLAY")) == 0);
+    else if (strncmp(message, "DISPLAY", strlen("DISPLAY")) == 0){
+      handleDisplay(message);
+    }
 
-    else if (strncmp(message, "QUIT ", strlen("QUIT ")) == 0);
+    else if (strncmp(message, "QUIT ", strlen("QUIT ")) == 0) {
+      handleQuit(message);
+      return true;
+    }
 
-    else if (strncmp(message, "ERROR ", strlen("ERROR ")) == 0);
+    else if (strncmp(message, "ERROR ", strlen("ERROR ")) == 0){
+      handleError(message);
+    }
 }
 
 
 
 /***************handleQuit*****************/
 void
-handleQuit(const char* message);
+handleQuit(const char* message){
+  char copy[message_MaxBytes];
+  strcpy(copy, message);
+
+  char* messageQuit = copy + strlen("QUIT ");
+  nocbreak();
+  endwin();
+  printf("%s", messageQuit);
+
+}
 
 
 /************handleGrid******************/
 void
-handleGrid(const char* message);
+handleGrid(const char* message){
+  int screenWidth, screenHeight;
+  getmaxyx(stdscr, screenHeight, screenWidth);
+  
+  // read the grid message
+
+  //if screen is big enough, continue
+  while (screenWidth<nrows || screenHeight<ncols) {
+    mvprintw(0, 0, "your screen is too small, please make it larger\n");
+    mvprintw(1, 0, "press enter when ready\n");
+    refresh();
+
+    char c = getch();
+
+    if (c == '\n') {
+      getmaxyx(stdscr, screenHeight, screenWidth);
+    }
+  }
+
+  clear();
+  refresh();
+
+}
+
 
 /*********handleGold****************/
 void
-handleGold(const char* message);
+handleGold(const char* message){
+
+
+  if (game.playername[0] == '\0') {
+     mvprintw(0, 0, "Spectator: %d nuggets unclaimed.", game.score->nuggetsLeft);
+  }
+  else {
+    mvprintw(0, 0, "Player %c has %d nuggets (%d nuggets unclaimed)",game.score->letter, game.score->purse, game.score->nuggetsLeft);
+    if (game.score->collected > 0) {  
+      mvprintw(0, maxStatusLength + 2, "GOLD received: %d",game.score->collected);
+    }
+
+  }
+
+}
 
 
 /*********handleDisplay***********/
@@ -157,7 +239,12 @@ handleDisplay(const char* message);
 
 /********handleError*************/
 void
-handleError(const char* message);
+handleError(const char* message){
+  
+
+}
+
+
 
 
 
