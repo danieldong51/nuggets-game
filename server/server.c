@@ -400,7 +400,6 @@ static void handleKeyMessage(const addr_t otherp, const char* message)
   // loop through the list of players to check if it is a player 
   player_t* currPlayer;
   if ((currPlayer = findPlayer(otherp)) != NULL) {
-    printf("Found player\n");
     foundPlayer = true; 
   }
 
@@ -789,7 +788,6 @@ static void gameOver()
   addr_t specAddress = spectator_getAddress(game.spectator);
 
   if (message_isAddr(specAddress)){
-    printf("send to spectator\n");
     sendQuitMessage(specAddress, gameOverMessage);
   }
 
