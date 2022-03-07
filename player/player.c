@@ -200,7 +200,7 @@ void player_delete(player_t* player)
     if (player->grid != NULL) {
       gridDelete(player->grid, false);
     }
-    if (player->name != "") {
+    if (strcmp(player->name, "")!=0) {
       free(player->name);
     }
     

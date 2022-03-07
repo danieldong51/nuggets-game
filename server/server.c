@@ -38,6 +38,7 @@ struct game {
   player_t** players; 
   grid_t* masterGrid; 
   spectator_t* spectator; 
+  bool playersJoined; 
   int seed;
 } game; 
 
@@ -178,6 +179,9 @@ static void initializeGame(char* mapPathname)
   // initalize master grid 
   game.masterGrid = grid_new();
 
+  // initialized playersJoined to false 
+  game.playersJoined = false;
+
   // call rand 
   int randNum = rand();
 
@@ -245,6 +249,7 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
     return true;
   }
 
+
   
   return false;
 
@@ -287,6 +292,10 @@ static void handlePlayMessage(const addr_t from, const char* message)
     player_setLetter(game.players[game.numPlayers], letter);
     player_changeStatus(game.players[game.numPlayers], true);
     player_setAddress(game.players[game.numPlayers], from);
+
+
+    // set playerJoined to true
+    game.playersJoined = true; 
 
     /// set random position for player and add it to list of positions, also create empty grid for player with grid_new()
     player_setGrid(game.players[game.numPlayers], gridNewPlayer(game.masterGrid, player_getLetter(game.players[game.numPlayers])));
@@ -385,7 +394,7 @@ static void handleKeyMessage(const addr_t otherp, const char* message)
 
         // change the player's isTalking status to false 
         player_changeStatus(currPlayer, false);
-        //grid_deletePlayer(game.masterGrid, player_getLetter(currPlayer));
+        grid_deletePlayer(game.masterGrid, player_getLetter(currPlayer));
         updateAllGrids();
         sendDisplayToAll();
         break;
@@ -503,6 +512,7 @@ static void sendDisplayMessage(player_t* player, const addr_t otherp)
     printf("%s",grid1D);
 
     message_send(otherp, response);
+    mem_free(grid1D);
   }
   
 }
@@ -517,6 +527,8 @@ static void sendSpecDisplayMessage(const addr_t otherp)
     sprintf(response, "DISPLAY\n%s", grid1D);
 
     message_send(otherp, response);
+    mem_free(grid1D);
+
   }
 
 }
