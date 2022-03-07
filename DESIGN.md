@@ -147,7 +147,7 @@ The server will run as follows:
 
 ### Major data structures
 
-The server has one major data structures: the _game_ struct, which is a single global variable accessible to both the client and server. The _game_ struct keeps track of a list of _players_ struct in _game.players_, the master _grid_ struct in _game.masterGrid_, and the /_spectator_ struct with _game.spectator_.
+The server has one major data structures: the _game_ struct, which is a single global variable accessible to both the client and server. The _game_ struct keeps track of a list of player struct in _game.players_, the master grid struct in _game.masterGrid_, and the spectator struct with _game.spectator_.
 
 
 ## Testing Plan
