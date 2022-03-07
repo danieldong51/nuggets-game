@@ -82,12 +82,14 @@ grid_t* grid_new();
  *  minimun number of gold piles
  *  maximum number of gold piles
  *  rand integer base (for seed)
- *
+ * gridMakeMaster takes in arguments and changes the compentents of the grid structure that is passed
+ * gridMakeMaster does not return anything
  */
 void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int randInt);
 
 /**************** gridNewPlayer ****************/
-/* Returns new playerGrid for player
+/* Returns new playerGrid for player, which starts off as completely empty.
+ * gridNewPlayer also creates a new playerAndPosition struct representing new player in the masterGrid
  *
  * Caller provides:
  *   a valid master map pointer, and a valid char of player letter.
@@ -100,21 +102,40 @@ grid_t* gridNewPlayer(grid_t* masterGrid, char playerLetter);
 
 
 /**************** getNumRows ****************/
+/* returns the number of rows in the 2d string structure
+ * 
+ * Caller provides: a pointer to a grid structure
+ */
 int getNumRows(grid_t* masterGrid);
 
-
+/**************** getNumColumns ****************/
+/* returns the number of columns in the 2d string structure
+ * 
+ * Caller provides: a pointer to a grid structure
+ */
 /**************** getNumColumns ****************/
 int getNumColumns(grid_t* masterGrid);
 
-
 /**************** getGrid2D ****************/
+/* returns the 2D string array of the grid object
+ * 
+ * Caller provides: a pointer to a grid structure
+ */
 char** getGrid2D(grid_t* masterGrid);
 
-void setPosition(position_t* position, int x, int y);
-
-
+/**************** getDelete ****************/
+/* frees all memory of contents in the grid and then deletes the grid structure
+ * 
+ * Caller provides: a pointer to a grid structure, boolean of whether or not the grid 
+ * is a master grid
+ */
 void gridDelete(grid_t* map, bool isMaster);
+
+/**************** get_deletePlayer ****************/
+/* function for when player quits the game. Sets the players position in mastergrid to be NULL
+ * 
+ * Caller provides: a pointer to the master grid structure, and the letter representing the player
+ */
 void grid_deletePlayer(grid_t* masterGrid, char playerLetter) ;
 
-position_t* newPosition();
 #endif
