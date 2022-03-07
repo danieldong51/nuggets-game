@@ -316,7 +316,7 @@ void mapDisplay(char* map) {
         if (isalpha(map[i]) != 0) {
           attron(COLOR_PAIR(1));
           mvprintw(Y, X, "%c", map[i]);
-          positionNext(&Y, &X);
+      
 
           attroff(COLOR_PAIR(1));
 
@@ -335,8 +335,4 @@ void mapDisplay(char* map) {
 }
 
 
-/***********positionNext*********/
-void positionNext(int* Y, int* X) {
 
-
-}
