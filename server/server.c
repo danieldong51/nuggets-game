@@ -38,6 +38,7 @@ struct game {
   player_t** players; 
   grid_t* masterGrid; 
   spectator_t* spectator; 
+  bool playersJoined; 
   int seed;
 } game; 
 
@@ -178,6 +179,9 @@ static void initializeGame(char* mapPathname)
   // initalize master grid 
   game.masterGrid = grid_new();
 
+  // initialized playersJoined to false 
+  game.playersJoined = false;
+
   // call rand 
   int randNum = rand();
 
@@ -209,21 +213,21 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
   // PLAY
   if (strncmp(message, "PLAY ", strlen("PLAY ")) == 0) {
     handlePlayMessage(from, message);
-    //return false; 
 
   }
   // SPECTATE 
   else if (strncmp(message, "SPECTATE", strlen("SPECTATE")) == 0) {
     handleSpectateMessage(from, message);
     
-    //return false; 
   }
   // KEY
   else if (strncmp(message, "KEY ", strlen("KEY ")) == 0) {
 
     // call handleKey() function
     handleKeyMessage(from, message);
-    //return false; 
+
+
+    
   }
   else {
     sendErrorMessage(from, "Unknown command.\n");
@@ -244,6 +248,8 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
     printf("returning true because no players talking...\n");
     return true;
   }
+
+
   
   return false;
 
@@ -286,6 +292,10 @@ static void handlePlayMessage(const addr_t from, const char* message)
     player_setLetter(game.players[game.numPlayers], letter);
     player_changeStatus(game.players[game.numPlayers], true);
     player_setAddress(game.players[game.numPlayers], from);
+
+
+    // set playerJoined to true
+    game.playersJoined = true; 
 
     /// set random position for player and add it to list of positions, also create empty grid for player with grid_new()
     player_setGrid(game.players[game.numPlayers], gridNewPlayer(game.masterGrid, player_getLetter(game.players[game.numPlayers])));
@@ -404,13 +414,6 @@ static void handleKeyMessage(const addr_t otherp, const char* message)
         //  the server shall ignore that keystroke and may send back an ERROR message as described below
         sendErrorMessage(otherp, "Invalid keystroke\n");
     }
-
-    // based on moveResult value, send messages to all clients 
-
-    // if the players keystroke causes them to move to a new spot, 
-    // updateGrid for every player
-    // inform all clients of a change in the game grid using a DISPLAY message as described below
-    
   }
 
   else if (foundSpectator) {
@@ -509,6 +512,7 @@ static void sendDisplayMessage(player_t* player, const addr_t otherp)
     printf("%s",grid1D);
 
     message_send(otherp, response);
+    mem_free(grid1D);
   }
   
 }
@@ -523,6 +527,8 @@ static void sendSpecDisplayMessage(const addr_t otherp)
     sprintf(response, "DISPLAY\n%s", grid1D);
 
     message_send(otherp, response);
+    mem_free(grid1D);
+
   }
 
 }
