@@ -6,7 +6,7 @@
 #
 
 LIB = support.a
-TESTS = miniclient messagetest
+TESTS =  messagetest
 
 CFLAGS = -Wall -pedantic -std=c11 -ggdb
 CC = gcc
