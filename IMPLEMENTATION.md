@@ -21,7 +21,7 @@ We avoid repeating information that is provided in the requirements spec.
 
 ### Data structures
 
-The data structures for the client are the _game_ struct, which is a single global variable accessible to both the client and server, and the _score_ struct, which is a struct that stores information about a player's purse. The structs are defined like so:
+The data structures for the client are the _game_ struct, which is a single global variable, and the _score_ struct, which is a struct that stores information about a player's purse. The structs are defined like so:
 
 ```c
 static struct {
@@ -29,14 +29,16 @@ static struct {
   char port[maxPortLength];
   addr_t serverAddress;
   char playerName[messageMaxLength];
+  int cX;              //the x cordinate of the cursor
+  int cY;              //the y cordinate of the cursor
 } game;
 ```
 ```c
 typedef struct score {
-  char letter;
-  int collected;
-  int nuggetsLeft;
-  int purse;
+  char letter;       //players letter
+  int collected;     //nuggets collected
+  int nuggetsLeft;   //nuggets left
+  int purse;        //gold the player has
 
 } score_t;
 ```
@@ -47,7 +49,7 @@ typedef struct score {
 A function to parse the command-line arguments, initialize the game struct, initialize the message module, and (BEYOND SPEC) initialize analytics module.
 
 ```c
-static int parseArgs(const int argc, char* argv[]);
+int main(const int argc, char* argv[]);
 ```
 
 A function to handle input from stdin. handleInput is used as a helper function for message_send(), which the client uses to send messages to the server. 
@@ -64,7 +66,7 @@ bool handleMessage(void* arg, const addr_t from, const char* message);
 
 ### Detailed pseudo code
 
-#### `parseArgs`:
+#### `main`:
 ```
   validate command-line arguments
   check if hostname or IP address is valid address by calling message_isAddr()
