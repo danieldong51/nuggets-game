@@ -828,9 +828,9 @@ goldPilesDelete(pile_t** goldPiles, bool isMaster)
 
     if (isMaster) {
       for (int i = 0; i < MAXGOLD; i++) {
-        printf("int i is %d - ", i);
+        // printf("int i is %d - ", i);
         if (goldPiles[i] != NULL) {
-          printf("in if block");
+          // printf("in if block");
           mem_free(goldPiles[i]->location);
           mem_free(goldPiles[i]);
         }
@@ -846,7 +846,9 @@ playerAndPositionDelete(playerAndPosition_t** playerPositions, bool isMaster)
 {
   if (isMaster) {
     for (int i = 0; i < MAXPLAYERS; i++) {
+      printf("int i is %d - \n", i);
       if (playerPositions[i] != NULL) {
+        printf("in here deleting once\n");
         mem_free(playerPositions[i]->playerPosition);
       }
       mem_free(playerPositions[i]);
