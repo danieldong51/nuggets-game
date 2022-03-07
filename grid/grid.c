@@ -451,10 +451,6 @@ char* gridPrint(grid_t* playerGrid, char playerLetter)
         
         position_t* pilePosition = goldPiles[i]->location;
 
-        if (pilePosition == NULL) {
-          printf("NULLn\n");
-        }
-
         gridMark(returnGrid, pilePosition, GOLDPILE);
       }
     }
@@ -747,15 +743,14 @@ getGrid2D(grid_t* masterGrid)
 void 
 gridDelete(grid_t* map, bool isMaster) 
 {
-  if (map->playerPositions[0] == NULL && isMaster) {
-    printf("THIS IS NULL, isMaster is\n");
-  }
-
+  // delete gold and player positions
   goldPilesDelete(map->goldPiles, isMaster); // delete the goldPiles
   playerAndPositionDelete(map->playerPositions, isMaster);
 
+  // free map->grid2D
   mem_free(map->grid2D[0]);
   mem_free(map->grid2D);
+
   mem_free(map);
 
 }
@@ -769,13 +764,13 @@ goldPilesDelete(pile_t** goldPiles, bool isMaster)
   if (goldPiles != NULL) {
 
     if (isMaster) {
+
+      // frees all gold piles
       for (int i = 0; i < MAXGOLD; i++) {
-        
         if (goldPiles[i] != NULL) {
           mem_free(goldPiles[i]->location);
           mem_free(goldPiles[i]);
         }
-        printf("\n");
       }
     }
     mem_free(goldPiles);
@@ -788,10 +783,12 @@ static void
 playerAndPositionDelete(playerAndPosition_t** playerPositions, bool isMaster)
 {
   if (isMaster) {
+
+    // loops over player positions
     for (int i = 0; i < MAXPLAYERS; i++) {
-      printf("int i is %d - \n", i);
+
+      // if not null, free its contents
       if (playerPositions[i] != NULL) {
-        printf("in here deleting once\n");
         mem_free(playerPositions[i]->playerPosition);
       }
       mem_free(playerPositions[i]);
@@ -807,6 +804,7 @@ void grid_deletePlayer(grid_t* masterGrid, char playerLetter)
   playerAndPosition_t** playerPositions = masterGrid->playerPositions;
   int index = playerLetter - 'a';
 
+  // free player if player position exists
   if (playerPositions[index] != NULL) {
     free(playerPositions[index]->playerPosition);
     free(playerPositions[index]);
