@@ -82,29 +82,21 @@ int main(const int argc, char* argv[])
 
   // validate command-line arguments 
   if (parseArgs(argc, argv)) {
+ 
+    char* mapPathname = argv[1];        // save pathname
 
-    // save pathname 
-    char* mapPathname = argv[1];
-
-    // call initialize game 
     initializeGame(mapPathname); 
-
-    // initialize the message module  
-    int port = message_init(stderr);                
-
-    // announce port 
+  
+    // initialize the message module and announce port 
+    int port = message_init(stderr);         
     printf("waiting on port %d for contact....\n", port);
 
-    
     // call message_loop() until error, or game over 
     message_loop(NULL, 0, NULL, NULL, handleMessage);
     
-    // call game over function once done looping
-    printf("getting out of message_loop, calling gameOver\n");
     gameOver();
-
-    // shut down message module 
-    message_done(); 
+  
+    message_done();                    // shut down message module
 
     exit(0);
 
@@ -133,27 +125,25 @@ static bool parseArgs(const int argc, char* argv[])
   }
   fclose(mapFile);
 
-  if (argc == 3) {
+  if (argc == 3) {           
 
-    // if a seed is provided, see if possible to scan into integer
+    // if seed provided, scan as integer 
     if (sscanf(argv[2], "%d", &game.seed) != 1) {
-      // if scan unsuccessful, print error 
-      fprintf(stderr, "Failed to initialize seed\n");
+      fprintf(stderr, "Failed to initialize seed\n");                 // scan unsuccessfull
       return false; 
     }
     if (game.seed < 0) {
-      // if seed not a postivie integer, invalid seed 
-      fprintf(stderr, "Invalid seed: must be a positive integer\n");
+      fprintf(stderr, "Invalid seed: must be a positive integer\n");  // invalid seed 
       return false; 
 
     }
   }
-  // if no seed provided, use getpid()
   else {
-    game.seed = (int) getpid();
+    game.seed = (int) getpid();                                       // if no seed provided, use getpid()
   }
 
   srand(game.seed);
+  
   return true;
   
 }
@@ -179,8 +169,8 @@ static void initializeGame(char* mapPathname)
   game.numPlayers = 0; 
 
   
-  game.players = calloc(MaxPlayers, sizeof(player_t*));     // initialize player list 
-  for (int i = 0; i < MaxPlayers; i++) {                    // intialize each player struct 
+  game.players = calloc(MaxPlayers, sizeof(player_t*));   // initialize player list 
+  for (int i = 0; i < MaxPlayers; i++) {                  // intialize each player struct 
     game.players[i] = player_new();
   }
 
@@ -191,8 +181,7 @@ static void initializeGame(char* mapPathname)
   // call rand 
   int randNum = rand();
 
-  // initalize master grid 
-  game.masterGrid = grid_new();
+  game.masterGrid = grid_new();                          // initalize master grid 
 
   // call function to initialize masterGrid 
   gridMakeMaster(game.masterGrid, mapPathname, GoldTotal, GoldMinNumPiles, GoldMaxNumPiles, randNum);
@@ -316,29 +305,26 @@ static void handlePlayMessage(const addr_t from, const char* message)
       return;
     }
 
-    // send ok message 
+    // send ok message to confirm player joined 
     sendOkMessage(from, letter);
     
-    // set this player's status to "true", set name, letter, and address of player 
+    // store information about player 
     player_setName(game.players[game.numPlayers], name);
     player_setLetter(game.players[game.numPlayers], letter);
     player_changeStatus(game.players[game.numPlayers], true);
     player_setAddress(game.players[game.numPlayers], from);
 
-
-    // set playerJoined to true
     game.playersJoined = true; 
 
-    /// set random position for player and add it to list of positions, also create empty grid for player with grid_new()
+    /// set random position and create empty for player 
     player_setGrid(game.players[game.numPlayers], gridNewPlayer(game.masterGrid, player_getLetter(game.players[game.numPlayers])));
 
-    // call updateGrid to recalculate visibility for all players, including this one 
+    // call updateGrid to recalculate visibility for all players
     updateAllGrids();
 
-    // server shall then immediately send GRID and GOLD messages to new clients
+    // immediately send GRID and GOLD messages to new clients
     sendGridMessage(from); 
 
-    // creating a new player, so n and p should be 0 
     sendGoldMessage(0, 0, game.goldRemaining, from);
 
     // send display message to all clients 
@@ -468,6 +454,7 @@ static void handleKeyMessage(const addr_t otherp, const char* message)
         sendQuitMessage(otherp, "Thanks for playing!\n");
 
         player_changeStatus(currPlayer, false);
+
         grid_deletePlayer(game.masterGrid, player_getLetter(currPlayer));     // delete player from master grid 
 
         updateAllGrids();
@@ -842,7 +829,7 @@ static void gameOver()
     printf("send to spectator\n");
     sendQuitMessage(specAddress, gameOverMessage);
   }
-  
+
   // call player_delete on players
   deleteAllPlayers();
   free(game.players);
