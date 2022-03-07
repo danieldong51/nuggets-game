@@ -51,12 +51,10 @@ void updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter);
 char* gridPrint(grid_t* playerGrid, char playerLetter);
 
 /**************** gridValidMove ****************/ 
-// NEED TO UPDATE!!
-/* Checks if move is valid, and makes move if valid.
+/* Checks if move is valid, and makes move if valid. Updates the mastergrid
  *
  * Caller provides:
- *   a valid master map pointer, and a valid position pointer of the
- *   move it is trying to make.
+ *   a valid master map pointer, the players letter (char), the move keystroke (char)
  * We return:
  *   0 if the move is valid and the player moves to an empty space
  *   -1 if the move is invalid
@@ -65,12 +63,26 @@ char* gridPrint(grid_t* playerGrid, char playerLetter);
  */
 int gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter);
 
-/**************** gridInit ****************/
-/*
+/**************** grid_new ****************/
+/* Allocates space for a grid
+ *
+ * We return: a valid pointer to a grid structure, that is empty
  */
 grid_t* grid_new();
 
 /**************** gridMakeMaster ****************/
+/* fills up to gold pile array and the 2d string array (representing map) of a grid object--only needed when making the master
+ * grid, which server and spectator needs
+ *
+ * Caller Provides:
+ *  a valid pointer to an empty grid (grid_t*)
+ *  a string file name (char*)
+ *  number of gold to be placed
+ *  minimun number of gold piles
+ *  maximum number of gold piles
+ *  rand integer base (for seed)
+ *
+ */
 void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int randInt);
 
 /**************** gridNewPlayer ****************/
