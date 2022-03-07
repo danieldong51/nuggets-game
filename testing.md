@@ -1,10 +1,8 @@
 # Nuggets Testing Plan 
 ## Team Tux 
-## Georgia Mandell, Daniel Dong, Emily Gao, Jefferson Adjetey
+### Georgia Mandell, Daniel Dong, Emily Gao, Jefferson Adjetey
 
 #### Note to grader: Our client functionality is the not complete. Please test our game on the professor's client. We have spoken to the professor about this, and he said it was okay. 
-
-integration testing = client alone or server alone), system testing = client + server together.
 
 ### Integration Testing
 
