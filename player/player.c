@@ -18,9 +18,7 @@
 
 /**************** file-local global variables ****************/
 /* none */
-
-/**************** local types ****************/
-
+static const char SPACE = ' ';
 
 /**************** global types ****************/
 typedef struct player {
@@ -34,13 +32,11 @@ typedef struct player {
 
 /**************** global functions ****************/
 /* that is, visible outside this file */
-/* see counters.h for comments about exported functions */
-
-/**************** local functions ****************/
-/* not visible outside this file */
 
 player_t* player_new();
-void player_delete(player_t* player); 
+void player_delete();
+
+/* Getter functions */ 
 bool player_isTalking(player_t* player);
 int player_getGold(player_t* player);
 grid_t* player_getGrid(player_t* player);
@@ -48,7 +44,7 @@ char* player_getName(player_t* player);
 char player_getLetter(player_t* player);
 addr_t player_getAddress(player_t* player);
 
-// setter functions 
+/* Setter functions */ 
 void player_addGold(player_t* player, int numGold);
 void player_changeStatus(player_t* player, bool status);
 void player_setLetter(player_t* player, char letter);
@@ -65,7 +61,7 @@ player_t* player_new()
 
   // initialize attributes of player to nothing
   player->name = "";
-  player->letter = ' ';
+  player->letter = SPACE;
   player->numGold = 0; 
   player->grid = NULL;
   player->address = message_noAddr();
@@ -74,8 +70,6 @@ player_t* player_new()
   return player; 
     
 }
-
-// GETTER FUNCTIONS
 
 /**************** player_isTalking() ****************/
 /* see player.h for description */
@@ -101,7 +95,7 @@ int player_getGold(player_t* player)
 /* see player.h for description */
 grid_t* player_getGrid(player_t* player)
 {
-  if (player != NULL){
+  if (player != NULL) {
     return player->grid; 
   }
   return NULL; 
@@ -124,7 +118,7 @@ char player_getLetter(player_t* player)
   if (player != NULL) {
     return player->letter; 
   }
-  return ' ';
+  return SPACE;
 }
 
 /**************** player_getLetter() ****************/
@@ -137,7 +131,6 @@ addr_t player_getAddress(player_t* player)
   return message_noAddr();
 }
 
-// SETTER FUNCTIONS
 
 /**************** player_addGold() ****************/
 /* see player.h for description */
@@ -170,7 +163,7 @@ void player_setName(player_t* player, char* name)
 /* see player.h for description */
 void player_setLetter(player_t* player, char letter)
 {
-  if (player != NULL && letter != ' ') {
+  if (player != NULL && letter != SPACE) {
     player->letter = letter; 
   }
 }
@@ -184,7 +177,7 @@ void player_setGrid(player_t* player, grid_t* grid)
   }
 }
 
-/**************** player_setLetter() ****************/
+/**************** player_setAddress() ****************/
 /* see player.h for description */
 void player_setAddress(player_t* player, const addr_t address)
 {
@@ -193,6 +186,7 @@ void player_setAddress(player_t* player, const addr_t address)
   }
 }
 
+/**************** player_delete() ****************/
 void player_delete(player_t* player)
 {
   if (player != NULL) {
