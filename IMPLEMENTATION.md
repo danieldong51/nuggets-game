@@ -12,10 +12,10 @@ We avoid repeating information that is provided in the requirements spec.
 ## Plan for division of labor
 
 - Emily: Grid module, minus visualizer function
-- Daniel: Visualizer, Client
-- Georgia: Player
-- Jeff: Spectator
-- We all do: Server, Testing, Documentation
+- Daniel: Visualizer, Server
+- Georgia: Player, Server
+- Jeff: Client
+- We all do: Testing, Documentation
 
 
 ## Client
@@ -25,18 +25,14 @@ We avoid repeating information that is provided in the requirements spec.
 The only data structure for the client is the _game_ struct, which is a single global variable accessible to both the client and server. The struct is defined like so: 
 
 ```c
-typedef struct game { 
-int maxNameLength = 50; 		// max number of chars in playerName
-int maxPlayers = 26;      		// maximum number of players
-int goldTotal = 250;     			// amount of gold in the game
-int goldMinNumPiles = 10; 		// minimum number of gold piles
-int goldMaxNumPiles = 30; 		// maximum number of gold piles
-
-int goldRemaining;              // amount of gold left in game 
-player_t* players[26];          // list of players 
-grid_t* masterGrid;             // master grid object that contains master char 2D array + other info 
-
-} game_t; 
+struct game {
+  int goldRemaining;              // amount of gold left in game 
+  int numPlayers;                 // amount of players that have joined so far 
+  player_t** players;             // list of player structs 
+  grid_t* masterGrid;             // master grid struct
+  spectator_t* spectator;         // spectator struct
+  int seed;                       // seed for rand()
+} game; 
 ```
 
 ### Definition of function prototypes
@@ -197,34 +193,45 @@ if the messsage from the client is:
 ## Grid
 The `grid` module is used to update the user interface for all clients each time a client sends a message.
 
-### Data structure
+### Data structures
 
-Position
+#### position
 ```c
 typedef struct position position_t; 
 ```
-Gives (x, y) coordinate position
+Contains
+* x coordinate
+* y coordiante
 
-
-Pile
+#### pile
 ```c
 typedef struct pile pile_t;
 ```
-Gives coordinate of gold pile and the amount of gold in that pile
+Contains
+* position of gold pile 
+* amount of gold in that pile
 
 
-PlayerAndPosition
+#### playerAndPosition
 ```c
 typedef struct playerAndPosition playerAndPosition_t;
 ```
-Contains position of the player and the players name
+Contains
+* position of the player 
+* amount of gold in that pile
 
 
-Grid
+#### grid
 ```c
 typedef struct grid grid_t;
 ```
-Contents 2D string array representing the map, list of piles representing the gold piles within the map, and list of positions representing the positions of the players
+This structure contains majority of data and variables necessary for nuggets gamplay.
+Contains
+* array of strings, with each array respresenting a row of a map
+* array of playerAndPosition structures
+* array of pile structures
+* number of columns in the map
+* number of rows in the map
 
 
 ### Definition of function prototypes
@@ -232,26 +239,58 @@ Contents 2D string array representing the map, list of piles representing the go
 A function to convert a map file into a 2d Array representing the map.
 
 ```c
-gridConvert(file *fp)
+void gridConvert(char** grid, FILE* fp, int nrows, int ncols)
 ```
-
-A function to update the player's grid based on the serverGrid and the other players. 
+A function that converts map.txt file to a grid.
 
 ```c
-bag_t* updateGrid(grid_t* playerGrid, grid_t* serverGrid);
+void updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter)
 ```
-
-A function that takes a grid and the current position of a player and prints the appropriate grid for that player.
+A function that updates a player's grid based on the player's location in the master grid
 
 ```c
-Void gridPrint(grid_t* grid, currentPosition) 
+char* gridPrint(grid_t* playerGrid, char playerLetter)
 ```
-
-
-A function that takes a coordinate and checks if the position is an open space to move to.
+A function that prints a grid with locations the players and gold piles stored within the grid
 
 ```c
-int gridValidMove(position_t* coordinate)
+int gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter)
+```
+A function that checks if a move command is valid, given the move command letter, If the move is valid, it will update the player's position in the master grid given the player letter. Returns an integer based on characteristics of the move. 
+
+```c
+grid_t* grid_new();
+```
+A function that allocates space for an empty grid structure
+
+```c
+void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int randInt)
+```
+A function fills up to gold pile array and the 2d string array (representing map) of a grid object--only needed when making the masterGrid, which the server needs
+
+```c
+grid_t* gridNewPlayer(grid_t* masterGrid, char playerLetter)
+```
+A function that returns new playerGrid for player, which starts off as completely empty. The function also creates a new playerAndPosition struct representing new player in the masterGrid
+
+```c
+int getNumRows(grid_t* masterGrid)
+```
+
+```c
+int getNumColumns(grid_t* masterGrid)
+```
+
+```c
+int getGrid2D(grid_t* masterGrid)
+```
+
+```c
+void gridDelete(grid_t* map, bool isMaster)
+```
+
+```c
+void grid_deletePlayer(grid_t* masterGrid, char playerLetter)
 ```
 
 ### Detailed pseudocode
@@ -285,30 +324,117 @@ For number of rows in file
 
 #### `gridPrint`
 ```
-For i < # of players, i++
-  Obtain position of player (x, y)
-  If (x,y) = currentPostion
-    Grid[y][x] = “@”
-  Else
-    Grid[y][x] = “i+65” (ascii conversion in character form) 
-  For i < # of gold piles, i++
-    Obtain position of pile, (x, y)
-    Grid[y][x] = “*”
-  For i<slots in grid array
-    Print the string in a new line
+Create a new grid with the same dimensions as the grid that needs to br printed
+for each row in the new grid
+	copy contents of old grid into the new grid
+if the array of playerAndPosition structures in the original grid is not null
+	for each player
+		if the playerAndPosition structure is not null, and the position is not null
+			if the position is the current player's position
+				set the position in the new grid to be '@'
+			else
+				set the position in the grid to be the player's letter
+if the array of pile structures in the original grid is not null 
+	for each pile
+		mark the position of the pile in the new grid to be '*'
+
+create a new string that represents all characters in the new grid
+	for each row in the new grid
+		for each column in the new grid
+			copy the contents of the new grid into the apprporiate index of the new string
+return the new string
 ```
 
 #### `gridValidMove`
 ```
-	Given position (x,y)
-	If grid[y][x] = ‘*’ // gold pile
-		For each pile list of piles in grid
-			If position of pile of grid equals (x,y)
-				Return amount in that pile of code
-		Return 
-	If grid[y][x] = ‘#’ or  ‘.’
-		Return 1
-	Return 0
+given player letter, calculate the index of the letter in the playerAndPosition array in the amsterGrid
+if the playerAndPosition structure is not null
+	store the x and y coridnates of the positon
+if move letter is h
+		move the (x,y) to the left
+if move letter is l
+		move the (x,y) to the right
+if move letter is j
+	move the (x,y) up
+if move letter is k
+	move the (x,y) down
+if move letter is y
+	move the (x,y) diagonally up and left
+if move letter is u
+	move the (x,y) diagonally up and right
+if move letter is b
+	move the (x,y) diagonally down and left
+if move letter is n
+	move the (x,y) diagonally down and right
+	
+if the coordinates are out of bounds of the map	
+	return -1
+	
+if the cordinates after the move are an empty room spot or passage spot in the map
+	return 0
+if the cooridanates after the move are a spot with a gold pile in the map
+	return the amount of gold in the gold pile
+else
+	return -1
+```
+
+#### `gridMakeMaster`
+```
+open the map file
+calculate number of rows and columns in file
+set nrows in masterGrid
+set ncols in mastergrid
+
+create a new array of strings
+call gridConvert on the new array of strings
+set grid2D in masterGrid to the the converted array of strings
+
+set random number of gold piles give the maxGoldPiles and minGoldPiles
+create an array of piles representing the gold piles
+
+for each goldPile
+	set a random position on the map for the gold pile (must be in an originally empty space)
+	set a random amount of gold to be in the pile using rand()
+
+for each goldPile
+	scale down the amount of gold in each pile so that the total gold placed in the map is equal to numGold
+
+set the masterGrid's goldPiles to the goldPiles just created
+```
+
+#### `gridNewPlayer`
+```
+create random position in the map to be the postiion of the player (must be in an originally empty space)
+creat a new playerAndPosition structure with the random position and character's letter
+add the new playerAndPosition structure to the masterGrid's list of playerAndPosition structures
+
+create a new playerGrid, initialized to empty
+create the grid2D for the player grid, initalized to empty, with the same dimensions of the masterGrid
+set nrows and ncols for the playerGrid to be the same as masterGrid
+```
+
+#### `gridDelete`
+```
+if the grid is the masterGrid
+	free all the piles in the array of piles
+	free the array of piles
+	free all the playerAndPositions in the array of playerAndPositions
+	free the array of playerAndPositions
+
+free the first pointer to the array of strings, grid2D[0]
+free the array of strings, grid2D
+
+free the map
+```
+
+#### `grid_deletePlayer`
+```
+find the index of the player in the masterGrid based on the players letter
+set the player in the masterGrid's array of playerAndPostiions
+	if the playerAndPosition structure is not null
+		free the position
+		free the playerAndPosition
+		set the index in the array to be null
 ```
 
 ---
