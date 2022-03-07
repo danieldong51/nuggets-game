@@ -2,7 +2,7 @@
 ## Design Spec
 ### Team Tux, Winter 2022
 
-According to the [Requirements Spec] (REQUIREMENTS.md), the Nuggets game requires two standalone programs: a client and a server.
+According to the [Requirements Spec](REQUIREMENTS.md), the Nuggets game requires two standalone programs: a client and a server.
 Our design also includes the player, spectator and grid modules. 
 We describe each program and module separately.
 We do not describe the `support` library nor the modules that enable features that go beyond the spec.
