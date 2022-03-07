@@ -48,18 +48,19 @@ typedef struct grid {
   int ncols;                                // ncols in the map
 } grid_t;
 
-void gridConvert(char** grid, FILE* fp, int nrows, int ncols);                          // convert map file to char** object
-void updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter);             // update visibility display within a grid's char**
-char* gridPrint(grid_t* map, char playerLetter);                                        // print out a grid's char** map with the gold piles and other players
-int gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter);              // check if a move is a valid move for a player, and make the move if it is valid
+/**************** global functions ****************/
+void gridConvert(char** grid, FILE* fp, int nrows, int ncols);                            // convert map file to char** object
+void updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter);               // update visibility display within a grid's char**
+char* gridPrint(grid_t* map, char playerLetter);                                          // print out a grid's char** map with the gold piles and other players
+int gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter);                // check if a move is a valid move for a player, and make the move if it is valid
 void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int randInt);  // make the mastergrid for the spectator and server
-grid_t* gridNewPlayer(grid_t* masterGrid, char playerLetter);                           // make a new player, update the masterGrid
-grid_t* grid_new();                                                                     // allocate memory for a new player
-int getNumRows(grid_t* masterGrid);                                                     // get number rows in the map
-int getNumColumns(grid_t* masterGrid);                                                  // get number columns in the map
-char** getGrid2D(grid_t* masterGrid);                                                   // get the char** component of a grid structure
-void gridDelete(grid_t* map, bool isMaster);                                            // delete grid and free its memory
-void grid_deletePlayer(grid_t* masterGrid, char playerLetter);                          // delete a player from the master grid so that it is no longer printed in the map
+grid_t* gridNewPlayer(grid_t* masterGrid, char playerLetter);                             // make a new player, update the masterGrid
+grid_t* grid_new();                                                                       // allocate memory for a new player
+int getNumRows(grid_t* masterGrid);                                                       // get number rows in the map
+int getNumColumns(grid_t* masterGrid);                                                    // get number columns in the map
+char** getGrid2D(grid_t* masterGrid);                                                     // get the char** component of a grid structure
+void gridDelete(grid_t* map, bool isMaster);                                              // delete grid and free its memory
+void grid_deletePlayer(grid_t* masterGrid, char playerLetter);                            // delete a player from the master grid so that it is no longer printed in the map
 
 /**************** local functions ****************/
 /* not visible outside this module */
@@ -77,6 +78,7 @@ static void playerAndPositionDelete(playerAndPosition_t** playerPositions, bool 
 
 
 /**************** newGrid2D ****************/
+/* creates and allocates space for an array of strings given number of rows and number of columns */
 static char**
 newGrid2D(int nrows, int ncols)
 {
@@ -104,7 +106,8 @@ newGrid2D(int nrows, int ncols)
   return grid;
 }
 
-
+/**************** gridConvert ****************/
+/* See grid.h for details */ 
 void
 gridConvert(char** grid, FILE* fp, int nrows, int ncols)
 {
