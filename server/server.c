@@ -1,10 +1,10 @@
 /* 
  * server - a program that implements all game logic for the CS50 'Nuggets' game 
- * the game server maintains all game state, and one or more game clients display the game to a user
+ * 
  * 
  * Nuggets
  * CS50, Winter 2022
- *
+ * Team Tux
  */
 
 #include <stdlib.h>
@@ -28,31 +28,20 @@ static const int MaxPlayers = 26;      // maximum number of players
 static const int GoldTotal = 250;      // amount of gold in the game
 static const int GoldMinNumPiles = 10; // minimum number of gold piles
 static const int GoldMaxNumPiles = 30; // maximum number of gold piles 
-const char SPACE = ' ';
-
-/* ***************************************** */
-/* Global types */
-struct game {
-  int goldRemaining;              // amount of gold left in game 
-  int numPlayers;                 // amount of players that have joined so far 
-  player_t** players; 
-  grid_t* masterGrid; 
-  spectator_t* spectator; 
-  bool playersJoined; 
-  bool hasSpectator; 
-  int seed;
-} game; 
-
-
-
-typedef struct position {
-  int x;
-  int y;
-} position_t;
+static const char SPACE = ' ';
 
 /* ***************************************** */
 /* Global variables */
-
+struct game {
+  int goldRemaining;              // amount of gold left in game 
+  int numPlayers;                 // amount of players that have joined so far 
+  player_t** players;             // list of player structs 
+  grid_t* masterGrid;             // master grid struct
+  spectator_t* spectator;         // spectator struct
+  bool playersJoined;             // whether or not any players have joined 
+  bool hasSpectator;              // whether or not a spectator is talking to the server
+  int seed;                       // seed for rand()
+} game; 
 
 /* *********************************************************************** */
 /* Public methods */
@@ -68,11 +57,11 @@ static void gameOver();
 static void handlePlayMessage(const addr_t from, const char* message);
 static void handleSpectateMessage(const addr_t from, const char* message);
 static void handleKeyMessage(const addr_t otherp, const char* message);
+static void handleMoveResult(int moveResult, player_t* currPlayer, addr_t otherp);
 
 static player_t* findPlayer(const addr_t address);
 static void deleteAllPlayers();
 static char* getName(const char* content);
-static void handleMoveResult(int moveResult, player_t* currPlayer, addr_t otherp);
 
 static void updateAllGrids();
 static void sendDisplayToAll();
@@ -87,12 +76,12 @@ static void sendDisplayMessage(player_t* player, const addr_t otherp);
 static void sendSpecDisplayMessage(const addr_t otherp);
 
 /* ******************** main() ************************** */
-/* calls parseArgs, initializeGame, acceptMessages, and gameOver before exiting*/ 
+/* calls parseArgs, initializeGame, message_loop, and gameOver before exiting */ 
 int main(const int argc, char* argv[])
 {
 
   // validate command-line arguments 
-  if ( parseArgs(argc, argv) ) {
+  if (parseArgs(argc, argv)) {
 
     // save pathname 
     char* mapPathname = argv[1];
@@ -103,7 +92,7 @@ int main(const int argc, char* argv[])
     // initialize the message module  
     int port = message_init(stderr);                
 
-    // print the port number on which we wait 
+    // announce port 
     printf("waiting on port %d for contact....\n", port);
 
     
@@ -124,10 +113,11 @@ int main(const int argc, char* argv[])
 }
 
 /* ******************** parseArgs() ************************** */
-/* verify that mapfile can be opened and call srand() */ 
+/* verify that mapfile can be opened, initialize seed, and call srand() */ 
 static bool parseArgs(const int argc, char* argv[])
 {
   char* progName = argv[0];
+
   // check number of args
   if (argc != 2 && argc != 3) {
     fprintf(stderr, "Invalid number of arguments\n");
@@ -135,16 +125,16 @@ static bool parseArgs(const int argc, char* argv[])
     exit(1);
   }
 
-
   // verify that map file can be opened for reading 
   FILE* mapFile = fopen(argv[1],"r");
   if ( mapFile == NULL ) {
-    fprintf(stderr, "Unable to open map file\n");
+    fprintf(stderr, "Unable to open map file of the form: %s\n", argv[1]);
     return false; 
   }
   fclose(mapFile);
 
   if (argc == 3) {
+    
     // if a seed is provided, see if possible to scan into integer
     if (sscanf(argv[2], "%d", &game.seed) != 1) {
       // if scan unsuccessful, print error 
@@ -169,30 +159,42 @@ static bool parseArgs(const int argc, char* argv[])
 }
 
 /* ******************** initializeGame() ************************** */
-/* verify that mapfile can be opened and call srand() */ 
+/* A function to initialize the variables in the game struct  */
+/*
+* Caller provides: 
+*   a pathname for a map.txt file
+* We do:  
+*   initialize the number of players in the game to zero 
+*   create memory for the list of players, and then initialize each player struct
+*   initialize masterGrid with grid_new(), and call gridMakeMaster
+*   initialize booleans for quitting game
+*   initialize spectator 
+*   initialize goldRemaining to GoldTotal
+* We return: 
+*   nothing
+*/ 
 static void initializeGame(char* mapPathname)
 {
   // initialize information about the game 
   game.numPlayers = 0; 
 
-  // initialize player list 
-  game.players = calloc(MaxPlayers, sizeof(player_t*));
-
-  // intialize each player struct
-  for (int i = 0; i < MaxPlayers; i++) {
+  
+  game.players = calloc(MaxPlayers, sizeof(player_t*));     // initialize player list 
+  for (int i = 0; i < MaxPlayers; i++) {                    // intialize each player struct 
     game.players[i] = player_new();
   }
 
-  // initalize master grid 
-  game.masterGrid = grid_new();
-
-  // initialized playersJoined to false 
+  // initialize booleans 
   game.playersJoined = false;
+  game.hasSpectator = false; 
 
   // call rand 
   int randNum = rand();
 
-  // function tto initialize game 
+  // initalize master grid 
+  game.masterGrid = grid_new();
+
+  // call function to initialize masterGrid 
   gridMakeMaster(game.masterGrid, mapPathname, GoldTotal, GoldMinNumPiles, GoldMaxNumPiles, randNum);
   game.goldRemaining = GoldTotal;
 
@@ -202,16 +204,22 @@ static void initializeGame(char* mapPathname)
 
 }
 
-/* Datagram received; print it.
- * We use 'arg' to carry an addr_t referring to the 'other' correspondent.
- * If 'other' is a valid client, leave it unchanged.
- * If 'other' is not a valid client, update *from to this sender.
- * Return true if the message loop should exit, otherwise false.
- * e.g., return true if fatal error.
- */
+/* ******************** handleMessage() ************************** */
+/* Handler function for message_loop, parses messages */
+/*
+* Caller provides: 
+*   'arg' to carry an addr_t referring to the 'other' correspondent, NULL in our case 
+*   add_t from, address of the sender
+*   const char* message, a message from the server
+* We do:  
+*   receive messages from the client
+*   call message handler functions to update the game grid and update clients 
+* We return: 
+*   false to keep looping, for valid or unknown commands, and if message is null 
+*   true to terminate message_loop(), if the game is over  
+*/ 
 static bool handleMessage(void* arg, const addr_t from, const char* message)
 {
-  bool noPlayersTalking = true; 
   // check parameters 
   if (message == NULL || !message_isAddr(from)) {
      return false;
@@ -229,42 +237,61 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
   }
   // KEY
   else if (strncmp(message, "KEY ", strlen("KEY ")) == 0) {
-
-    // call handleKey() function
     handleKeyMessage(from, message);
-
-
-    
   }
   else {
-    sendErrorMessage(from, "Unknown command.\n");
+    sendErrorMessage(from, "Unknown command.\n");             // malformatted message; ignore 
   }
 
   // end the game if no more gold 
   if (game.goldRemaining == 0) {
     return true; 
   }
+
+  // check if any more players are talking
+  bool noPlayersTalking = true; 
   for (int i = 0; i < MaxPlayers; i++) {
     if (player_isTalking(game.players[i])) {
-      printf("Player %c still talking...\n", player_getLetter(game.players[i]));
-      noPlayersTalking = false; 
+      noPlayersTalking = false;               
     }
   }
-  // if all players have quit, and there's no spectator, quit 
+
+  // if all players have quit, quit 
   if (game.numPlayers > 0 && noPlayersTalking) {
-    printf("returning true because no players talking...\n");
     return true;
   }
 
-
-  return false;
+  return false;       // keep looping                             
 
 }
 
+/* ******************** handlePlayMessage() ************************** */
+/* Message-specific handler function for handleMessage(), used for adding a new player */
+/*
+* Caller provides: 
+*   add_t from, address of the sender
+*   const char* message, a message from the server
+* We do:  
+* if there are not already MaxPlayers that have joined the game:
+*     get the name of the player from the start of message content after "PLAY "
+*     verify the address and name of the sender
+*     send "OK" message to player to confirm they joined game
+*     add a player struct to game's player list and store information for this player 
+*     call gridNewPlayer to generate a random position and a grid object for the player
+*     update all players grids
+*     send GRID message to sender
+*     send GOLD message to sender
+*     send DISPLAY message to all clients
+*     increment the number of players that have joined so far 
+* if there are already MaxPlayers: 
+*     send QUIT message to current sender
+* We return: 
+*   nothing 
+*/ 
 static void handlePlayMessage(const addr_t from, const char* message)
 {
-  const char* content = message + strlen("PLAY ");        // pointer to message, starting after strlen play? 
-    
+  const char* content = message + strlen("PLAY ");                // pointer to the middle of the message
+  
   if (game.numPlayers < MaxPlayers)
   {
     // get name from rest of message 
@@ -285,7 +312,6 @@ static void handlePlayMessage(const addr_t from, const char* message)
     // check to see if we already have this address, or if address is invalid 
     player_t* p; 
     if ( (p = findPlayer(from)) != NULL) {
-      printf("Found player trying to play again!\n");
       sendErrorMessage(from, "Sorry - you cannot rejoin the same game.\n");
       return;
     }
@@ -329,14 +355,29 @@ static void handlePlayMessage(const addr_t from, const char* message)
   }
 }
 
+/* ******************** handleSpectateMessage() ************************** */
+/* Message-specific handler function for handleMessage(), used for adding a new spectator */
+/*
+* Caller provides: 
+*   add_t from, address of the sender
+*   const char* message, a message from the server
+* We do:  
+*   if we already have a spectator: 
+*     compare address of sender to our spectator, replace and send QUIT message to old spectator if they are different 
+*   verify the address is valid
+*   set the spectators address to from
+*   send GRID message to new spectator
+*   send GOLD message to new spectator
+*   send DISPLAY message to new spectator
+* We return: 
+*   nothing 
+*/ 
 static void handleSpectateMessage(const addr_t from, const char* message)
 {
-  printf("Called handleSpectate\n");
   // see if we already have a spectator 
   addr_t gameSpecAdd = spectator_getAddress(game.spectator);
 
   if (message_isAddr(gameSpecAdd)) {
-
     // if we do, compare the address to this new address 
     if (message_isAddr(from) == true && message_eqAddr(gameSpecAdd, from) == false) {
 
@@ -346,8 +387,8 @@ static void handleSpectateMessage(const addr_t from, const char* message)
   }
 
   // either way, check if this address is valid and set it as spectator's address 
-  // send messages 
   if (message_isAddr(from)){
+
     // set address of spectator to this new spectator 
     spectator_t* newSpectator = game.spectator;
     spectator_setAddress(newSpectator, from);
@@ -357,25 +398,55 @@ static void handleSpectateMessage(const addr_t from, const char* message)
 
     sendGoldMessage(0, 0, game.goldRemaining, from);
 
-    // send masterGrid to spectator 
     sendSpecDisplayMessage(from);
   }
+
   game.hasSpectator = true; 
   
 
 }
 
+/* ******************** handleKeyMessage() ************************** */
+/* Message-specific handler function for handleMessage(), used when a client presses a key */
+/*
+* Caller provides: 
+*   add_t otherp, address of the sender
+*   const char* message, a message from the server
+* We do:  
+*   check if we are dealing with a spectator or a player
+*   if it is a player: 
+*     get the letter of the player from its address
+*     if key is: 
+*     'q' or 'Q': 
+*       send quit message to player 
+*       change players status to not talking
+*       delete player from master grid
+*       update all grids
+*       send DISPLAY message to all clients 
+*     one of the moving keys: 
+*       call gridValidMove on key to get moveResult
+*       call handleMoveResult to send messages to clients based on outcome of attempted move 
+*      send ERROR message if invalid keystroke
+*   if it is a spectator: 
+*       if key is: 
+*       'q' or 'Q':
+*         set spectators address to no address 
+*         send QUIT message to spectator
+*      send ERROR message if invalid keystroke 
+* We return: 
+*   nothing 
+*/ 
 static void handleKeyMessage(const addr_t otherp, const char* message)
 {
-  printf("Handling key...\n");
   bool foundPlayer = false; 
   bool foundSpectator = false; 
-  // is this our spectator? 
+
+  // check if this is a spectator 
   if (message_eqAddr(spectator_getAddress(game.spectator), otherp)) {
     foundSpectator = true; 
   }
 
-  // loop through the list of players 
+  // loop through the list of players to check if it is a player 
   player_t* currPlayer;
   if ((currPlayer = findPlayer(otherp)) != NULL) {
     printf("Found player\n");
@@ -383,6 +454,7 @@ static void handleKeyMessage(const addr_t otherp, const char* message)
   }
 
   if (foundPlayer) {
+
     // get the letter of this player 
     char letter = player_getLetter(currPlayer);
 
@@ -390,7 +462,7 @@ static void handleKeyMessage(const addr_t otherp, const char* message)
 
     char key; 
 
-    // parse using sscanf 
+    // parse content for keystroke using sscanf 
     sscanf(content, " %c", &key);
     int moveResult; 
 
