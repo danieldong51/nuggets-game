@@ -6,7 +6,7 @@
 #
 # Server testing script 
 
-#./server ../maps/main.txt
+./server ../maps/big.txt
 
 # nonexistent map file 
 ./server ../maps/error.txt
