@@ -12,3 +12,4 @@ There will be a max of 30 gold piles.
 
 ### Limitations
 
+No notable limitations of grid
