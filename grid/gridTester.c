@@ -26,7 +26,7 @@ tester()
 
   srand(2);
   int randInt = rand();
-  gridMakeMaster(masterGrid, "../maps/main.txt", 20, 10, 30, 1);
+  gridMakeMaster(masterGrid, "../maps/edges.txt", 20, 10, 30, 1);
   printf("made master grid\n");
 
   grid_t* playerAGrid = gridNewPlayer(masterGrid, 'a');

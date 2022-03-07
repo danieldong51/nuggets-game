@@ -231,16 +231,18 @@ updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter)
 bool
 checkSpot(grid_t* masterGrid, grid_t* playerGrid, char** visible, position_t* playerPos, position_t* checkPos)
 {
-  if (isVisible(playerPos, checkPos, masterGrid)) {
+  if (checkPos->x >= 0 && checkPos->y >= 0 && checkPos->x < masterGrid->ncols && checkPos->y < masterGrid->nrows) {
+    if (isVisible(playerPos, checkPos, masterGrid)) {
 
-    // mark player grid
-    char gridChar = gridGetChar(masterGrid->grid2D, checkPos);
-    gridMark(playerGrid->grid2D, checkPos, gridChar);
+      // mark player grid
+      char gridChar = gridGetChar(masterGrid->grid2D, checkPos);
+      gridMark(playerGrid->grid2D, checkPos, gridChar);
 
-    //mark visible grid
-    gridMark(visible, checkPos, '.');
+      //mark visible grid
+      gridMark(visible, checkPos, '.');
 
-    return true;
+      return true;
+    }
   }
   return false;
 }
