@@ -10,18 +10,11 @@ We avoid repeating information that is provided in the requirements spec.
 
 ## Plan for division of labor
 
-<<<<<<< HEAD
 - Emily: Grid module, minus visualizer function
 - Daniel: Visualizer, Server
 - Georgia: Player, Server
 - Jeff: Client
 - We all do: Testing, Documentation
-=======
-- Emily and Dan: grid 
-- Georgia: server, player  
-- Jeff: spectator, client 
-- We all do: documentation, testing 
->>>>>>> 867a9a232099efabb7a1622b9ce95f1af062cca3
 
 
 ## Client
@@ -31,16 +24,6 @@ We avoid repeating information that is provided in the requirements spec.
 The data structures for the client are the _game_ struct, which is a single global variable accessible to both the client and server, and the _score_ struct, which is a struct that stores information about a player's purse. The structs are defined like so:
 
 ```c
-<<<<<<< HEAD
-struct game {
-  int goldRemaining;              // amount of gold left in game 
-  int numPlayers;                 // amount of players that have joined so far 
-  player_t** players;             // list of player structs 
-  grid_t* masterGrid;             // master grid struct
-  spectator_t* spectator;         // spectator struct
-  int seed;                       // seed for rand()
-} game; 
-=======
 static struct {
   char hostname[messageMaxLength];
   char port[maxPortLength];
@@ -56,7 +39,6 @@ typedef struct score {
   int purse;
 
 } score_t;
->>>>>>> 867a9a232099efabb7a1622b9ce95f1af062cca3
 ```
 
 ### Definition of function prototypes

@@ -20,6 +20,7 @@ We also tested collecting all of the gold, and confirming that when all of the g
 
 We tested erroneous cases, such as an invalid pathname to a map file, a non-integer seed, and a negative seed. We also tested incorrect input from the client (invalid keystrokes).
 
+### Unit Testing
 
 #### Grid
 
