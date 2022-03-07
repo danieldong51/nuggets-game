@@ -8,6 +8,8 @@
  * Team tux - March 2022
  */
 
+ // NOTE TO GRADER: functionality not complete. Please test using professor's client. We talked to Professor Palner about this.
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
