@@ -30,14 +30,16 @@ static struct {
   char port[maxPortLength];
   addr_t serverAddress;
   char playerName[messageMaxLength];
+  int cX;     //the x cordinate of the cursor
+  int cY;     //the y cordinate of the cursor
 } game;
 
 
 typedef struct score {
-  char letter;
-  int collected;
-  int nuggetsLeft;
-  int purse;
+  char letter;       //players letter
+  int collected;     //nuggets collected
+  int nuggetsLeft;   //nuggets left
+  int purse;         //gold the player has
 
 } score_t;
 
@@ -129,17 +131,35 @@ void initNcurses() {
 /* stdin has input ready; read a line and send it to the client. 
 */
 
-bool
-handleInput(void* arg){
+bool handleInput(void* arg){
+  // We use 'arg' to receive an addr_t referring to the 'server' correspondent.
+  // Defensive checks ensure it is not NULL pointer or non-address value.
+  game.serverAddress = arg;
+  if (game.serverAddress == NULL) {
+    fprintf(stderr, "handleInput called with arg=NULL");
+    return true;
+  }
+  if(!message_isAddr(game.serverAddress)) {
+    fprintf(stderr, "handleInput called without a correspondent");
+    return true;
+  }
 
-  //player input
-  char c = getch();
-  char keyMessage[strlen("KEY " + 2)];
+  //allocate a buffer into which we can read a line of input
+  char key = getch();
+  char line[strlen("KEY " + 2)];
 
-  sprintf(keyMessage, "KEY %c", key);           
-  message_send(game.serverAddress, keyMessage);
+  sprintf(line, "KEY %c", key);
+  message_send(game.serverAddress, line); //send as message to server
 
-  //Not complete
+  if (game.playerName[0] != '\0') {
+    move(0, maxStatusLength + 2);
+    clrtoeol();
+    move(game.cY, game.cX); //move the cursor back to its original place
+  }
+
+  refresh();
+  return false;
+
 }
 
 
