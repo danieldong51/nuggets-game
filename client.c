@@ -335,6 +335,6 @@ void mapDisplay(char* map) {
 
 /***********positionNext*********/
 void positionNext(int* Y, int* X) {
-
+  if (*X < nrows)
 
 }
