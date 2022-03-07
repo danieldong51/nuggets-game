@@ -39,6 +39,7 @@ struct game {
   grid_t* masterGrid; 
   spectator_t* spectator; 
   bool playersJoined; 
+  bool hasSpectator; 
   int seed;
 } game; 
 
@@ -119,9 +120,6 @@ int main(const int argc, char* argv[])
     exit(0);
 
   }
-  else {
-    fprintf(stderr, "Invalid number of arguments\n");
-  }
   
 }
 
@@ -129,36 +127,45 @@ int main(const int argc, char* argv[])
 /* verify that mapfile can be opened and call srand() */ 
 static bool parseArgs(const int argc, char* argv[])
 {
-  if (argc >= 2) {
+  char* progName = argv[0];
+  // check number of args
+  if (argc != 2 && argc != 3) {
+    fprintf(stderr, "Invalid number of arguments\n");
+    fprintf(stderr, "usage: %s map.txt [seed]\n", progName);
+    exit(1);
+  }
 
-    // verify that map file can be opened for reading 
-    FILE* mapFile = fopen(argv[1],"r");
-    if ( mapFile == NULL ) {
-      fprintf(stderr, "Unable to open map file\n");
+
+  // verify that map file can be opened for reading 
+  FILE* mapFile = fopen(argv[1],"r");
+  if ( mapFile == NULL ) {
+    fprintf(stderr, "Unable to open map file\n");
+    return false; 
+  }
+  fclose(mapFile);
+
+  if (argc == 3) {
+    // if a seed is provided, see if possible to scan into integer
+    if (sscanf(argv[2], "%d", &game.seed) != 1) {
+      // if scan unsuccessful, print error 
+      fprintf(stderr, "Failed to initialize seed\n");
       return false; 
     }
-    fclose(mapFile);
+    if (game.seed < 0) {
+      // if seed not a postivie integer, invalid seed 
+      fprintf(stderr, "Invalid seed: must be a positive integer\n");
+      return false; 
 
-    if (argc == 3) {
-      // if a seed is provided, verify that it is a positive integer, and then set in game struct 
-      int seed = atoi(argv[2]);
-        
-      if (seed >= 0) {
-        game.seed = seed; 
-      }
-      else {
-        fprintf(stderr, "Failed to initialize seed\n");
-        return false; 
-      }
     }
-
-    else{
-      game.seed = (int) getpid();
-    }
-    srand(game.seed);
-    return true; 
   }
-  return false; 
+  // if no seed provided, use getpid()
+  else {
+    game.seed = (int) getpid();
+  }
+
+  srand(game.seed);
+  return true;
+  
 }
 
 /* ******************** initializeGame() ************************** */
@@ -244,13 +251,12 @@ static bool handleMessage(void* arg, const addr_t from, const char* message)
     }
   }
   // if all players have quit, and there's no spectator, quit 
-  if (game.numPlayers > 0 && noPlayersTalking){
+  if (game.numPlayers > 0 && noPlayersTalking) {
     printf("returning true because no players talking...\n");
     return true;
   }
 
 
-  
   return false;
 
 }
@@ -354,6 +360,7 @@ static void handleSpectateMessage(const addr_t from, const char* message)
     // send masterGrid to spectator 
     sendSpecDisplayMessage(from);
   }
+  game.hasSpectator = true; 
   
 
 }
@@ -429,6 +436,7 @@ static void handleKeyMessage(const addr_t otherp, const char* message)
       case 'Q': case 'q':
         // set spectator's address to no address
         spectator_setAddress(game.spectator, message_noAddr());
+        game.hasSpectator = false; 
         sendQuitMessage(otherp, "Thanks for watching!\n");
         break;
       default: 
@@ -654,7 +662,8 @@ static void gameOver()
       // set info pointer to each player line, incrementing each time 
       char* info;
       for (info = gameOverMessage ; *info ; info++);
-      sprintf(info, "%c\t%3d %s\n", player_getLetter(p), player_getGold(p), player_getName(p));
+      char letter = toupper(player_getLetter(p));
+      sprintf(info, "%c\t%3d %s\n", letter, player_getGold(p), player_getName(p));
       } 
   }
   
