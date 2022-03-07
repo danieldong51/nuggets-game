@@ -265,25 +265,33 @@ int gridValidMove(position_t* coordinate)
 		Add contents of row x into slot x of a the array of strings
 
 #### `updateGrid`
-```
-	initialize toVisit bag
-	initialize char** visited as a blank grid with same dimensions as serverGrid
-	clear players and piles of gold in playerGrid
-	Add adjacent squares to toVisit bag
-	Mark adjacent squares in visited
-	While toVisit is not empty:
-		extract square from toVisit
-		if toVisit isVisible:
-			mark square as visible:
-				add player or piles of gold to grid struct if it exists at that square
-			loop over adjacent squares:
-				if square not visited:
-          mark square as visited
-          add to toVisit
-```
+
+	initialize empty visible grid
+	while there are still visible squares in the loop:
+		increment radius
+		go around the perimeter of the square of radius by radius
+		if square is visible:
+			mark square as visible
+	clear playergrid's playerlist
+	loop over player positions in mastergrid:
+		if player position is in visible square:
+			add player to playergrid's player list
+	loop over gold positions in mastergrid:
+		if gold position is in visible square:
+			add gold to playergrid's gold list
+
+#### `isVisible`
+
+	loop over rows between player position and checking position:
+		if a square is blocking view:
+			return false
+	loop over columns between player position and checking position:
+		if a square is blocking view:
+			return false
+	return true
 
 #### `gridPrint`
-```
+
 For i < # of players, i++
   Obtain position of player (x, y)
   If (x,y) = currentPostion
@@ -293,9 +301,9 @@ For i < # of players, i++
   For i < # of gold piles, i++
     Obtain position of pile, (x, y)
     Grid[y][x] = “*”
-  For i<slots in grid array
+  For i < slots in grid array
     Print the string in a new line
-```
+
 
 #### `gridValidMove`
 ```
