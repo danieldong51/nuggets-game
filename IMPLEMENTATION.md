@@ -66,36 +66,34 @@ bool handleMessage(void* arg, const addr_t from, const char* message);
 
 ### Detailed pseudo code
 
-#### `main`:
-```
-  validate command-line arguments
-  check if hostname or IP address is valid address by calling message_isAddr()
-  initialize message module by calling message_init() 
-  print assigned port number
-  decide whether spectator or player
-```
+#### `main`
 
-#### `handleInput`:
-```
-Parse stdin using ncurses.
-```
+	validate command-line arguments
+	check if hostname or IP address is valid address by calling message_isAddr()
+	initialize message module by calling message_init() 
+	print assigned port number
+	decide whether spectator or player
+
+
+#### `handleInput`
+
+	Parse stdin using ncurses.
 
 #### `handleMessage`:
-```
-if the message from the server is: 
-  “OK”:
-    User was allowed into game
-  “GRID”:
-    This message shows the GRID’s dimensions.
-  “GOLD”:
-    Allows user to see nuggets collected, current score, and nuggets left.
-  “DISPLAY”:
-    Allows the user to see the map.
-  “QUIT”:
-    Ends the ncurses library
-  “ERROR”: 
-    Print explanation that should be to the right of the error message.
-```
+
+	if the message from the server is: 
+		“OK”:
+			User was allowed into game
+		“GRID”:
+			This message shows the GRID’s dimensions.
+		“GOLD”:
+			Allows user to see nuggets collected, current score, and nuggets left.
+		“DISPLAY”:
+			Allows the user to see the map.
+		“QUIT”:
+			Ends the ncurses library
+		“ERROR”: 
+			Print explanation that should be to the right of the error message.
 
 ## Server
 
@@ -217,156 +215,158 @@ static void sendSpecDisplayMessage(const addr_t otherp);
 
 #### `main`:
 
-  validate command line arguments using parseArgs()
-  call initializeGame() with map.txt 
-  initialize ‘message module’ 
-  print the port number on which we wait 
-  call message_loop()
-  call gameOver() to inform all clients the game has ended
-  clean up
+	validate command line arguments using parseArgs()
+	call initializeGame() with map.txt 
+	initialize ‘message module’ 
+	print the port number on which we wait 
+	call message_loop()
+	call gameOver() to inform all clients the game has ended
+	clean up
 
 
-#### `parseArgs`:
+#### `parseArgs`
 
-  validate number of arguments 
-  verify map file can be opened for reading
-  if seed provided
-    verify it is a valid seed number
-    seed the random-number generator with that seed
-  else
-    seed the random-number generator with getpid()
-
-
-#### `initializeGame`:
-
-  initialize information about the game
-  initialize list of players by calling player_new() for each player
-  call gridMakeMaster() with mapPathname and game.masterGrid to initialize and drop gold on game grid 
-  initialize spectator
+	validate number of arguments 
+	verify map file can be opened for reading
+	if seed provided
+		verify it is a valid seed number
+		seed the random-number generator with that seed
+	else
+		seed the random-number generator with getpid()
 
 
+#### `initializeGame`
 
-#### `handleMessage`:
-
-  if the messsage from the client is: 
-    “PLAY”
-      call handlePlayMessage 
-    “SPECTATE”
-      call handleSpectateMessage
-    "KEY"
-      call handleKeyMessage 
-    otherwise, send ERROR message for uknown command 
-  if there is no more gold, return true
-  if no more players are talking, return true 
-  return false 
-
-
-#### `handlePlayMessage`:
-
-  if there are not already MaxPlayers that have joined the game
-    get the name of the player from the start of message content after "PLAY "
-    verify the address and name of the sender
-    send "OK" message to player to confirm they joined game
-    add a player struct to game.players and store information for this player 
-    call gridNewPlayer to generate a random position and a grid object for the player
-    update all players grids
-    send GRID message to sender
-    send GOLD message to sender
-    send DISPLAY message to all clients
-    increment the number of players that have joined so far 
-  if there are already MaxPlayers:
-    send QUIT message to current sender
-
-
-#### `handleSpectateMessage`:
-
-  if we already have a spectator: 
-    compare address of sender to our spectator, replace and send QUIT
-  message to old spectator if they are different 
-  verify the address is valid
-  set the spectators address to from
-  send GRID, GOLD, DISPLAY messages to new spectator
-
-
-#### `handleKeyMessage`:
-
-  check if we are dealing with a spectator or a player
-  if it is a player: 
-    get the letter of the player from its address
-    if key is: 
-    'q' or 'Q': 
-      send quit message to player 
-      change players status to not talking
-      delete player from master grid
-      update all grids
-      send DISPLAY message to all clients 
-    one of the moving keys: 
-      call gridValidMove on key to get moveResult
-      call handleMoveResult to send messages to clients based on outcome of attempted move 
-  if it is a spectator: 
-    if key is: 
-    'q' or 'Q':
-      set spectators address to no address 
-      send QUIT message to spectator
-      send ERROR message if invalid keystroke 
+	initialize information about the game
+	initialize list of players by calling player_new() for each player
+	call gridMakeMaster() with mapPathname and game.masterGrid to initialize and drop gold on game grid 
+	initialize spectator
 
 
 
-#### `handleMoveResult`:
+#### `handleMessage`
 
-  if moveResult == 0:
-    user successfully moved, so update all grids 
-    send DISPLAY message to all clients 
-  if moveResult == -1: 
-    move was invalid, send ERORR message to sender
-  else: 
-    nonzero moveResult represents amount of gold picked up by player 
-    add gold to this players numGold
-    decrement from goldRemaining
-    update all grids
-    send DISPLAY message to all clients
+	if the messsage from the client is: 
+		“PLAY”
+			call handlePlayMessage 
+		“SPECTATE”
+			call handleSpectateMessage
+		"KEY"
+			call handleKeyMessage 
+		otherwise, send ERROR message for uknown command 
+	if there is no more gold, return true
+	if no more players are talking, return true 
+	return false 
+
+
+#### `handlePlayMessage`
+
+	if there are not already MaxPlayers that have joined the game
+		get the name of the player from the start of message content after "PLAY "
+		verify the address and name of the sender
+		send "OK" message to player to confirm they joined game
+		add a player struct to game.players and store information for this player 
+		call gridNewPlayer to generate a random position and a grid object for the player
+		update all players grids
+		send GRID message to sender
+		send GOLD message to sender
+		send DISPLAY message to all clients
+		increment the number of players that have joined so far 
+	if there are already MaxPlayers:
+		send QUIT message to current sender
+
+
+#### `handleSpectateMessage`
+
+	if we already have a spectator: 
+		compare address of sender to our spectator, replace and send QUIT
+	message to old spectator if they are different 
+	verify the address is valid
+	set the spectators address to from
+	send GRID, GOLD, DISPLAY messages to new spectator
+
+
+#### `handleKeyMessage`
+
+	check if we are dealing with a spectator or a player
+	if it is a player: 
+		get the letter of the player from its address
+		if key is: 
+			'q' or 'Q': 
+				send quit message to player 
+				change players status to not talking
+				delete player from master grid
+				update all grids
+				send DISPLAY message to all clients 
+			one of the moving keys: 
+				call gridValidMove on key to get moveResult
+				call handleMoveResult to send messages to clients based on outcome of attempted move 
+	if it is a spectator: 
+		if key is: 
+			'q' or 'Q':
+				set spectators address to no address 
+				send QUIT message to spectator
+				send ERROR message if invalid keystroke 
+
+
+
+#### `handleMoveResult`
+
+	if moveResult == 0:
+		user successfully moved, so update all grids 
+		send DISPLAY message to all clients 
+	if moveResult == -1: 
+		move was invalid, send ERORR message to sender
+	else: 
+		nonzero moveResult represents amount of gold picked up by player 
+		add gold to this players numGold
+		decrement from goldRemaining
+		update all grids
+		send DISPLAY message to all clients
 
 
 #### `findPlayer`:
 
-  if the given address is valid: 
-    for each player in game.players: 
-      if player address matches given adress, return player
-    return null
+	if the given address is valid: 
+		for each player in game.players: 
+			if player address matches given adress, return player
+		return null
 
 
 #### `deleteAllPlayers`:
 
-  for each player in game.players
-    call player_delete()
+	for each player in game.players
+		call player_delete()
 
 
 #### `getName`:
 
-  loop through given pointer to message content until MaxNameLength
-  if a character has both isgraph() and isblank() false:
-    replace with an underscore _ 
-  truncate name 
-  return name 
+	loop through given pointer to message content until MaxNameLength
+	if a character has both isgraph() and isblank() false:
+		replace with an underscore _ 
+	truncate name 
+	return name 
 
 
 ### `sendQuitMessage`, `sendOkMessage`,  `sendGridMessage`, `sendGoldMessage`, `sendDisplayMessage`, `sendSpecDisplayMessage`
 
 
-  check that addres is valid and verify other parameters if necessary
-  create a response string of message_MaxBytes length
-  construct specified message
-  send message to given address
+	check that addres is valid and verify other parameters if necessary
+	create a response string of message_MaxBytes length
+	construct specified message
+	send message to given address
 
 
 ---
 
 ## Grid
+
 The `grid` module is used to update the user interface for all clients each time a client sends a message.
 
 ### Data structures
 
 #### position
+
 ```c
 typedef struct position position_t; 
 ```
@@ -375,6 +375,7 @@ Contains
 * y coordiante
 
 #### pile
+
 ```c
 typedef struct pile pile_t;
 ```
@@ -384,6 +385,7 @@ Contains
 
 
 #### playerAndPosition
+
 ```c
 typedef struct playerAndPosition playerAndPosition_t;
 ```
@@ -393,6 +395,7 @@ Contains
 
 
 #### grid
+
 ```c
 typedef struct grid grid_t;
 ```
@@ -412,53 +415,67 @@ A function to convert a map file into a 2d Array representing the map.
 ```c
 void gridConvert(char** grid, FILE* fp, int nrows, int ncols)
 ```
-A function that converts map.txt file to a grid.
+
+A function that updates a player's grid based on the player's location in the master grid
 
 ```c
 void updateGrid(grid_t* playerGrid, grid_t* masterGrid, char playerLetter)
 ```
-A function that updates a player's grid based on the player's location in the master grid
+
+A function that prints a grid with locations the players and gold piles stored within the grid
 
 ```c
 char* gridPrint(grid_t* playerGrid, char playerLetter)
 ```
-A function that prints a grid with locations the players and gold piles stored within the grid
+A function that checks if a move command is valid, given the move command letter, If the move is valid, it will update the player's position in the master grid given the player letter. Returns an integer based on characteristics of the move. 
 
 ```c
 int gridValidMove(grid_t* masterGrid, char playerLetter, char moveLetter)
 ```
-A function that checks if a move command is valid, given the move command letter, If the move is valid, it will update the player's position in the master grid given the player letter. Returns an integer based on characteristics of the move. 
+
+A function that allocates space for an empty grid structure
 
 ```c
 grid_t* grid_new();
 ```
-A function that allocates space for an empty grid structure
+
+A function fills up to gold pile array and the 2d string array (representing map) of a grid object--only needed when making the masterGrid, which the server needs
 
 ```c
 void gridMakeMaster(grid_t* masterGrid, char* fileName, int numGold, int minGoldPiles, int maxGoldPiles, int randInt)
 ```
-A function fills up to gold pile array and the 2d string array (representing map) of a grid object--only needed when making the masterGrid, which the server needs
+
+A function that returns new playerGrid for player, which starts off as completely empty. The function also creates a new playerAndPosition struct representing new player in the masterGrid
 
 ```c
 grid_t* gridNewPlayer(grid_t* masterGrid, char playerLetter)
 ```
-A function that returns new playerGrid for player, which starts off as completely empty. The function also creates a new playerAndPosition struct representing new player in the masterGrid
+
+A function that returns the number of rows in the grid2D, which is stored inside the grid struct
 
 ```c
 int getNumRows(grid_t* masterGrid)
 ```
 
+A function that returns the number of columns in the grid2D, which is stored inside the grid struct
+
 ```c
 int getNumColumns(grid_t* masterGrid)
 ```
 
+A function that returns the grid2D stored inside the grid struct
+
 ```c
-int getGrid2D(grid_t* masterGrid)
+char** getGrid2D(grid_t* masterGrid)
 ```
+
+A function that frees the grid and its contents, freeing the playerAndPosition and gold piles structs if the grid is a master grid
 
 ```c
 void gridDelete(grid_t* map, bool isMaster)
 ```
+
+A function that deletes the player position from the master grid, setting it to NULL
 
 ```c
 void grid_deletePlayer(grid_t* masterGrid, char playerLetter)
@@ -502,115 +519,115 @@ void grid_deletePlayer(grid_t* masterGrid, char playerLetter)
 
 #### `gridPrint`
 
-  Create a new grid with the same dimensions as the grid that needs to br printed
-  for each row in the new grid
-    copy contents of old grid into the new grid
-  if the array of playerAndPosition structures in the original grid is not null
-    for each player
-      if the playerAndPosition structure is not null, and the position is not null
-        if the position is the current player's position
-          set the position in the new grid to be '@'
-        else
-          set the position in the grid to be the player's letter
-  if the array of pile structures in the original grid is not null 
-    for each pile
-      mark the position of the pile in the new grid to be '*'
+	Create a new grid with the same dimensions as the grid that needs to br printed
+	for each row in the new grid
+		copy contents of old grid into the new grid
+	if the array of playerAndPosition structures in the original grid is not null
+		for each player
+			if the playerAndPosition structure is not null, and the position is not null
+				if the position is the current player's position
+					set the position in the new grid to be '@'
+				else
+					set the position in the grid to be the player's letter
+	if the array of pile structures in the original grid is not null 
+		for each pile
+			mark the position of the pile in the new grid to be '*'
 
-  create a new string that represents all characters in the new grid
-    for each row in the new grid
-      for each column in the new grid
-        copy the contents of the new grid into the apprporiate index of the new string
-  return the new string
+	create a new string that represents all characters in the new grid
+		for each row in the new grid
+			for each column in the new grid
+				copy the contents of the new grid into the apprporiate index of the new string
+	return the new string
 
 #### `gridValidMove`
 
-  given player letter, calculate the index of the letter in the playerAndPosition array in the amsterGrid
-  if the playerAndPosition structure is not null
-    store the x and y coridnates of the positon
-  if move letter is h
-      move the (x,y) to the left
-  if move letter is l
-      move the (x,y) to the right
-  if move letter is j
-    move the (x,y) up
-  if move letter is k
-    move the (x,y) down
-  if move letter is y
-    move the (x,y) diagonally up and left
-  if move letter is u
-    move the (x,y) diagonally up and right
-  if move letter is b
-    move the (x,y) diagonally down and left
-  if move letter is n
-    move the (x,y) diagonally down and right
-    
-  if the coordinates are out of bounds of the map	
-    return -1
-    
-  if the cordinates after the move are an empty room spot or passage spot in the map
-    return 0
-  if the cooridanates after the move are a spot with a gold pile in the map
-    return the amount of gold in the gold pile
-  else
-    return -1
+	given player letter, calculate the index of the letter in the playerAndPosition array in the amsterGrid
+	if the playerAndPosition structure is not null
+		store the x and y coridnates of the positon
+	if move letter is h
+		move the (x,y) to the left
+	if move letter is l
+		move the (x,y) to the right
+	if move letter is j
+		move the (x,y) up
+	if move letter is k
+		move the (x,y) down
+	if move letter is y
+		move the (x,y) diagonally up and left
+	if move letter is u
+		move the (x,y) diagonally up and right
+	if move letter is b
+		move the (x,y) diagonally down and left
+	if move letter is n
+		move the (x,y) diagonally down and right
+
+	if the coordinates are out of bounds of the map	
+		return -1
+
+	if the cordinates after the move are an empty room spot or passage spot in the map
+		return 0
+	if the cooridanates after the move are a spot with a gold pile in the map
+		return the amount of gold in the gold pile
+	else
+		return -1
 
 
 #### `gridMakeMaster`
 
-  open the map file
-  calculate number of rows and columns in file
-  set nrows in masterGrid
-  set ncols in mastergrid
+	open the map file
+	calculate number of rows and columns in file
+	set nrows in masterGrid
+	set ncols in mastergrid
 
-  create a new array of strings
-  call gridConvert on the new array of strings
-  set grid2D in masterGrid to the the converted array of strings
+	create a new array of strings
+	call gridConvert on the new array of strings
+	set grid2D in masterGrid to the the converted array of strings
 
-  set random number of gold piles give the maxGoldPiles and minGoldPiles
-  create an array of piles representing the gold piles
+	set random number of gold piles give the maxGoldPiles and minGoldPiles
+	create an array of piles representing the gold piles
 
-  for each goldPile
-    set a random position on the map for the gold pile (must be in an originally empty space)
-    set a random amount of gold to be in the pile using rand()
+	for each goldPile
+		set a random position on the map for the gold pile (must be in an originally empty space)
+		set a random amount of gold to be in the pile using rand()
 
-  for each goldPile
-    scale down the amount of gold in each pile so that the total gold placed in the map is equal to numGold
-
-  set the masterGrid's goldPiles to the goldPiles just created
+	for each goldPile
+		scale down the amount of gold in each pile so that the total gold placed in the map is equal to numGold
+	
+	set the masterGrid's goldPiles to the goldPiles just created
 
 #### `gridNewPlayer`
 
-  create random position in the map to be the postiion of the player (must be in an originally empty space)
-  creat a new playerAndPosition structure with the random position and character's letter
-  add the new playerAndPosition structure to the masterGrid's list of playerAndPosition structures
+	create random position in the map to be the postiion of the player (must be in an originally empty space)
+	creat a new playerAndPosition structure with the random position and character's letter
+	add the new playerAndPosition structure to the masterGrid's list of playerAndPosition structures
 
-  create a new playerGrid, initialized to empty
-  create the grid2D for the player grid, initalized to empty, with the same dimensions of the masterGrid
-  set nrows and ncols for the playerGrid to be the same as masterGrid
+	create a new playerGrid, initialized to empty
+	create the grid2D for the player grid, initalized to empty, with the same dimensions of the masterGrid
+	set nrows and ncols for the playerGrid to be the same as masterGrid
 
 
 #### `gridDelete`
 
-  if the grid is the masterGrid
-    free all the piles in the array of piles
-    free the array of piles
-    free all the playerAndPositions in the array of playerAndPositions
-    free the array of playerAndPositions
+	if the grid is the masterGrid
+		free all the piles in the array of piles
+		free the array of piles
+		free all the playerAndPositions in the array of playerAndPositions
+		free the array of playerAndPositions
 
-  free the first pointer to the array of strings, grid2D[0]
-  free the array of strings, grid2D
+	free the first pointer to the array of strings, grid2D[0]
+	free the array of strings, grid2D
 
-  free the map
+	free the map
 
 
 #### `grid_deletePlayer`
 
-  find the index of the player in the masterGrid based on the players letter
-  set the player in the masterGrid's array of playerAndPostiions
-    if the playerAndPosition structure is not null
-      free the position
-      free the playerAndPosition
-      set the index in the array to be null
+	find the index of the player in the masterGrid based on the players letter
+	set the player in the masterGrid's array of playerAndPostiions
+		if the playerAndPosition structure is not null
+		free the position
+		free the playerAndPosition
+		set the index in the array to be null
 
 
 ## Player 
@@ -712,111 +729,88 @@ void player_setAddress(player_t* player, addr_t address);
 
 #### `player_new`
 
-```c
-create memory for new player struct
-initialize player name to empty string, player letter to ' '
-initialize numGold to zero and grid to null
-initialize address to message_noAddr()
-initialize player isTalking to false
-return player
-```
+	create memory for new player struct
+	initialize player name to empty string, player letter to ' '
+	initialize numGold to zero and grid to null
+	initialize address to message_noAddr()
+	initialize player isTalking to false
+	return player
 
 #### `player_delete` 
 
-```c
-if the given player struct is not null
-	if grid is not null 
-    call gridDelete on grid 
-  if player name is not empty
-    free player name 
-  free player memory 
-```
+	if the given player struct is not null
+		if grid is not null 
+			call gridDelete on grid 
+	if player name is not empty
+		free player name 
+		free player memory 
 
 #### `player_isTalking`
-```c
-if player is not null 
-	return this player’s bool struct isTalking
-else 
-	return false 
-```
+
+	if player is not null 
+		return this player’s bool struct isTalking
+	else 
+		return false 
+
 
 #### `player_getGrid`
 
-```c
-if player is not null 
-	return this player’s grid struct 
-else 
-	return null
-```
+	if player is not null 
+		return this player’s grid struct 
+	else 
+		return null
 
 #### `player_getGrid`
 
-```c
-if player is not null
-  return this players grid
-return null 
-```
+	if player is not null
+		return this players grid
+	return null 
 
 #### `player_getAddress`
 
-```c
-if player is not null
-  return this players address
-return null 
-```
-
+	if player is not null
+		return this players address
+	return null 
 
 #### `player_addGold` 
 
-```c
-if player is not null and numGold>0 
-	add the given amount to this player’s numGold count
-```
+	if player is not null and numGold>0 
+		add the given amount to this player’s numGold count
 
 #### `player_changeStatus`
 
-```c
-if player is not null 
-  set isTalking to given value
-else 
-  do nothing
-```
+	if player is not null 
+		set isTalking to given value
+	else
+		do nothing
 
 #### `player_setLetter`
 
-```c
-if player and letter are not null 
-  set this player letter to given value
-else 
-  do nothing
-```
+	if player and letter are not null 
+		set this player letter to given value
+	else 
+		do nothing
 
 #### `player_setName`
 
-```c
-if player and name are not null 
-  set this player name to given value
-else 
-  do nothing
-```
+	if player and name are not null 
+		set this player name to given value
+	else 
+		do nothing
 
 #### `player_setGrid`
 
-```c
-if player and grid are not null 
-  set this player grid to given value
-else 
-  do nothing
-```
+	if player and grid are not null 
+		set this player grid to given value
+	else 
+		do nothing
 
 #### `player_setAddress`
 
-```c
-if player is not null and address is valid
-  set this player address to given value
-else 
-  do nothing
-```
+	if player is not null and address is valid
+		set this player address to given value
+	else 
+  		do nothing
 
 ---
 
@@ -872,56 +866,45 @@ void spectator_setAddress(spectator_t* spectator, addr_t address);
 
 #### `spectator_new`
 
-```
-if the spectator given is not NULL,
-	 set the grid for the player to be an empty grid
- return the spectator.
-else:
-	Print an error message and return NULL.
-```
+	if the spectator given is not NULL,
+		set the grid for the player to be an empty grid
+		return the spectator.
+	else:
+		Print an error message and return NULL.
+
 
 #### `spectator_delete` 
 
-```
-if the given spectator struct is not null:
-	free the memory for the spectator object
-```
+
+	if the given spectator struct is not null:
+		free the memory for the spectator object
+
 
 #### `spectator_getGrid`
 
-```c
-if spectator is not null
-  return this spectator grid
-return null 
-```
+	if spectator is not null
+		return this spectator grid
+	return null 
 
 #### `spectator_getAddress`
 
-```c
-if spectator is not null
-  return this spectator address
-return null 
-```
+	if spectator is not null
+		return this spectator address
+	return null 
 
 #### `spectator_setGrid`
 
-```c
-if spectator and grid are not null 
-  set this spectator grid to given value
-else 
-  do nothing
-```
+	if spectator and grid are not null 
+		set this spectator grid to given value
+	else 
+		do nothing
 
 #### `spectator_setAddress`
 
-```c
-if spectator is not null and address is valid
-  set this spectator address to given value
-else 
-  do nothing
-```
-
----
+	if spectator is not null and address is valid
+		set this spectator address to given value
+	else 
+		do nothing
 
 ## Testing plan
 
